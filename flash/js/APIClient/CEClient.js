@@ -225,7 +225,10 @@ function CEClient() {
 
 
 javaRest.protocol = "https";
+//Production domain
 javaRest.domain = "api.crowdemotion.co.uk";
+//Sandbox domain
+//javaRest.domain = "api-sandbox.crowdemotion.co.uk";
 javaRest.version = "v1";
 javaRest.debug = false;
 javaRest.token = null;
