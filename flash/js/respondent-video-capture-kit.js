@@ -4,7 +4,7 @@ $(document).ready(function () {
         streamName, // This is the name of the stream
         streamFileName; // This the file name of the file created,
 
-    var setupCamera, setupConnection; // Do not set
+    var setupCamera, setupConnection, streamDisconnect; // Do not set
 
     var producer = new WebProducer({
         id: 'producer', // the html object id
@@ -73,7 +73,7 @@ $(document).ready(function () {
 
             producer.on('disconnect', function () {
                 setStatusConnection(0);
-                log("The producer has been disconnected", 'warning');
+                log("The producer has been disconnected");
             });
 
             producer.on('error', function (reason) {
@@ -91,6 +91,10 @@ $(document).ready(function () {
 
             producer.connect();
             canRecStop();
+        }
+
+        streamDisconnect = function(){
+            producer.disconnect();
         }
 
     });
@@ -138,8 +142,9 @@ $(document).ready(function () {
         });
 
     $('#stopButton').click(function () {
-        log('stop recording', 'success');
-        producer.disconnect();
+        log('stop recording - uploading file', 'success');
+        streamDisconnect();
+
     });
 
     $('#recButton').click(function () {
