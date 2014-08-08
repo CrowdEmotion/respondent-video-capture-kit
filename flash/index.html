@@ -4,10 +4,23 @@
     <title>Crowd Emotion: respondent video capture kit - flash version</title>
     <link rel="stylesheet" href="css/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
+    <!-- Mandatory files -->
     <script type="text/javascript" charset="utf-8" src="js/jquery-1.9.1.js"></script>
+
+    <!-- Configuration file -->
+    <script type="text/javascript" charset="utf-8" src="js/rvckConfiguration.js"></script>
+
+    <!-- Recorder files -->
     <script type="text/javascript" charset="utf-8" src="js/swfobject.js"></script>
     <script type="text/javascript" charset="utf-8" src="js/webproducer.js"></script>
     <script type="text/javascript" charset="utf-8" src="js/respondent-video-capture-kit.js"></script>
+
+    <!-- Client files -->
+    <script  type="text/javascript" charset="utf-8" src="js/CEClient/sha256.js"></script>
+    <script  type="text/javascript" charset="utf-8" src="js/CEClient/enc-base64-min.js"></script>
+    <script  type="text/javascript" charset="utf-8" src="js/CEClient/store.js"></script>
+    <script  type="text/javascript" charset="utf-8" src="js/CEClient/CEClient.js"></script>
+
 </head>
 
 <body>
@@ -27,12 +40,20 @@
         </div>
         <div class="col-xs-4" id="information">
 
+                <div id="message" class="alert alert-info" role="alert">Please, insert data connection</div>
+
                 <div id="connectionInterface" class="panel panel-default">
                     <div class="panel-heading">Connection</div>
                     <div class="panel-body">
                         <h4>Status: <span id="status" class="label label-danger">Not streaming</span></h4>
+                        <label for="domainNameInput">Domain url</label>
                         <input id="domainNameInput" placeholder="Domain url" class="form-control"/>
+                        <label for="streamNameInput">Stream name</label>
                         <input id="streamNameInput" placeholder="Stream name" class="form-control"/>
+                        <label for="apiUsernameInput">API username</label>
+                        <input id="apiUsernameInput" placeholder="API username" class="form-control"/>
+                        <label for="apiPasswordInput">API password</label>
+                        <input id="apiPasswordInput" placeholder="API password" class="form-control"/>
                         <button id="connectButton" value="Save data" class="btn btn-primary btn-block"/>Save connection data</button>
                     </div>
                 </div>
@@ -45,8 +66,6 @@
                         <div class="clearfix"></div>
                     </div>
                 </div>
-
-                <div id="message" class="alert alert-info" role="alert">Please, insert data connection</div>
 
                 <div id="logInterface" class="panel panel-default">
                     <div class="panel-heading">Log</div>
