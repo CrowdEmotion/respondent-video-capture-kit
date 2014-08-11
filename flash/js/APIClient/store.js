@@ -96,4 +96,4 @@
         t.disabled = !0
     }
     t.enabled = !t.disabled, typeof module != "undefined" && module.exports && this.module !== module ? module.exports = t : typeof define == "function" && define.amd ? define(t) : e.store = t
-})(Function("return this")())
+})(Function("return this")());

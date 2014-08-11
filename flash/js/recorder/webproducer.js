@@ -51,11 +51,11 @@ WebProducer.prototype = {
         var attributes = {};
         attributes.align = "left";
         swfobject.embedSWF(
-            "swf/producer.swf", "producer",
+            "swf/producer.swf", id,
             width, height,
             swfVersionStr, xiSwfUrlStr,
             flashvars, params, attributes);
-        swfobject.createCSS("#producer", "display:block;text-align:left;");
+        swfobject.createCSS("#"+id, "display:block;text-align:left;");
 
         var self = this;
         this.on('ready', function () {
@@ -66,8 +66,7 @@ WebProducer.prototype = {
     get_http_base_url: function () {
         var port = '8082';
         var host = this.getUrl().split('/')[2].split(':')[0];
-        var ret = ['http://', host, ':', port, '/'].join('');
-        return ret;
+        return ['http://', host, ':', port, '/'].join('');
     },
 
     get_http_api_base_url: function () {

@@ -1,4 +1,4 @@
-Respondent video capture kit (RVCK)
+Respondent video capture kit - flash version  (RVCK)
 ===========
 
 Description
