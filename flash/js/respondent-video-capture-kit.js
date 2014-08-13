@@ -36,15 +36,15 @@ $(document).ready(function () {
             log("We have " + numCameras + " camera(s) available");
             if (numCameras == 0) return alert('there is no camera availalbe');
 
+            log("Camera is now available");
+            producer.setMirroredPreview(true);
+            log('Is preview mirrored ? ' + producer.getMirroredPreview());
+            producer.setAudioStreamActive(false);
+            log('Is audio streaming active ? ' + producer.getAudioStreamActive());
+
             // checking user permissions on camera
             producer.once('camera-unmuted', function () {
-                log("Camera is now available");
-                producer.setMirroredPreview(true);
-                log('Is preview mirrored ? ' + producer.getMirroredPreview());
-                producer.setAudioStreamActive(false);
-                log('Is audio streaming active ? ' + producer.getAudioStreamActive());
 
-                //setupClient();
                 if(cbSuccess) cbSuccess();
             });
 
@@ -108,6 +108,7 @@ $(document).ready(function () {
             producer.disconnect();
         }
 
+        producerSetupCamera();
     });
 
     // API CLIENT functions
@@ -149,12 +150,11 @@ $(document).ready(function () {
             //message before login
             apiClientSetup(afterApiClientSetup);
             }, 100);
-
     }
 
     var afterApiClientSetup = function(){
         log('afterSetupClient');
-        producerSetupCamera(afterProducerSetupCamera);
+        afterProducerSetupCamera();
     }
 
     var afterProducerSetupCamera = function(){
@@ -236,7 +236,7 @@ $(document).ready(function () {
 
     //init
     var init = function(){
-        log(init);
+        log('init');
         if(rvckConfiguration.streamDomain!=null){
             streamUrlDomain = rvckConfiguration.streamDomain;
             $('#domainNameInput').val(streamUrlDomain);

@@ -16,19 +16,19 @@
     <script type="text/javascript" charset="utf-8" src="js/respondent-video-capture-kit.js"></script>
 
     <!-- Client files -->
-    <script  type="text/javascript" charset="utf-8" src="js/APIClient/sha256.js"></script>
-    <script  type="text/javascript" charset="utf-8" src="js/APIClient/enc-base64-min.js"></script>
-    <script  type="text/javascript" charset="utf-8" src="js/APIClient/store.js"></script>
-    <script  type="text/javascript" charset="utf-8" src="js/APIClient/CEClient.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/APIClient/sha256.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/APIClient/enc-base64-min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/APIClient/store.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/APIClient/CEClient.js"></script>
 
 </head>
 
 <body>
 <div class="navbar navbar-default">
 
-        <div class="container">
-            <h3><a class="brand" href="#">Respondent video capture kit - flash version</a></h3>
-        </div>
+    <div class="container">
+        <h3><a class="brand" href="#">Respondent video capture kit - flash version</a></h3>
+    </div>
 
 
 </div>
@@ -36,9 +36,12 @@
 <div class="container">
 
     <div class="row">
-        <div class="col-xs-8" id="producer">
+        <div id="main" class="col-xs-8 col-md-6">
+            <div id="producer"></div>
+            <div id="data"></div>
         </div>
-        <div class="col-xs-4" id="information">
+        <div id="side" class="col-xs-4 col-md-4" >
+            <div id="information">
 
                 <div id="message" class="alert alert-info" role="alert">Please, insert data connection</div>
 
@@ -54,15 +57,18 @@
                         <input id="apiUsernameInput" placeholder="API username" class="form-control"/>
                         <label for="apiPasswordInput">API password</label>
                         <input id="apiPasswordInput" placeholder="API password" class="form-control"/>
-                        <button id="connectButton" value="Save data" class="btn btn-primary btn-block"/>Save connection data</button>
+                        <button id="connectButton" value="Save data" class="btn btn-primary btn-block"/>
+                        Save connection data</button>
                     </div>
                 </div>
 
                 <div id="recordInterface" class="panel panel-default">
                     <div class="panel-heading">Recording</div>
                     <div class="panel-body">
-                        <button id="recButton" value="Start Recording" class="disabled btn btn-success btn-block"/>Start Recording</button>
-                        <button id="stopButton" value="Stop Recording" class="disabled btn btn-danger btn-block"/>Stop Recording</button>
+                        <button id="recButton" value="Start Recording" class="disabled btn btn-success btn-block"/>
+                        Start Recording</button>
+                        <button id="stopButton" value="Stop Recording" class="disabled btn btn-danger btn-block"/>
+                        Stop Recording</button>
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -77,7 +83,9 @@
                 </div>
 
 
+            </div>
         </div>
+
     </div>
 
 
@@ -85,11 +93,11 @@
 
 <div class="navbar navbar-default">
 
-        <div class="container">
-            <a href="http://www.crowdemotion.co.uk/">Crow Emotion</a> ||
-            <a href="https://github.com/CrowdEmotion/respondent-video-capture-kit">Github</a> ||
-            <a href="#" onclick="javascript: return false">Support [at] crowdemotion.co.uk</a>
-        </div>
+    <div class="container">
+        <a href="http://www.crowdemotion.co.uk/">Crow Emotion</a> ||
+        <a href="https://github.com/CrowdEmotion/respondent-video-capture-kit">Github</a> ||
+        <a href="#" onclick="javascript: return false">Support [at] crowdemotion.co.uk</a>
+    </div>
 
     <br/>
 </div>
