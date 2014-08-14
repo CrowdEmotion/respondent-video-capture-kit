@@ -1,4 +1,4 @@
-var rvckConfiguration = {
+var recorderConfiguration = {
     //Custom configuration, please fill all the field
     'streamDomain' : '',                //Url to stream the recording
     'streamName' : '',                  //name of the streming, used for the final name of the recorded video file

@@ -9,7 +9,7 @@ $(document).ready(function () {
     var producerSetupCamera, producerSetupConnection, producerStreamDisconnect; // Do not set
 
     var producer = new WebProducer({
-        id: rvckConfiguration.recorderID, // the html object id
+        id: recorderConfiguration.recorderID, // the html object id
         width: 320 * 1.5, // these are sizes of the player on the page
         height: 240 * 1.5, // not related to the stream resolution
         trace: false // would enable debug logs in js console
@@ -22,7 +22,7 @@ $(document).ready(function () {
 
     window.ceclient = ceclient;
 
-    // Recorder events
+    // Recorder object
 
     producer.once('ready', function () {
 
@@ -74,13 +74,13 @@ $(document).ready(function () {
             producer.setStreamHeight(480);
 
             producer.on('connect', function () {
-                setStatusConnection(1);
+                displayStatusConnection(1);
                 log("We are now streaming live on our channel", 'success');
                 if(cbAfterConnect) cbAfterConnect();
             });
 
             producer.on('disconnect', function () {
-                setStatusConnection(0);
+                displayStatusConnection(0);
                 log("The producer has been disconnected");
                 if(cbAfterDisconnect) cbAfterDisconnect();
             });
@@ -104,8 +104,9 @@ $(document).ready(function () {
             if(cbAfterSetup) cbAfterSetup();
         };
 
-        producerStreamDisconnect = function(){
+        producerStreamDisconnect = function(cb){
             producer.disconnect();
+            if(cb) cb();
         }
 
         producerSetupCamera();
@@ -114,7 +115,7 @@ $(document).ready(function () {
     // API CLIENT functions
     var  apiClientSetup = function(cb){
         log('Api login in progress');
-        ceclient.init(true, true, rvckConfiguration.apiDomain);
+        ceclient.init(true, true, recorderConfiguration.apiDomain);
         ceclient.login(apiUsername,apiPassword,
             function(ret){
                 if(ret){
@@ -186,18 +187,18 @@ $(document).ready(function () {
         $('#stopButton').removeClass('active').addClass('disabled');
     }
 
-    function setStatusConnection(status) {
-        if (status == 1) {
-            $('#status').removeClass('label-danger').addClass('label-success').html('Streaming video    ');
+    function displayStatusConnection(status) {
+        if (status == 1) { //streaming video
+            $('#status').removeClass('label-danger').addClass('label-success').html('Streaming video');
             $('#connectButton').removeClass('active').addClass('disabled');
         }
-        if (status == 0) {
+        if (status == 0) { //not streaming
             $('#status').removeClass('label-success').addClass('label-danger').html('Not streaming');
             $('#connectButton').removeClass('disabled').addClass('active');
         }
     }
 
-    //Log function
+    //Log functions
     function logHide() {
         //$('#message').removeClass().addClass('invisible').html('');
         $('#message').removeClass().addClass('alert').addClass('alert-info').html(' ');
@@ -237,20 +238,20 @@ $(document).ready(function () {
     //init
     var init = function(){
         log('init');
-        if(rvckConfiguration.streamDomain!=null){
-            streamUrlDomain = rvckConfiguration.streamDomain;
+        if(recorderConfiguration.streamDomain!=null){
+            streamUrlDomain = recorderConfiguration.streamDomain;
             $('#domainNameInput').val(streamUrlDomain);
         }
-        if(rvckConfiguration.streamName!=null){
-            streamName = rvckConfiguration.streamName;
+        if(recorderConfiguration.streamName!=null){
+            streamName = recorderConfiguration.streamName;
             $('#streamNameInput').val(streamName);
         }
-        if(rvckConfiguration.apiUsername!=null){
-            apiUsername = rvckConfiguration.apiUsername;
+        if(recorderConfiguration.apiUsername!=null){
+            apiUsername = recorderConfiguration.apiUsername;
             $('#apiUsernameInput').val(apiUsername);
         }
-        if(rvckConfiguration.apiPassword!=null){
-            apiPassword = rvckConfiguration.apiPassword;
+        if(recorderConfiguration.apiPassword!=null){
+            apiPassword = recorderConfiguration.apiPassword;
             $('#apiPasswordInput').val(apiPassword);
         }
     };
