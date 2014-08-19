@@ -18,7 +18,7 @@ $(document).ready(function () {
     window.producer = producer;
 
     var ceclient = new CEClient();
-    var apiUsername, apiPassword;
+    var apiUsername, apiPassword, apiDomain;
 
     window.ceclient = ceclient;
 
@@ -115,7 +115,7 @@ $(document).ready(function () {
     // API CLIENT functions
     var  apiClientSetup = function(cb){
         log('Api login in progress');
-        ceclient.init(true, true, recorderConfiguration.apiDomain);
+        ceclient.init(true, true, apiDomain);
         ceclient.login(apiUsername,apiPassword,
             function(ret){
                 if(ret){
@@ -222,6 +222,7 @@ $(document).ready(function () {
             streamName = $('#streamNameInput').val();
             apiUsername = $('#apiUsernameInput').val();
             apiPassword = $('#apiPasswordInput').val();
+            apiDomain = $('#apiDomainInput').val();
             afterSaveConnectData();
         });
 
@@ -253,6 +254,10 @@ $(document).ready(function () {
         if(recorderConfiguration.apiPassword!=null){
             apiPassword = recorderConfiguration.apiPassword;
             $('#apiPasswordInput').val(apiPassword);
+        }
+        if(recorderConfiguration.apiDomain!=null){
+            apiDomain = recorderConfiguration.apiDomain;
+            $('#apiDomainInput').val(apiDomain);
         }
     };
 
