@@ -7,5 +7,5 @@ var recorderConfiguration = {
 
     //Default configuration element
     'recorderID' : 'producer',                       //ID of the html element that contain the recorder
-    'apiDomain'  : 'api-sandbox.crowdemotion.co.uk'  //Domain to stream, use api.crowdemotion.co.uk OR api-sanbox.crowdemotion.co.uk
+    'apiDomain'  : ''  //Domain to stream, use api.crowdemotion.co.uk OR api-sanbox.crowdemotion.co.uk
 };
