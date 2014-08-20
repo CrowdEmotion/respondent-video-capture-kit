@@ -150,7 +150,7 @@ $(document).ready(function () {
         setTimeout(function(){
             //message before login
             apiClientSetup(afterApiClientSetup);
-            }, 100);
+        }, 100);
     }
 
     var afterApiClientSetup = function(){
@@ -220,6 +220,7 @@ $(document).ready(function () {
         function () {
             streamUrlDomain = $('#domainNameInput').val();
             streamName = $('#streamNameInput').val();
+            streamName = streamName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             apiUsername = $('#apiUsernameInput').val();
             apiPassword = $('#apiPasswordInput').val();
             apiDomain = $('#apiDomainInput').val();
