@@ -254,9 +254,6 @@ function javaRest(debug, http_fallback, domain) {
             javaRest.protocol = 'http';
         }
 
-        if(javaRest.domain == "api-sandbox.crowdemotion.co.uk"){
-            javaRest.protocol = 'http';
-        }
     }
 }
 
