@@ -12,7 +12,8 @@ $(document).ready(function () {
         id: recorderConfiguration.recorderID, // the html object id
         width: 320 * 1.5, // these are sizes of the player on the page
         height: 240 * 1.5, // not related to the stream resolution
-        trace: false // would enable debug logs in js console
+        trace: false, // would enable debug logs in js console
+        path: '../swf/'
     });
 
     window.producer = producer;

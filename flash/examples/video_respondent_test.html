@@ -1,0 +1,112 @@
+<html>
+
+<!--
+    1 - copy and paste file code below, the HEAD part and the BODY part
+    2 - fill all data in the videoRespondentTestConf.js
+-->
+
+<head>
+    <!-- VIDEO  RESPONDENT TEST PAGE - HEAD - START  -->
+    <!-- Configuration file -->
+    <script type="text/javascript" charset="utf-8" src="../js/examples/videoRespondentTestConf.js"></script>
+
+    <!-- Mandatory files -->
+    <script type="text/javascript" charset="utf-8" src="../js/external/jquery-1.9.1.js"></script>
+
+    <!-- Recorder files -->
+    <script type="text/javascript" charset="utf-8" src="../js/external/swfobject.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/recorder/webproducer.js"></script>
+
+    <!-- Client files -->
+    <script type="text/javascript" charset="utf-8" src="../js/APIClient/sha256.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/APIClient/enc-base64-min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/APIClient/store.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/APIClient/CEClient.js"></script>
+
+    <script type="text/javascript" charset="utf-8" src="../js/examples/videoRespondentTestPlayer.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/examples/videoRespondentTest.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            var vrt = new Vrt(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
+                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,{debug:true}
+            );
+
+
+
+
+            // show start button
+            $(vrt).on('vrt_event_producer_camera_ok',function(){
+                $('#start').show();
+            });
+            // watch first video
+            $('#start').on('click',function(){
+                $('#start').hide();
+                $(vrt).trigger('vrt_event_start_video_session');
+            });
+            // watch next video
+            $(vrt).on('vrt_event_video_step_completed',function(e, data){
+                $('#next').show();
+                if(data.responseId){
+                    alert('Facevideo uploaded with response id: '+ data.responseId);
+                }
+            });
+            $('#next').on('click',function(){
+                $('#next').hide();
+                $(vrt).trigger('vrt_event_user_next_video');
+            });
+            //end session
+            $(vrt).on('vrt_event_video_session_complete',function(){
+                $('#next').hide();
+                $('#end').show();
+            });
+            $('#end').on('click',function(){
+                $('#end').hide();
+                $(vrt).trigger('vrt_event_user_session_complete');
+            });
+
+            //alerts
+            //no api login
+            $(vrt).on('vrt_event_api_login_fail',function(){
+                alert('Error: API login fail');
+            });
+            //no camera
+            $(vrt).on('vrt_event_producer_no_camera_found',function(){
+                alert('Error: No webcam found');
+            });
+            //camera blocked
+            $(vrt).on('vrt_event_producer_camera_blocked',function(){
+                alert('Error: Webcam blocked by user');
+            });
+            //no Flash
+            $(vrt).on('vrt_event_flash_no', function(){
+                alert('Error: no Adobe Flash founded');
+                if(console.log)console.log('Error: no Adobe Flash founded');
+            });
+            //old Flash version
+            $(vrt).on('vrt_event_flash_old', function(){
+                alert('Error: the version of Adobe Flash is old');
+            });
+
+            vrt.init(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
+                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,{debug:true});
+        });
+    </script>
+    <!-- EXAMPLE OF IMPLEMENTATION END -->
+    <style>
+        .hide{display: none }
+        .clearfix{clear: both}
+    </style>
+</head>
+
+<body>
+<!-- VIDEO  RESPONDENT TEST PAGE - BODY - START  -->
+<div id="vrt"></div>
+<!-- VIDEO  RESPONDENT TEST PAGE - BODY - START -->
+
+<button id="start" class="hide">Start Session</button>
+<button id="next"  class="hide">Next video</button>
+<button id="end"  class="hide">End</button>
+
+</body>
+</html>

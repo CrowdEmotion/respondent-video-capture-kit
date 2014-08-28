@@ -4,11 +4,12 @@ var WebProducer = function (options) {
     this.id = options.id;
     this.width = options.width || 320;
     this.height = options.height || 240;
+    var path = options.path || '';
     this.el = null;
     this.trace = options.trace;
     WebProducer[this.id] = this;
-    this.createElement(this.id, this.width, this.height);
-    this.port = '8082';
+    this.createElement(this.id, this.width, this.height, path);
+    this.port = options.port || '8082';
     this.methods = [
         'setCredentials', 'getCredentials',
         'setUrl', 'getUrl',
@@ -39,9 +40,9 @@ WebProducer.js_event = function (producerId, eventName, arg1, arg2) {
 };
 
 WebProducer.prototype = {
-    createElement: function (id, width, height) {
+    createElement: function (id, width, height,path) {
         var swfVersionStr = "11.4.0";
-        var xiSwfUrlStr = "swf/playerProductInstall.swf";
+        var xiSwfUrlStr = path+"playerProductInstall.swf";
         var flashvars = { id: id };
         var params = {};
         params.quality = "high";
@@ -51,7 +52,7 @@ WebProducer.prototype = {
         var attributes = {};
         attributes.align = "left";
         swfobject.embedSWF(
-            "swf/producer.swf", id,
+            path+"producer.swf", id,
             width, height,
             swfVersionStr, xiSwfUrlStr,
             flashvars, params, attributes);

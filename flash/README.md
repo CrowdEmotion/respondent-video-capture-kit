@@ -1,51 +1,119 @@
-Respondent video capture kit - flash version  (RVCK)
-===========
-
-To use the RVCK, we include two different pages
-
- - recorder page (recorder.html)                                include a GUI interface with the flash recorder
- - video respondent test (video_respondent_test.html)           include the flash recorder and video player
+# Respondent Video Capture Kit (RVCK) - Flash version
 
 
+CrowdEmotion RVCK includes two different functionalities:
 
-RECORDER page Description
------------
-
-Components
-
- - GUI interface for setup: recording input and log data
-
- - flash based RTMP encoder: record video
-
- - API client: upload you to analyzer server
-
-Here is how it works (GUI interface)
-------------------------------------
-
-1. Setting connection values in the recorderConfiguration.js file OR use the GUI interface
-
-2. Using a web server, setting document root to the project root, and connect to the domain
-
-    ```
-    http://localhost/flash/index.html
-    ```
-
-3. If recorderConfiguration object have no values, fill the form
-
-4. Click on "save connection data"
-
-5. CLick on "start recording" and "stop recording" when you finish
-
-6. After clicking on "stop recording", wait until your video is uploaded
+ - recorder (example: examples/recorder.html) include a GUI interface with the Flash recorder
+ - video respondent test (example: examples/video_respondent_test.html) include the Flash recorder and a video player
 
 
-VIDEO RESPONDENT TEST page description
-------------------
-Components
+## RECORDER Page Description
 
- - flash based RTMP encoder: record video
-
- - API client: upload you to analyzer server
+This page is an example how to record and upload a video.
  
- - Video client: player for youtube videos OR custom server video, use videojs 
+Components:
+
+ - HTML UI for setup: recording input and log events (examples/recorder.html)
+ - Flash based RTMP encoder: records video from webcam
+ - API client: upload your video to analyzer server
+
+### Here is how it works (UI)
+
+1. Set connection values in the recorderConfiguration.js file
+
+1. Using a web server, set the document root to the project root, and connect to the domain
+
+    ```
+    http://localhost/flash/examples/index.html
+    ```
+
+1. Click on "save connection data"
+
+1. Click on "start recording" and "stop recording" when you finish
+
+1. After clicking on "stop recording", wait until your video is uploaded
+
+
+## VIDEO RESPONDENT TEST Page (VRT) description
+
+VRT include all components to play a video stimuli, record user face and upload a video for analysis.
+
+Components:
+
+ - Flash based RTMP encoder: records video from webcam
+
+ - API client: upload your video to analyzer server
+ 
+ - Video client: player for YouTube videos OR video.js for custom video server
+
+### Example
+
+For a fast implementation, please look at HTML file [video_respondent_test.html](./examples/video_respondent_test.html)
+
+### Implement VRT
+
+1. In the head of your page, include all the files under these folders:
+    - js/APIClient/
+    - js/external/
+    - js/recorder/
+    - js/video
+
+2. Include this html code in the body of your page
+     ```
+     <div id="vrt"></div>
+     ```
+     
+3. Include the following code in the head of your page
+     ```
+     <SCRIPT>
+      $(document).ready(function(){
+                 var vrt = new Vrt(<<VIDEOTYPE>>,<<VIDEODATA>>,<<STREAM DOMAIN>>,<<STREAM NAME>>,
+                         <<API DOMAIN>>,<<API USERNAME>>, <<API PASSWORD>>,<<OPTION>>
+                     );
+             });
+     </SCRIPT>
+     ```       
+    - `VIDEOTYPE` string: youtube|customserver - video stimuli are hosted on YouTube or custom server
+    - `VIDEODATA` array: list of video stimuli. 
+        
+        Each object must include 3 properties:
+            
+        - `path` a string with full url of video stimuli, like http://www.youtube.com/watch?v=o9BqrSAHbTc
+            
+        - `length` integer number of seconds, describe how long the video will be seen by users
+            
+        - `name` a simple string with name
+            
+        Example:
+        
+        ```
+        [
+           {'path': 'http://www.youtube.com/watch?v=o9BqrSAHbTc', 'length': 10, 'name' : 'How the sun sees you'},
+           {'path': 'http://www.youtube.com/watch?v=IJNR2EpS0jw', 'length': 11, 'name' : 'Dumb Ways to Die'},
+           {'path': 'http://www.youtube.com/watch?v=Yfr5ISTSIAM', 'length': 12, 'name' : 'best of Sheldon Cooper'}
+        ]
+        ```                 
+    - `STREAM DOMAIN` string: the URL where to stream the recorder output as a RTMP/Adobe Flash Media Server compatible (ask to [support@crowdemotion.co.uk](mailto:support@crowdemotion.co.uk) for more information if you like to use our servers)
+    
+    - `STREAM NAME` string: a simple string used as recording name
+    
+    - `API DOMAIN`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)                     
+          
+4. Implement in you code the listeners for the following events:
+
+    - `vrt_event_preview_loaded`:              all objects are loaded
+    - `vrt_event_producer_camera_ok`:          the user camera is ok
+    - `vrt_event_api_login_fail`:              login to api is failed
+    - `vrt_event_producer_camera_blocked`:     webcam is not available
+    - `vrt_event_start_video_session`:         the first video stimuli is played and producer is recording        
+    - `vrt_event_video_step_completed`:       one video stimuli is ended and facevideos is uplodead, a `responseId` is received 
+    - `vrt_event_user_next_video`:             user is ready for next video              
+    - `vrt_event_video_session_complete`:      all video stimuli are played
+    - `vrt_event_user_session_complete`:       user finish his session
+    - `vrt_event_flash_old`:                   the Flash version included is too old (Flash 11.1.0 is required)
+    - `vrt_event_flash_no`:                    there is no Flash included
+    - `vrt_event_producer_no_camera_found`:    no camera found
+     
+ 
+ 
 
