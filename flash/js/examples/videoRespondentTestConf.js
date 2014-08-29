@@ -14,11 +14,11 @@ var vrtConf = {
     'videoFullscreen' : false,                // video in fullscreen
 
     //Custom configuration, please fill all the field
-    'streamDomain' : 'XXXX',     //Url to stream the recording
-    'streamName' : 'XXXX',                  //name of the streming, used for the final name of the recorded video file
+    'streamDomain' : '',     //Url to stream the recording
+    'streamName' : '',                  //name of the streming, used for the final name of the recorded video file
 
-    'apiDomain'  : 'XXX',             //Domain to stream, use api.crowdemotion.co.uk OR api-sanbox.crowdemotion.co.uk
-    'apiUsername' : 'XXXX',                    //Username to use the Crowd Emotion API
-    'apiPassword' : 'XXXX'                 //Password to use the Crowd Emotion API
+    'apiDomain'  : '',             //Domain to stream, use api.crowdemotion.co.uk OR api-sanbox.crowdemotion.co.uk
+    'apiUsername' : '',                    //Username to use the Crowd Emotion API
+    'apiPassword' : ''                 //Password to use the Crowd Emotion API
 
 };

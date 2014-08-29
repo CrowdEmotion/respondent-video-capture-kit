@@ -56,7 +56,8 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
     - js/APIClient/
     - js/external/
     - js/recorder/
-    - js/video
+    - js/video/
+    - js/video_respondent_test/
 
 2. Include this html code in the body of your page
      ```
@@ -104,7 +105,8 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
     - `vrt_event_preview_loaded`:              all objects are loaded
     - `vrt_event_producer_camera_ok`:          the user camera is ok
     - `vrt_event_api_login_fail`:              login to api is failed
-    - `vrt_event_producer_camera_blocked`:     webcam is not available
+    - `vrt_event_producer_camera_muted`:       webcam is waiting for user permission
+    - `vrt_event_producer_camera_blocked`:     user block webcam
     - `vrt_event_start_video_session`:         the first video stimuli is played and producer is recording        
     - `vrt_event_video_step_completed`:       one video stimuli is ended and facevideos is uplodead, a `responseId` is received 
     - `vrt_event_user_next_video`:             user is ready for next video              

@@ -23,8 +23,8 @@
     <script type="text/javascript" charset="utf-8" src="../js/APIClient/store.js"></script>
     <script type="text/javascript" charset="utf-8" src="../js/APIClient/CEClient.js"></script>
 
-    <script type="text/javascript" charset="utf-8" src="../js/examples/videoRespondentTestPlayer.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/examples/videoRespondentTest.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/video_respondent_test/videoRespondentTestPlayer.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/video_respondent_test/videoRespondentTest.js"></script>
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
@@ -77,6 +77,10 @@
             //camera blocked
             $(vrt).on('vrt_event_producer_camera_blocked',function(){
                 alert('Error: Webcam blocked by user');
+            });
+            //wating user permission for webcam
+            $(vrt).on('vrt_event_producer_camera_muted',function(){
+                alert('Please click on the "Allow" button in the Adobe Flash Player security request');
             });
             //no Flash
             $(vrt).on('vrt_event_flash_no', function(){

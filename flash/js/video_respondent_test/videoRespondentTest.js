@@ -621,6 +621,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log("===WEBP The user must approve camera access");
                 vrt.popOverCe('pop_click_allow');
                 vrt.log('user must approve camera','producerConnStatus');
+                $(window.vrt).trigger('vrt_event_producer_camera_muted');
             } else {
                 vrt.log('camera aviable','producerConnStatus');
                 vrt.log("===WEBP The camera is available, user already approved");
@@ -701,27 +702,22 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log('Api login in progress');
         this.log('>>STEP api init')
         this.ceclient.init(true, false, this.apiDomain);
-        this.ceclient.login(this.apiUsername,this.apiPassword,
-            function(ret){
-                if(ret){
-                    if(console.log)console.log('Api login OK + success');
-                    if(cbSuccess) cbSuccess();
-                }else{
-                    if(console.log)console.log('Api login FAIL + danger');
-                    if(cbFail) cbFail();
-                }
-            });
-
+        this.ceclient.logout(
+                this.ceclient.login(this.apiUsername,this.apiPassword,
+                    function(ret){
+                        if(ret){
+                            if(console.log)console.log('Api login OK + success');
+                            if(cbSuccess) cbSuccess();
+                        }else{
+                            if(console.log)console.log('Api login FAIL + danger');
+                            if(cbFail) cbFail();
+                        }
+                    })
+        );
     };
 
-    this.apiClientLogout = function(res){
+    this.apiClientLogout = function(){
         this.log('>>STEP api logout')
-        if(res.responseId){
-            if(console.log)console.log(res);
-            if(console.log)console.log('Uploaded file to api with response id: '+res.responseId +' success');
-        }else{
-            if(console.log)console.log('Upload error status: '+res.statusText + ' [' + res.status + '] warning');
-        }
         this.ceclient.logout();
     };
 
