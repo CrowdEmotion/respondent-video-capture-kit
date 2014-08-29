@@ -4,7 +4,7 @@ function PlayerInterface() {
     this.player_starts_recorder = false;
     this.timeout_alert = 0,
     this.videos_preload = null,
-    this.media_path_pre = 'http://XXXX',
+    this.media_path_pre = 'http://none',
     this.test_media_path = this.media_path_pre + 'throughput_test.mp4', // TODO: HTTPS support, document.location.protocol
     this.enough_bandwidth = false,
     this.videos_preload = null,
@@ -26,6 +26,8 @@ function PlayerInterface() {
             return true;
     }
 }
+
+// TODO video.js implementation
 
 function VjsInterface() {
 
@@ -80,10 +82,8 @@ function VjsInterface() {
 
 }
 
-//PLAYER yt
 
-
-
+// PLAYER YouTube
 
 function YtInterface() {
 
@@ -95,7 +95,9 @@ function YtInterface() {
         if (this.player) {
             this.log("player [YT]: play");
 
-            /* todo
+            // TODO fullscreen
+
+            /*
             if (this.fullscreen_needed) {
                 // enlarge video
                 if (this.hasFullscreen) {
@@ -123,10 +125,9 @@ function YtInterface() {
             this.log("player [YT]: stop");
             this.player.stopVideo();
 
-            // remove object to uniform lifetime of Flash object between browsers
+            // TODO remove object to uniform lifetime of Flash object between browsers
             //swfobject.removeSWF('ytPlayer');
             //this.player = null;
-
         }
     };
 

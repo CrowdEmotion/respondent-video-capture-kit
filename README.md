@@ -1,9 +1,9 @@
-Respondent video capture kit (RVCK)
+Respondent Video Capture Kit (RVCK)
 ===========
 
 Description
 -----------
 
-RVCK include a series of tools to recorder and upload videos to Crowdemotion
+CrowdEmotion's RVCK include a series of tools to record, show and upload videos to CrowdEmotion API
 
- - Flash: this include a flash recorder and html/js components.
+ - flash: this include a flash recorder and html/js components
