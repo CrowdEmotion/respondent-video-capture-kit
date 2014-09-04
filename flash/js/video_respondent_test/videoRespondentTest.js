@@ -6,7 +6,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     //User settings
     this.videoList = null;
     this.videoFullscreen = false;
-    this.videoType = null; //youtube or ceserver
+    this.videoType = null; //youtube or customserver
     this.canSkip = false;
     this.debug = false
 
@@ -325,6 +325,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(this.videoType=='youtube'){
             this.player = window.ytInterface;
         }else{
+            videojs.options.flash.swf = "video-js.swf";
             this.player = window.vjsInterface;
         }
 
@@ -370,7 +371,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             this.media_id = this.clearname(this.videoList[this.currentMedia].name); //was media_info[current_media].id
             this.media_length = this.videoList[this.currentMedia].length;
-            this.media_path = this.youtubeParser(this.videoList[this.currentMedia].path);
+            if(this.videoType=='youtube'){
+                this.media_path = this.youtubeParser(this.videoList[this.currentMedia].path);
+            }else{
+                this.media_path = this.videoList[this.currentMedia].path;
+            }
             this.log('>>STEP  YT path ' + this.media_path);
 
             this.proceedToShow();
@@ -461,7 +466,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
         var streamName = this.videoList[this.currentMedia].streamCode; // stream name will reflect in the recorded filename
 
-        this.log('STREAM HERE');
+        this.log('>>STEP STREAM HERE');
         this.log(streamUrl);
         this.log('filename ' + this.producerStreamName);
         var url = 'rtmp://' + this.producerStreamUrl + ':1935/live'; // "live/" is the RTMP application name, always the same.
@@ -500,11 +505,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     // LOG FUNCTIONS
     this.log = function (msg , display,mode) {
 
-        if(msg.toString().substring(0,2)=='>>' || msg.toString().substring(0,2)=='EV') {
+        var str = msg.toString().substring(0,2);
+        if(str=='>>' || str=='EV' || str=='TM') {
+            if(str == 'TM') this.logTime(msg);
             if (console && console.log) console.log(msg);
             if (display != undefined && this.debug == true) {
                 if (msg instanceof Object) {
-
                     $('#vrtVal_' + display + ' span').html(JSON.stringify(msg));
                 } else {
                     if (mode && mode == 'a')
@@ -514,6 +520,21 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 }
             }
         }
+    };
+
+    this.logTime = function(msg){
+        if(!msg) msg='';
+        var date = new Date();
+        var datevalues = [
+            date.getFullYear()
+            ,date.getMonth()+1
+            ,date.getDate()
+            ,date.getHours()
+            ,date.getMinutes()
+            ,date.getSeconds()
+            ,date.getMilliseconds()
+        ];
+        if (console && console.log) console.log('TIME '+ msg +': '+datevalues[4]+' '+datevalues[5]+' '+datevalues[6]);
     }
 
     // BROWSER FUNCTIONS
@@ -525,6 +546,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         else
             return true;
     };
+
+    this.checkIe = function()
+    {
+        return (/msie|trident/i).test(navigator.userAgent)
+
+    }
+
+    this.checkIeVersion = function(version)
+    {
+        return ((navigator.userAgent.toLowerCase().indexOf('msie ')+version != -1) || (navigator.userAgent.toLowerCase().indexOf('trident 6') != -1));
+    }
 
     this.youtubeParser = function(url) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
@@ -544,13 +576,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.setup_stop_playing =function() {
         this.log('>>STEP vrt setup stop playing');
-
         this.stop_handle = setTimeout(vrt.stop_playing, this.media_length * 1000 + 100);
     };
 
     this.stop_playing =function() {
         vrt.log('>>STEP vrt stop play');
-        vrt.log('stop_playing');
+        vrt.logTime('stop_playing');
         vrt.player.video_stop();
 
         clearTimeout(vrt.stop_handle);
@@ -563,7 +594,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     // WEBPRODUCER FUNCTION
     this.webProducerInit = function(){
         this.log("===WEBP Webpr_init");
-
+        vrt.logTime('webProducerInit');
         this.producer = new WebProducer({
             id: this.producerID, // the html object id
             width: this.producerWidth, // these are sizes of the player on the page
@@ -574,6 +605,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         this.producer.once('ready', function () {
             var vrt = window.vrt;
+            vrt.logTime('webpr ready');
             vrt.log('>>STEP producer ready');
             vrt.log('===WEBP The producer is now ready');
             vrt.log('ready','producerConnStatus');
@@ -642,12 +674,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('connect', function () {
                 vrt.log('>>STEP producer connect');
+                vrt.logTime('webpr connect');
                 this.setMirroredPreview(true);
                 vrt.log('Is preview mirrored ? ', this.getMirroredPreview());
                 this.setAudioStreamActive(false);
                 vrt.log('Is audio streaming active ? ', this.getAudioStreamActive());
 
-                console.log('ON CONNECTED');
                 vrt.log('connected','producerConnStatus');
                 this.setStreamFPS(15);
                 vrt.log('FPS ', this.getStreamFPS());
@@ -666,6 +698,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             });
 
             this.on('save', function (url) {
+                vrt.logTime('webpr save');
                 vrt.log('>>STEP producer save');
                 vrt.log("===WEBP Save: The file has been saved to " + url);
                 vrt.hideVideoBox();
@@ -675,10 +708,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             });
 
             this.on('error', function (reason) {
+                vrt.logTime('webpr error');
                 vrt.log("===WEBP ERROR: ", reason);
             });
 
             this.on('disconnect', function () {
+                vrt.logTime('webpr disconnect');
                 vrt.log('>>STEP producer disconnected');
                 vrt.is_recording_started = false;
 

@@ -56,8 +56,10 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
     - js/APIClient/
     - js/external/
     - js/recorder/
-    - js/video/
+    - js/video/ [^]
     - js/video_respondent_test/
+
+[^]: required only if you don't use YouTube
 
 2. Include this html code in the body of your page
      ```
