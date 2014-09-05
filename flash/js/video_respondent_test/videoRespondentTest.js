@@ -136,8 +136,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.injectLayout = function(){
         var pre = this.vrtID;
-        $("#"+pre).html(
-                " <div id='vrtProducer' class='vrtWrap'> " +
+
+        var html=" <div id='vrtWrapper' class='vrtWrap'> " +
                 "       <div id='vrtProducer' class='vrtWrap'>                                                          "+
                 "           <div id='producer'></div>                                                                   "+
                 "           <div class='clearfix'></div>                                                                "+
@@ -148,8 +148,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 "      <div id='videoDiv'></div>                                                                        "+
                 "      <div id='ytPlayer'></div>                                                                        "+
                 "      <div class='clearfix'></div>                                                                     "+
-                "  </div>                                                                                               "+
-                "     <!-- <div id='vrtValues' class='vrtWrap'>                                                             "+
+                "  </div>                                                                                               ";
+
+        var debugT="     <div id='vrtValues' class='vrtWrap'>                                                             "+
                 "          <h4>Info</h4>                                                                                "+
                 "          <div id='vrtVal_type'>Type: <span></span></div>                                              "+
                 "          <div id='vrtVal_mediaCount'>media count: <span></span></div>                                 "+
@@ -161,9 +162,40 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 "          <div id='vrtVal_apiStatus'>API status: <span>Not connected</span></div>                      "+
                 "          <div id='vrtVal_fileUpload'>Files: <span>Not connected</span></div>                          "+
                 "      </div>                                                                                           "+
-                "      <div id='vrtLog'></div>                 --->                                                          "
-        );
-    }
+                "      <div id='vrtLog'></div>                                                                          "
+
+        $("#"+pre).html(html);
+    };
+
+    /**
+     * The function set recorder to visibility none, if not a altFunction is specified.
+     * In some browser, if you use display: none, the swf object will be destroyed
+     * @param altFunction
+     * @param callback
+     */
+    this.recorderHide = function(altFunction,callback){
+        if(!altFunction){
+            $('#vrtProducer').css('visibility','hidden');
+            $('#producer').css('visibility','hidden');
+            $('#vrtProducer').css('z-index',-1000);
+            $('#producer').css('z-index',-1000);
+        }else{
+            altFunction();
+        }
+        if(callback)callback();
+    };
+
+    this.recorderShow = function(altFunction,callback ){
+        if(!altFunction){
+            $('#vrtProducer').css('visibility','visible');
+            $('#producer').css('visibility','visible');
+            $('#vrtProducer').css('z-index',1000);
+            $('#producer').css('z-index',1000);
+        }else{
+            altFunction();
+        }
+        if(callback)callback();
+    };
 
     this.vrtOnStartSequence = 0;
     this.vrtOn = function(){
@@ -272,21 +304,24 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
 
     this.hideAllAndStartPlayer = function(){
-        this.hideSimple('#vrtProducer');
-        this.hideSimple('#vrtCanStartButtonWrapper');
-        this.hideSimple('#vrtGuidingButton');
+        this.hideVisibility('#vrtProducer');
+        this.hideVisibility('#vrtCanStartButtonWrapper');
+        this.hideVisibility('#vrtGuidingButton');
 
         this.producer.height=1;
         this.producer.width=1;
     };
 
-    this.hideSimple = function(el){
+    this.hideVisibility = function(el){
         $(el).css('visibility','hidden');
         $(el).css('z-index',-1000);
-        $(el).css('position','absolute');
-        $(el).css('top','1000000px');
-        $(el).css('left','1000000px');
     };
+    this.showVisibility = function(el){
+        $(el).css('visibility','hidden');
+        $(el).css('z-index',0);
+    };
+
+
 
     //TODO skipVideo
     this.skipVideo = function(){

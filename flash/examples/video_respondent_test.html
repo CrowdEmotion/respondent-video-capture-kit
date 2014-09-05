@@ -47,6 +47,7 @@
             // watch first video
             $('#start').on('click',function(){
                 $('#start').hide();
+                vrt.recorderHide();
                 $(vrt).trigger('vrt_event_start_video_session');
             });
             // watch next video

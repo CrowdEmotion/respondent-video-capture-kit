@@ -138,12 +138,10 @@ function VjsInterface() {
     this.loadeddata = false;
     this.on_player_play = function (cb) {
         vrt.log("player [VJSnew]: on_play");
-        vrt.logTime('vjs loadedalldata');
-        vrt.player_is_ready(true);
-        if(this.loadeddata == true){
-            vrt.player_started_playing();
-            vrt.startRecording();
-        }
+        vrt.logTime('vjs on_player_play');
+
+        vrt.player_started_playing();
+        vrt.startRecording();
 
         //vrt.player_started_playing();
         //vrt.startRecording();
@@ -152,13 +150,14 @@ function VjsInterface() {
     };
 
     this.loadedalldata = function (cb) {
-        vrt.log("player [VJSnew]: on_play");
-        vrt.logTime('vjs loadedalldata')
+        vrt.log("player [VJSnew]: loadedalldata");
+        vrt.logTime('vjs loadedalldata');
         this.loadeddata = true;
-        vrt.player.on_player_play();
-        //vrt.player_started_playing();
-        //vrt.startRecording();
-
+        /*
+        vrt.player_is_ready(true);
+        vrt.player_started_playing();
+        vrt.startRecording();
+        */
         //if(cb)cb(); //showVideoBox();
     };
 

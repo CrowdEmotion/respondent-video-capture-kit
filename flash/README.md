@@ -101,7 +101,7 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
     - `STREAM NAME` string: a simple string used as recording name
     
     - `API DOMAIN`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)                     
-          
+                    
 4. Implement in you code the listeners for the following events:
 
     - `vrt_event_preview_loaded`:              all objects are loaded
@@ -117,6 +117,11 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
     - `vrt_event_flash_old`:                   the Flash version included is too old (Flash 11.1.0 is required)
     - `vrt_event_flash_no`:                    there is no Flash included
     - `vrt_event_producer_no_camera_found`:    no camera found
+         
+5. List of usable methods 
+    -  `recorderHide`:                          hide the recorder
+    -  `recorderShow`:                          show the recorder
+     
      
  
  
