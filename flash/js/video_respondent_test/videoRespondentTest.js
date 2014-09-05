@@ -48,6 +48,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.player = null;
     this.is_player_ready = false;
     this.player_starts_recorder = false;
+    this.avgPreLoadTime = 2000;
 
     //api client values
     this.ceclient;
@@ -64,6 +65,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.debug)? this.debug = options.debug : this.debug = false;
         (options && options.producerStreamWidth)? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
         (options && options.producerStreamHeight)? this.producerStreamHeight = options.producerStreamHeight : this.producerStreamHeight = 480;
+        (options && options.avgPreLoadTime)? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 2000;
 
         this.mediaCount = list.length;
         this.videoType  = type;
@@ -451,7 +453,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.player.loadPlayer();
 
         if (this.is_player_ready){
-
             this.player_is_ready();
         }
     };
@@ -611,7 +612,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.setup_stop_playing =function() {
         this.log('>>STEP vrt setup stop playing');
-        this.stop_handle = setTimeout(vrt.stop_playing, this.media_length * 1000 + 100);
+
+        this.stop_handle = setTimeout(vrt.stop_playing, this.media_length * 1000 + this.avgPreLoadTime+ 100);
     };
 
     this.stop_playing =function() {
