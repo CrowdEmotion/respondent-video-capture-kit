@@ -48,7 +48,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.player = null;
     this.is_player_ready = false;
     this.player_starts_recorder = false;
-    this.avgPreLoadTime = 2000;
+    this.avgPreLoadTime = 0;
 
     //api client values
     this.ceclient;
@@ -65,7 +65,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.debug)? this.debug = options.debug : this.debug = false;
         (options && options.producerStreamWidth)? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
         (options && options.producerStreamHeight)? this.producerStreamHeight = options.producerStreamHeight : this.producerStreamHeight = 480;
-        (options && options.avgPreLoadTime)? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 2000;
+        (options && options.avgPreLoadTime)? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
 
         this.mediaCount = list.length;
         this.videoType  = type;
@@ -152,7 +152,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 "      <div class='clearfix'></div>                                                                     "+
                 "  </div>                                                                                               ";
 
-        var debugT="     <div id='vrtValues' class='vrtWrap'>                                                             "+
+        var debugHtml="<div id='vrtValues' class='vrtWrap'>                                                             "+
                 "          <h4>Info</h4>                                                                                "+
                 "          <div id='vrtVal_type'>Type: <span></span></div>                                              "+
                 "          <div id='vrtVal_mediaCount'>media count: <span></span></div>                                 "+
@@ -170,7 +170,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     /**
-     * The function set recorder to visibility none, if not a altFunction is specified.
+     * The function set recorder to visibility hidden, if not a altFunction is specified.
      * In some browser, if you use display: none, the swf object will be destroyed
      * @param altFunction
      * @param callback
@@ -224,9 +224,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(window.vrt).on('vrt_event_user_session_complete', function() {
             window.vrt.closeSession();
         });
-
-
-
 
     };
 
@@ -391,6 +388,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.stepComplete = function(res){
+        vrt.logChrono(3,'API UPLOD FILES', false);
         $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId}]);
     };
 
@@ -513,6 +511,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producer.setStreamWidth(this.producerStreamWidth);
         this.producer.setStreamHeight(this.producerStreamHeight);
 
+        this.logTime('producer start connection');
         this.producer.connect();
     };
 
@@ -569,10 +568,57 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ,date.getMinutes()
             ,date.getSeconds()
             ,date.getMilliseconds()
+            ,date.getTime()
         ];
-        if (console && console.log) console.log('TIME '+ msg +': '+datevalues[4]+' '+datevalues[5]+' '+datevalues[6]);
-    }
+        if (console && console.log && msg!='') console.log('TIME '+ msg +': '+datevalues[4]+' '+datevalues[5]+' '+datevalues[6]);
+        return datevalues;
+    };
 
+    this.chronoStart = [];
+    this.chronoEnd = [];
+    this.chronoMessagge = [];
+    this.logChrono = function(pos, msg, start){
+        var startm='end';
+        (start==true)? startm = 'start':'';
+
+        if(start){
+            vrt.chronoMessagge[pos] = msg;
+            vrt.chronoStart[pos] = vrt.logTime();
+            if (console && console.log) console.log('CHRONO ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6]);
+        }else{
+            vrt.chronoEnd[pos] = vrt.logTime();
+            if (console && console.log) console.log('CHRONO ' +startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6]);
+            if (console && console.log) console.log('CHRONO  ' + msg +' RESULTS: '
+                + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7])
+            );
+        }
+
+    };
+
+    this.get_time_diff = function( datetimes, datetimee )
+    {
+
+        var datetime = datetimes;
+        var now = datetimee;
+
+        if( isNaN(datetime) )
+        {
+            return "";
+        }
+
+        if (datetime < now) {
+            var milisec_diff = now - datetime;
+        }else{
+            var milisec_diff = datetime - now;
+        }
+
+        var days = Math.floor(milisec_diff / 1000 / 60 / (60 * 24));
+
+        var date_diff = new Date( milisec_diff );
+
+        return /* days + " Days "+ date_diff.getHours() + " Hours " + */ date_diff.getMinutes() + " M " + date_diff.getSeconds() + " S "+ date_diff.getMilliseconds() + " m ";
+
+    }
     // BROWSER FUNCTIONS
     this.checkSafariMinVer = function(plat, ver) {
         var bver, isSafari = $.browser.safari && window.navigator.appVersion.indexOf('Chrome') < 0;
@@ -619,6 +665,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.stop_playing =function() {
         vrt.log('>>STEP vrt stop play');
         vrt.logTime('stop_playing');
+        vrt.logChrono(1,'player',false);
         vrt.player.video_stop();
 
         clearTimeout(vrt.stop_handle);
@@ -710,8 +757,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('connect', function () {
+                vrt.logChrono(0,'PRODUCER RECORDING', true);
                 vrt.log('>>STEP producer connect');
-                vrt.logTime('webpr connect');
+                vrt.logTime('producer connected');
                 this.setMirroredPreview(true);
                 vrt.log('Is preview mirrored ? ', this.getMirroredPreview());
                 this.setAudioStreamActive(false);
@@ -736,10 +784,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             this.on('save', function (url) {
                 vrt.logTime('webpr save');
+                vrt.logChrono(2,'PRODUCER SAVING', false);
                 vrt.log('>>STEP producer save');
                 vrt.log("===WEBP Save: The file has been saved to " + url);
                 vrt.hideVideoBox();
                 vrt.postPartecipate();
+                vrt.logChrono(3,'API UPLOD FILES', true);
                 vrt.facevideoUpload(url, vrt.stepComplete);
                 //vrt.is_recording_started = false;
             });
@@ -750,6 +800,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             });
 
             this.on('disconnect', function () {
+                vrt.logChrono(0,'PRODUCER RECORDING', false);
+                vrt.logChrono(2,'PRODUCER SAVING', true);
                 vrt.logTime('webpr disconnect');
                 vrt.log('>>STEP producer disconnected');
                 vrt.is_recording_started = false;

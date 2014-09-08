@@ -135,11 +135,13 @@ function VjsInterface() {
         vrt.player_is_ready(false);
         //if(cb)cb();
     };
+
     this.loadeddata = false;
+
     this.on_player_play = function (cb) {
         vrt.log("player [VJSnew]: on_play");
         vrt.logTime('vjs on_player_play');
-
+        vrt.logChrono(1,'player',true);
         vrt.player_started_playing();
         vrt.startRecording();
 
@@ -484,6 +486,7 @@ window.onytplayerStateChange = function (newState) {
 
     if (newState == 1) {
         vrt.startRecording();
+        vrt.logChrono(1,'player',true);
         this.player_started_playing();
     }
 
