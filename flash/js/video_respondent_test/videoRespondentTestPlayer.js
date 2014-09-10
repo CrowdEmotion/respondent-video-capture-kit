@@ -483,13 +483,14 @@ window.onytplayerStateChange = function (newState) {
 
     // TODO sync recording when buffering
 
+    $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}])
     if (newState == 3 || newState == 1) {
         //vrt.startRecording();
     }
 
     if (newState == 1) {
         vrt.logChrono(1,'player',true);
-        vrt.trigger('vrtstep_play')
+        $(vrt).trigger('vrtstep_play')
         //OLD
         //vrt.startRecording();
         //this.player_started_playing();

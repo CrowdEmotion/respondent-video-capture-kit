@@ -8,7 +8,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.videoFullscreen = false;
     this.videoType = null; //youtube or customserver
     this.canSkip = false;
-    this.debug = false
+    this.debug = false;
+    this.debugEvt = false;
+    this.debugTime = false;
+    this.debugChrono = false;
 
     //Producer
     this.playerVersion = null;
@@ -63,6 +66,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.producerWidth)? this.producerWidth = options.producerWidth : this.producerWidth = 320;
         (options && options.producerHeight)? this.producerHeight = options.producerHeight : this.producerHeight = 240;
         (options && options.debug)? this.debug = options.debug : this.debug = false;
+        (options && options.debugEvt)? this.debugEvt = options.debugEvt : this.debugEvt = false;
+        (options && options.debugTime)? this.debugTime = options.debugTime : this.debugTime = false;
+        (options && options.debugChrono)? this.debugChrono = options.debugChrono : this.debugChrono = false;
+        (options && options.debugImportant)? this.debugImportant = options.debugImportant : this.debugImportant = false;
         (options && options.producerStreamWidth)? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
         (options && options.producerStreamHeight)? this.producerStreamHeight = options.producerStreamHeight : this.producerStreamHeight = 480;
         (options && options.avgPreLoadTime)? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
@@ -231,6 +238,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         */
         $(window.vrt).on('vrtstep_loaded', function() {
+            vrt.log('EVT vrtstep_loaded');
             vrt.showVisibility('#videoDiv');
             // OLD && NEW
             vrt.log('>>EVT vrtstep_loaded');
@@ -238,16 +246,22 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             //TODO open_video_window();  // HACK else the Flash player is not instantiated
             vrt.producerSetupConnection(function(){vrt.producerConnection()});
         });
+        $(window.vrt).on('vrtstep_connect', function() {
+
+        });
+        $(window.vrt).on('vrtstep_playerStateChange', function(e, data) {
+            vrt.log('EVT vrtstep_playerStateChange '+data.state+' time '+data.time[4]+' '+data.time[5]+' '+data.time[6]);
+        });
         //vrtstep_connect
         $(window.vrt).on('vrtstep_loadplay', function() {
-            vrt.log('>>EVT vrtstep_loadplay');
+            vrt.log('EVT vrtstep_loadplay');
             // OLD
             // vrt.player_is_ready();
             // NEW
 
         });
         $(window.vrt).on('vrtstep_play', function() {
-            vrt.log('>>EVT vrtstep_play');
+            vrt.log('EVT vrtstep_play');
             // OLD
             // vrt.startRecording();
             // this.player_started_playing();
@@ -256,7 +270,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.setup_stop_playing();
         });
         $(window.vrt).on('vrtstep_connect', function() {
-            vrt.log('>>EVT vrtstep_connect');
+            vrt.log('EVT vrtstep_connect');
             /*OLD
                 if (!vrt.player_starts_recorder) {
                     $('#videoDiv').css('visibility','visible');
@@ -270,7 +284,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             //vrt.setup_stop_playing();
         });
         $(window.vrt).on('vrtstep_disconnect', function() {
-                vrt.log('>>EVT vrtstep_disconnect');
+                vrt.log('EVT vrtstep_disconnect');
                 // OLD
                 // vrt.is_recording_started = false;
         });
@@ -618,7 +632,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     // LOG FUNCTIONS
     this.log = function (msg , display,mode) {
 
+        if(!this.debug) return'';
         var str = msg.toString().substring(0,2);
+
+        if(!this.debugEvt && str=='EV') return'';
+        if(!this.debugTime && str=='TM') return'';
+        if(!this.debugImportant && str=='>>') return'';
+
         if(str=='>>' || str=='EV' || str=='TM') {
             if(str == 'TM') this.logTime(msg);
             if (console && console.log) console.log(msg);
@@ -636,6 +656,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.logTime = function(msg){
+
         if(!msg) msg='';
         var date = new Date();
         var datevalues = [
@@ -648,7 +669,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ,date.getMilliseconds()
             ,date.getTime()
         ];
-        if (console && console.log && msg!='') console.log('TIME '+ msg +': '+datevalues[4]+' '+datevalues[5]+' '+datevalues[6]);
+        if(!this.debugTime){}
+        else {
+            if (console && console.log && msg!='') console.log('TIME '+ msg +': '+datevalues[4]+' '+datevalues[5]+' '+datevalues[6]);
+        }
         return datevalues;
     };
 
@@ -656,6 +680,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.chronoEnd = [];
     this.chronoMessagge = [];
     this.logChrono = function(pos, msg, start){
+        if(!this.debugChrono)return'';
         var startm='end';
         (start==true)? startm = 'start':'';
 
@@ -838,6 +863,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.logChrono(0,'PRODUCER RECORDING', true);
                 vrt.log('>>STEP producer connect');
                 vrt.logTime('producer connected');
+
                 this.setMirroredPreview(true);
                 vrt.log('Is preview mirrored ? ', this.getMirroredPreview());
                 this.setAudioStreamActive(false);
@@ -901,6 +927,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.apiClientUploadLink = function(streamFileName, cb){
         this.log('>>STEP api file upload ' + streamFileName);
+        this.log('EVT upload api file upload ' + streamFileName);
         this.ceclient.uploadLink(streamFileName,cb);
     };
 
