@@ -306,7 +306,7 @@ function YtInterface() {
         this.log('>>STEP video play '+ vrt.media_path);
         vrt.logTime('YtInterface video_play');
         if (this.player) {
-            this.log("player [YT]: play");
+            this.log("player [YT]: play" + vrt.media_path);
 
             // TODO fullscreen
 
@@ -439,6 +439,8 @@ function YtInterface() {
                     "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1",
                 "videoDivConvict", "640", "400", "11.1", null, null, params, atts);
             if(cbSuccess)cbSuccess();
+        }else{
+            $(vrt).trigger('vrtstep_loaded');
         }
     };
 
@@ -470,7 +472,8 @@ window.onYouTubePlayerReady =function() {
     vrt.player.player.addEventListener("onStateChange", "onytplayerStateChange");
     vrt.player.player.addEventListener("onError", "onytplayerError");
 
-    vrt.player_is_ready();
+    $(vrt).trigger('vrtstep_loaded');
+    //vrt.player_is_ready();
 
 };
 
@@ -485,9 +488,11 @@ window.onytplayerStateChange = function (newState) {
     }
 
     if (newState == 1) {
-        vrt.startRecording();
         vrt.logChrono(1,'player',true);
-        this.player_started_playing();
+        vrt.trigger('vrtstep_play')
+        //OLD
+        //vrt.startRecording();
+        //this.player_started_playing();
     }
 
 };
