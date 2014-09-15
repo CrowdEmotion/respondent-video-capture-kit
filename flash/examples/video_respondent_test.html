@@ -6,6 +6,16 @@
 -->
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css">
+    <![endif]-->
+    <!--[if gt IE 8]><!-->
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css">
+    <!--<![endif]-->
+    <link rel="stylesheet" href="../css/video_respondent_test.css">
+
     <!-- VIDEO  RESPONDENT TEST PAGE - HEAD - START  -->
     <!-- Configuration file -->
     <script type="text/javascript" charset="utf-8" src="../js/examples/videoRespondentTestConf.js"></script>
@@ -33,40 +43,68 @@
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
+            var options = {debug:true,debugChrono: true,debugEvt:true
+                //htmlRecorderPre: '<div class="pure-u-1 pure-u-md-1-2"><div class="l-box"><h3 class="information-head">Recorder</h3><p>',
+                //htmlRecorderClass: '',
+                //htmlRecorderPost: '</p></div></div>',
+                //htmlVideoPre: '<div class="pure-u-1 pure-u-md-1-2"><div class="l-box"><h3 class="information-head">Video</h3><p>',
+                //htmlVideoClass: '',
+                //htmlVideoPost:  '</p></div></div>',
+            };
             var vrt = new Vrt(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
-                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,{debug:true}
+                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options
             );
 
+            var alertMessage = function(msg){
+                if(msg==undefined || msg==null){
+                    $('#alerts').html('');
+                    $('#alerts').removeClass('pure-button');
+                    $('#alerts').removeClass('button-b');
+                }else{
+                    $('#alerts').html(msg);
+                    $('#alerts').addClass('pure-button');
+                    $('#alerts').addClass('button-b');
+                }
+            };
 
+            $('#alerts').on('click',function(){
+                alertMessage();
+
+            });
 
 
             // show start button
             $(vrt).on('vrt_event_producer_camera_ok',function(){
+                alertMessage();
                 $('#start').show();
             });
             // watch first video
             $('#start').on('click',function(){
+                alertMessage();
                 $('#start').hide();
-                vrt.recorderHide();
                 $(vrt).trigger('vrt_event_start_video_session');
             });
             // watch next video
             $(vrt).on('vrt_event_video_step_completed',function(e, data){
+                alertMessage();
                 $('#next').show();
                 if(data.responseId){
-                    alert('Facevideo uploaded with response id: '+ data.responseId);
+                    alertMessage('Facevideo uploaded with response id: '+ data.responseId);
                 }
             });
             $('#next').on('click',function(){
+                alertMessage();
                 $('#next').hide();
                 $(vrt).trigger('vrt_event_user_next_video');
             });
             //end session
             $(vrt).on('vrt_event_video_session_complete',function(){
+                alertMessage();
                 $('#next').hide();
                 $('#end').show();
             });
             $('#end').on('click',function(){
+                alertMessage();
                 $('#end').hide();
                 $(vrt).trigger('vrt_event_user_session_complete');
             });
@@ -74,32 +112,30 @@
             //alerts
             //no api login
             $(vrt).on('vrt_event_api_login_fail',function(){
-                alert('Error: API login fail');
+                alertMessage('Error: API login fail');
             });
             //no camera
             $(vrt).on('vrt_event_producer_no_camera_found',function(){
-                alert('Error: No webcam found');
+                alertMessage('Error: No webcam found');
             });
             //camera blocked
             $(vrt).on('vrt_event_producer_camera_blocked',function(){
-                alert('Error: Webcam blocked by user');
+                alertMessage('Error: Webcam blocked by user');
             });
             //wating user permission for webcam
             $(vrt).on('vrt_event_producer_camera_muted',function(){
-                alert('Please click on the "Allow" button in the Adobe Flash Player security request');
+                alertMessage('Please click on the "Allow" button in the Adobe Flash Player security request');
             });
             //no Flash
             $(vrt).on('vrt_event_flash_no', function(){
-                alert('Error: no Adobe Flash founded');
-                if(console.log)console.log('Error: no Adobe Flash founded');
+                alertMessage('Error: no Adobe Flash founded');
             });
             //old Flash version
             $(vrt).on('vrt_event_flash_old', function(){
-                alert('Error: the version of Adobe Flash is old');
+                alertMessage('Error: the version of Adobe Flash is old');
             });
 
-            vrt.init(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
-                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,{debug:true});
+            vrt.init();
         });
     </script>
     <!-- EXAMPLE OF IMPLEMENTATION END -->
@@ -110,13 +146,33 @@
 </head>
 
 <body>
-<!-- VIDEO  RESPONDENT TEST PAGE - BODY - START  -->
-<div id="vrt"></div>
-<!-- VIDEO  RESPONDENT TEST PAGE - BODY - START -->
+<div class="banner">
+    <h1 class="banner-head">
+        Video Respondent Test Demo
+    </h1>
+</div>
 
-<button id="start" class="hide">Start Session</button>
-<button id="next"  class="hide">Next video</button>
-<button id="end"  class="hide">End</button>
+<div class="content-wrapper">
+    <div class="information pure-g smallline">
+        <div id="alerts" class="pure-u-1 pure-u-md-1"></div>
+    </div>
+    <div class="information pure-g smallline">
+        <div id="buttons"  class="pure-u-1 pure-u-md-1">
+            <button id="start" class="hide button-choose pure-button">Start Session</button>
+            <button id="next"  class="hide button-choose pure-button">Next video</button>
+            <button id="end"  class="hide button-choose pure-button">End</button>
+        </div>
+    </div>
+
+    <div class="information pure-g">
+
+    <!-- VIDEO  RESPONDENT TEST PAGE - BODY - START  -->
+    <div id="vrt" style="margin: 0 auto"></div>
+    <!-- VIDEO  RESPONDENT TEST PAGE - BODY - START -->
+
+    </div>
+
+</div>
 
 </body>
 </html>

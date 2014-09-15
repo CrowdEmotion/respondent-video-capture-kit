@@ -12,6 +12,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.debugEvt = false;
     this.debugTime = false;
     this.debugChrono = false;
+    this.options = {};
 
     //Producer
     this.playerVersion = null;
@@ -27,7 +28,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.producerStreamName = null;
     this.producerStreamWidth = 640;
     this.producerStreamHeight = 480;
-    this.stream_code = null
+    this.stream_code = null;
+    this.recAutoHide =true;
 
     //Various
     this.flash_allowed = false;
@@ -37,6 +39,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.media_length = 0;  //media played
     this.media_path = null; //media played
     this.exitcode = null;
+    this.mainStyle =  '';
 
 
 
@@ -60,19 +63,22 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.initialized = function(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options){
         if(options && options.fullscreen) {this.videoFullscreen = options.fullscreen && this.checkSafariMinVer(false,6)} else {  this.videoFullscreen = false };
-        (options && options.skip)? this.canSkip = options.skip : this.canSkip = false;
+        (options && options.skip !=undefined)? this.canSkip = options.skip : this.canSkip = false;
         (options && options.vrtID)? this.vrtID = options.vrtID : this.vrtID = 'vrt';
         (options && options.producerID)? this.producerID = options.producerID : this.producerID = 'producer';
         (options && options.producerWidth)? this.producerWidth = options.producerWidth : this.producerWidth = 320;
         (options && options.producerHeight)? this.producerHeight = options.producerHeight : this.producerHeight = 240;
-        (options && options.debug)? this.debug = options.debug : this.debug = false;
-        (options && options.debugEvt)? this.debugEvt = options.debugEvt : this.debugEvt = false;
-        (options && options.debugTime)? this.debugTime = options.debugTime : this.debugTime = false;
-        (options && options.debugChrono)? this.debugChrono = options.debugChrono : this.debugChrono = false;
-        (options && options.debugImportant)? this.debugImportant = options.debugImportant : this.debugImportant = false;
+        (options && options.debug !=undefined)? this.debug = options.debug : this.debug = false;
+        (options && options.debugEvt !=undefined)? this.debugEvt = options.debugEvt : this.debugEvt = false;
+        (options && options.debugTime !=undefined)? this.debugTime = options.debugTime : this.debugTime = false;
+        (options && options.debugChrono !=undefined)? this.debugChrono = options.debugChrono : this.debugChrono = false;
+        (options && options.debugImportant !=undefined)? this.debugImportant = options.debugImportant : this.debugImportant = false;
         (options && options.producerStreamWidth)? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
         (options && options.producerStreamHeight)? this.producerStreamHeight = options.producerStreamHeight : this.producerStreamHeight = 480;
         (options && options.avgPreLoadTime)? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
+        (options && options.recAutoHide!=undefined)? this.recAutoHide = options.recAutoHide : this.recAutoHide = true;
+
+        this.options = options;
 
         this.mediaCount = list.length;
         this.videoType  = type;
@@ -100,6 +106,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log(this.producerStreamName,'producerStreamName');
 
         this.injectLayout();
+        this.initVar();
         this.vrtOn();
 
 
@@ -143,21 +150,37 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(this).trigger('vrt_init_ok');
     };
 
+    this.initVar = function(){
+    };
+
     this.injectLayout = function(){
         var pre = this.vrtID;
+        (this.options && this.options.mainStyle)? '' : this.options.mainStyle = 'margin: 0 auto';
+        (this.options && this.options.recStyle)? '' : this.options.recStyle = 'margin: 0 auto';
+        (this.options && this.options.videoStyle)? '' : this.options.videoStyle = 'margin: 0 auto';
 
-        var html=" <div id='vrtWrapper' class='vrtWrap'> " +
-                "       <div id='vrtProducer' class='vrtWrap'>                                                          "+
+        var html=" <div id='vrtWrapper' class='vrtWrap' style='"+this.options.mainStyle+"'> " +
+                ((this.options.htmlRecorderPre)? this.options.htmlRecorderPre : '') +
+                "       <div id='vrtProducer' class='vrtWrap "+this.options.htmlRecorderClass+"' style='"+this.options.recStyle+"'>                      "+
                 "           <div id='producer'></div>                                                                   "+
                 "           <div class='clearfix'></div>                                                                "+
                 "       </div>                                                                                          "+
-                "       <div id='vrtVideoWrapper' class='vrtWrap'>                                                      "+
-                "      <div id='vrtvideo'></div>                                                                        "+
-                "      <div id='vrtalert'></div>                                                                        "+
-                "      <div id='videoDiv'></div>                                                                        "+
-                "      <div id='ytPlayer'></div>                                                                        "+
+                ((this.options.htmlRecorderPost)? this.options.htmlRecorderPost : '') +
+                ((this.options.htmlVideoPre)? this.options.htmlVideoPre : '') +
+                "<div id='vrtVideoWrapper' class='vrtWrap' style='"+this.options.videoStyle+"'>                                                      "+
+                "      <div id='vrtvideo' class='"+this.options.htmlVideoClass+"'></div>                                "+
+                "      <div id='videoDiv' class='"+this.options.htmlVideoClass+"'></div>                                "+
+                "      <div id='ytPlayer' class='"+this.options.htmlVideoClass+"'></div>                                "+
                 "      <div class='clearfix'></div>                                                                     "+
-                "  </div>                                                                                               ";
+                "</div>                                                                                               "+
+                ((this.options.htmlVideoPost)? this.options.htmlVideoPost : '') +
+                "<div id='vrtLogWrapper' class='vrtWrap'>                                                      "+
+                "      <div id='vrtalert'></div>                                                                        "+
+                "      <div id='vrt_timer_player'></div>                                                                       " +
+                "      <div id='vrt_timer_recorder'></div>                                                                       " +
+                "      <div class='clearfix'></div>                                                                     "+
+                "</div>                                                                                               "+
+                "</div>";
 
         var debugHtml="<div id='vrtValues' class='vrtWrap'>                                                             "+
                 "          <h4>Info</h4>                                                                                "+
@@ -188,6 +211,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $('#producer').css('visibility','hidden');
             $('#vrtProducer').css('z-index',-1000);
             $('#producer').css('z-index',-1000);
+            $('#vrtProducer').css('height','1px');
+            $('#producer').css('width','1px');
         }else{
             altFunction();
         }
@@ -200,6 +225,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $('#producer').css('visibility','visible');
             $('#vrtProducer').css('z-index',1000);
             $('#producer').css('z-index',1000);
+            $('#vrtProducer').css('height','320px');
+            $('#producer').css('width','240px');
         }else{
             altFunction();
         }
@@ -226,11 +253,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         //internal event: steps
         /*
+        OLD && YT
          1 player load
          2 webpr connection
          3 player play
 
-
+       VJ
          1 player load
          3 player play
            player loaded data
@@ -246,27 +274,27 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             //TODO open_video_window();  // HACK else the Flash player is not instantiated
             vrt.producerSetupConnection(function(){vrt.producerConnection()});
         });
-        $(window.vrt).on('vrtstep_connect', function() {
-
-        });
         $(window.vrt).on('vrtstep_playerStateChange', function(e, data) {
             vrt.log('EVT vrtstep_playerStateChange '+data.state+' time '+data.time[4]+' '+data.time[5]+' '+data.time[6]);
         });
         //vrtstep_connect
         $(window.vrt).on('vrtstep_loadplay', function() {
             vrt.log('EVT vrtstep_loadplay');
+
             // OLD
             // vrt.player_is_ready();
             // NEW
 
         });
-        $(window.vrt).on('vrtstep_play', function() {
-            vrt.log('EVT vrtstep_play');
+        $(window.vrt).on('vrtstep_play', function(e, data) {
+            vrt.log('EVT vrtstep_play caller'+data.caller);
+            vrt.logChrono(1,'player', true);
             // OLD
             // vrt.startRecording();
             // this.player_started_playing();
             // NEW
             //vrt.producerConnection();
+
             vrt.setup_stop_playing();
         });
         $(window.vrt).on('vrtstep_connect', function() {
@@ -280,7 +308,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     vrt.setup_stop_playing();
                 }
              */
-            vrt.player.video_play();
+
+            setTimeout(function(){vrt.player.video_play();},1500);
+
+            //vrt.player.video_play();
+            window.onload = CreateTimer("vrt_timer_recorder", 10);
+            //vrt.player.video_play()
+
             //vrt.setup_stop_playing();
         });
         $(window.vrt).on('vrtstep_disconnect', function() {
@@ -291,7 +325,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         //external event
         $(window.vrt).on('vrt_event_start_video_session', function() {
-            window.vrt.setupPlayer();
+            if(window.vrt.recAutoHide==false){
+                window.vrt.setupPlayer()
+            }else{
+                window.vrt.recorderHide(null,window.vrt.setupPlayer());
+            }
         });
 
         $(window.vrt).on('vrt_event_user_next_video', function() {
@@ -436,7 +474,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(this.videoType=='youtube'){
             this.player = window.ytInterface;
         }else{
-            videojs.options.flash.swf = "video-js.swf";
+            //videojs.options.flash.swf = "videovideo-js.swf";
+            videojs.options.techOrder = ["flash","html5"];
             this.player = window.vjsInterface;
         }
 
@@ -565,7 +604,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         //OLD
         //this.is_player_ready = true;
         //this.startRecording();
-        this.video_play();
+        this.player.video_play();
 
     };
 
@@ -687,11 +726,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(start){
             vrt.chronoMessagge[pos] = msg;
             vrt.chronoStart[pos] = vrt.logTime();
-            if (console && console.log) console.log('CHRONO ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6]);
+            if (console && console.log) console.log('CHRONO '+pos+': ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6]);
         }else{
             vrt.chronoEnd[pos] = vrt.logTime();
-            if (console && console.log) console.log('CHRONO ' +startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6]);
-            if (console && console.log) console.log('CHRONO  ' + msg +' RESULTS: '
+            if (console && console.log) console.log('CHRONO '+pos+': '+startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6]);
+            if (console && console.log) console.log('CHRONO '+pos+': '+ msg +' RESULTS: '
                 + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7])
             );
         }
@@ -761,8 +800,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.setup_stop_playing =function() {
         this.log('>>STEP vrt setup stop playing');
-
-        this.stop_handle = setTimeout(vrt.stop_playing, this.media_length * 1000 + this.avgPreLoadTime+ 100);
+        var time =this.media_length * 1000 + this.avgPreLoadTime+ 100;
+        this.stop_handle = setTimeout(vrt.stop_playing,time );
     };
 
     this.stop_playing =function() {
@@ -957,3 +996,26 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
 };
+
+var Timer;
+var TotalSeconds;
+
+
+function CreateTimer(TimerID, Time) {
+    Timer = document.getElementById(TimerID);
+    TotalSeconds = Time;
+
+    UpdateTimer()
+    window.setTimeout("Tick()", 1000);
+
+}
+
+function Tick() {
+    TotalSeconds -= 1;
+    UpdateTimer()
+    window.setTimeout("Tick()", 1000);
+}
+
+function UpdateTimer() {
+    //Timer.innerHTML = TotalSeconds;
+}
