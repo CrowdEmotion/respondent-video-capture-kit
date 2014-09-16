@@ -44,26 +44,25 @@ p {
  * vertically center the text.
  */
 
+
 .banner {
-    background: transparent url('../img/banner.jpg') 0 0 no-repeat fixed;
     text-align: center;
     background-size: cover;
-    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../img/banner.jpg', sizingMethod='scale');
-
-    height: 200px;
     width: 100%;
     margin-bottom: 1em;
     display: table;
 }
 
 .banner-head {
+    background: transparent url('../img/banner.jpg') top left no-repeat fixed;
     display: table-cell;
     vertical-align: middle;
     margin-bottom: 0;
     font-size: 2em;
-    color: white;
+    color: #909090;
     font-weight: 500;
     text-shadow: 0 1px 1px black;
+    height: 100px;
 }
 
 
