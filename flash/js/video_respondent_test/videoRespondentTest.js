@@ -30,6 +30,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.producerStreamHeight = 480;
     this.stream_code = null;
     this.recAutoHide =true;
+    this.playerCenter =true;
+    this.recorderCenter =true;
 
     //Various
     this.flash_allowed = false;
@@ -76,7 +78,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.producerStreamWidth)? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
         (options && options.producerStreamHeight)? this.producerStreamHeight = options.producerStreamHeight : this.producerStreamHeight = 480;
         (options && options.avgPreLoadTime)? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
-        (options && options.recAutoHide!=undefined)? this.recAutoHide = options.recAutoHide : this.recAutoHide = true;
+        (options && options.recorderCenter!=undefined)? this.recorderCenter = options.recAutoHide : this.recorderCenter = true;
+        (options && options.playerCenter!=undefined)? this.playerCenter = options.recAutoHide : this.playerCenter = true;
 
         this.options = options;
 
@@ -155,9 +158,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.injectLayout = function(){
         var pre = this.vrtID;
-        (this.options && this.options.mainStyle)? '' : this.options.mainStyle = 'margin: 0 auto';
-        (this.options && this.options.recStyle)? '' : this.options.recStyle = 'margin: 0 auto';
-        (this.options && this.options.videoStyle)? '' : this.options.videoStyle = 'margin: 0 auto';
+        var certerstyle ="";//   "    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);";
+        (this.options && this.options.mainStyle)? '' : this.options.mainStyle = certerstyle;
+        (this.options && this.options.recStyle)? '' : this.options.recStyle = certerstyle;
+        (this.options && this.options.videoStyle)? '' : this.options.videoStyle = certerstyle;
+
 
         var html=" <div id='vrtWrapper' class='vrtWrap' style='"+this.options.mainStyle+"'> " +
                 ((this.options.htmlRecorderPre)? this.options.htmlRecorderPre : '') +
@@ -197,6 +202,16 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 "      <div id='vrtLog'></div>                                                                          "
 
         $("#"+pre).html(html);
+
+        if(this.recorderCenter===true) {
+            //$('#producer').vrtCenter();
+        }
+        if(this.playerCenter===true) {
+            //$('#vrtVideoWrapper').vrtCenter();
+        }
+        if(this.playerCenter===true || this.recorderCenter===true){
+            //$('#vrtWrapper').css({'position':'relative','top':0,'left':0});
+        }
     };
 
     /**
@@ -218,6 +233,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
         if(callback)callback();
     };
+
+
+
 
     this.recorderShow = function(altFunction,callback ){
         if(!altFunction){
@@ -659,7 +677,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log('loadProducer');
         this.log('>>STEP producer init')
 
-        $('#'+this.producerID).css('display', 'inline-block');
+        //$('#'+this.producerID).css('display', 'inline-block');
         //$('#'+this.producerID).addClass('rotating-loader');
 
         this.webProducerInit();
@@ -831,6 +849,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         this.producer.once('ready', function () {
             var vrt = window.vrt;
+            if(vrt.recorderCenter===true)  $('#producer').vrtCenter();
             vrt.logTime('webpr ready');
             vrt.log('>>STEP producer ready');
             vrt.log('===WEBP The producer is now ready');
@@ -997,25 +1016,52 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
 };
 
-var Timer;
-var TotalSeconds;
+var vrtTimer;
+var vrtTotalSeconds;
 
 
-function CreateTimer(TimerID, Time) {
-    Timer = document.getElementById(TimerID);
-    TotalSeconds = Time;
+function vrtCreateTimer(TimerID, Time) {
+    vrtTimer = document.getElementById(TimerID);
+    vrtTotalSeconds = Time;
 
-    UpdateTimer()
-    window.setTimeout("Tick()", 1000);
+    vrtUpdateTimer()
+    window.setTimeout("vrtTick()", 1000);
 
 }
 
-function Tick() {
+function vrtTick() {
     TotalSeconds -= 1;
     UpdateTimer()
-    window.setTimeout("Tick()", 1000);
+    window.setTimeout("vrtTick()", 1000);
 }
 
-function UpdateTimer() {
+function vrtUpdateTimer() {
     //Timer.innerHTML = TotalSeconds;
 }
+
+jQuery.fn.vrtCenter2 = function () {
+    var w = $(window);
+    console.log(this);
+    console.log(w.width());
+    console.log('('+w.width() + ' - ' + this.outerWidth() +') / 2) + ' + w.scrollLeft()+')');
+
+    this.css({
+        'position':'absolute',
+        //'top':Math.abs(((w.height() - this.outerHeight()) / 2) + w.scrollTop()),
+        'left':Math.abs(((w.width() - this.outerWidth()) / 2) + w.scrollLeft())
+    });
+    return this;
+};
+jQuery.fn.vrtCenter = function () {
+    return this.each(function () {
+        var el = $(this);
+        var h = el.height();
+        var w = el.width();
+        var w_box = $(window).width();
+        var h_box = $(window).height();
+        var w_total = (w_box - w) / 2; //400
+        var h_total = (h_box - h) / 2;
+        var css = {"position": 'absolute', "left": w_total + "px"/*, "top": h_total + "px"*/};
+        el.css(css)
+    });
+};

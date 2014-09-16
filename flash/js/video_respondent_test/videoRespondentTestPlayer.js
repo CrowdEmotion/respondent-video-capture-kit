@@ -241,6 +241,7 @@ function VjsInterface() {
             // { preload: 'auto' };
             videojs(videoObj[0], { "controls": false, "autoplay": false, "preload": "none" }, vjs_on_player_ready);
             //$(vrt).trigger('vrtstep_loaded');
+            if(vrt.playerCenter===true)  $('#videoDiv').vrtCenter();
         }else{
             $(vrt).trigger('vrtstep_loaded');
         }
@@ -490,6 +491,7 @@ function YtInterface() {
             swfobject.embedSWF("http://www.youtube.com/apiplayer?" +
                     "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1",
                 "videoDivConvict", "640", "400", "11.1", null, null, params, atts);
+            if(vrt.playerCenter===true)  $('#ytPlayer').vrtCenter();
             if(cbSuccess)cbSuccess();
         }else{
             $(vrt).trigger('vrtstep_loaded');
