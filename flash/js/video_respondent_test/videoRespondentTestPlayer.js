@@ -11,6 +11,9 @@ function PlayerInterface() {
     this.hasFullscreen = false,
     this.sources = '',
     this.swf = '',
+    this.width = 640;
+    this.height = 400;
+
     this.log = function (msg) {
         if (console.log) {
             console.log('player log: ');
@@ -226,22 +229,26 @@ function VjsInterface() {
         vrt.logTime('player_dispose');
     };
 
-    this.loadPlayer = function () {
+    this.loadPlayer = function (options) {
         vrt.logTime('loadPlayer');
         //TODO if(((videojs.options.techOrder && videojs.options.techOrder[0] == 'flash')) open_video_window();  // HACK else the Flash player is not instantiated
 
         // load player only one time
         if(!this.player) {
 
+            var p_w = this.width;
+            var p_h = this.height;
+            if(options && options.width) p_w =this.width = options.width;
+            if(options && options.height) p_h =this.height = options.height;
 
             this.player_starts_recorder = false;
 
-            var videoObj = $('#videoDiv').prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="640" height="400" poster=""> </video>').children();
+            var videoObj = $('#videoDiv').prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="'+p_w+'" height="'+p_h+'" poster=""> </video>').children();
 
             // { preload: 'auto' };
             videojs(videoObj[0], { "controls": false, "autoplay": false, "preload": "none" }, vjs_on_player_ready);
             //$(vrt).trigger('vrtstep_loaded');
-            if(vrt.playerCenter===true)  $('#videoDiv').vrtCenter();
+            if(options.centered && options.centered===true)  $('#videoDiv').vrtCenter();
         }else{
             $(vrt).trigger('vrtstep_loaded');
         }
@@ -475,7 +482,7 @@ function YtInterface() {
         this.alertAndRestart('YT');
     };
 
-    this.loadPlayer = function (cbSuccess) {
+    this.loadPlayer = function (options, cbSuccess) {
         this.log('>>STEP player load');
         vrt.logTime('YtInterface loadPlayer');
 
@@ -484,14 +491,20 @@ function YtInterface() {
 
             this.player_starts_recorder = false;
 
+            var p_w = this.width;
+            var p_h = this.height;
+            if(options && options.width) p_w =this.width = options.width;
+            if(options && options.height) p_h =this.height = options.height;
+
             $('#videoDiv').append('<div id="videoDivConvict"></div>');
 
             var params = { allowScriptAccess: "always", allowFullScreen: true, wmode: this.decideWmode() }; //, bgcolor: '#FFF4D5'
             var atts = { id: "ytPlayer" };
             swfobject.embedSWF("http://www.youtube.com/apiplayer?" +
                     "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1",
-                "videoDivConvict", "640", "400", "11.1", null, null, params, atts);
-            if(vrt.playerCenter===true)  $('#ytPlayer').vrtCenter();
+                "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
+            if(options.centered && options.centered===true)  $('#ytPlayer').vrtCenter();
+
             if(cbSuccess)cbSuccess();
         }else{
             $(vrt).trigger('vrtstep_loaded');

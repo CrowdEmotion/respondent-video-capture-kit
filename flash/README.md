@@ -104,6 +104,9 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
                          
     - `OPTION` object: contains a list of properties
         - `randomOrder` (*true*|*false* - default: *false*): display videos in a random order  
+        - `playerCentered` (*true*|*false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
+        - `playerWidth` (integer - default 640): set the width of the videos
+        - `playerHeight` (integer - default 400): set the height of the videos
                              
                     
 4. Implement in you code the listeners for the following events:

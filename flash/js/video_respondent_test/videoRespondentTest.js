@@ -30,9 +30,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.producerStreamHeight = 480;
     this.stream_code = null;
     this.recAutoHide =true;
-    this.playerCenter =true;
     this.recorderCenter =true;
     this.randomOrder = false;
+
 
     //Various
     this.flash_allowed = false;
@@ -65,6 +65,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
 
     this.initialized = function(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options){
+
+        if(options == undefined || options == null) options = {player : {}};
+
+
+
         if(options && options.fullscreen) {this.videoFullscreen = options.fullscreen && this.checkSafariMinVer(false,6)} else {  this.videoFullscreen = false };
         (options && options.skip !=undefined)? this.canSkip = options.skip : this.canSkip = false;
         (options && options.vrtID)? this.vrtID = options.vrtID : this.vrtID = 'vrt';
@@ -80,10 +85,16 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.producerStreamHeight)? this.producerStreamHeight = options.producerStreamHeight : this.producerStreamHeight = 480;
         (options && options.avgPreLoadTime)? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
         (options && options.recorderCenter!=undefined)? this.recorderCenter = options.recAutoHide : this.recorderCenter = true;
-        (options && options.playerCenter!=undefined)? this.playerCenter = options.recAutoHide : this.playerCenter = true;
         (options && options.randomOrder!=undefined)? this.randomOrder = options.randomOrder : this.randomOrder = false;
 
         this.options = options;
+        if(options.player == undefined || options.player == null) options.player = {};
+
+        (options && options.playerCentered!=undefined)? this.options.player.centered = options.playerCentered : this.options.player.centered = true;
+        (options && options.playerWidth!=undefined)? this.options.player.width = options.playerWidth : this.options.player.Width = 640;
+        (options && options.playerHeight!=undefined)? this.options.player.height = options.playerHeight : this.options.player.height = 400;
+
+
 
         this.mediaCount = list.length;
         this.videoType  = type;
@@ -206,15 +217,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         $("#"+pre).html(html);
 
-        if(this.recorderCenter===true) {
-            //$('#producer').vrtCenter();
-        }
-        if(this.playerCenter===true) {
-            //$('#vrtVideoWrapper').vrtCenter();
-        }
-        if(this.playerCenter===true || this.recorderCenter===true){
-            //$('#vrtWrapper').css({'position':'relative','top':0,'left':0});
-        }
     };
 
     /**
@@ -595,7 +597,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log('proceedToShow');
 
 
-        this.player.loadPlayer();
+        this.player.loadPlayer(this.options.player);
 
         // OLD
         /*
