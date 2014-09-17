@@ -32,6 +32,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.recAutoHide =true;
     this.playerCenter =true;
     this.recorderCenter =true;
+    this.randomOrder = false;
 
     //Various
     this.flash_allowed = false;
@@ -80,6 +81,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.avgPreLoadTime)? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
         (options && options.recorderCenter!=undefined)? this.recorderCenter = options.recAutoHide : this.recorderCenter = true;
         (options && options.playerCenter!=undefined)? this.playerCenter = options.recAutoHide : this.playerCenter = true;
+        (options && options.randomOrder!=undefined)? this.randomOrder = options.randomOrder : this.randomOrder = false;
 
         this.options = options;
 
@@ -88,7 +90,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.videoList  = list;
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
-        this.calculateStreamCode();
+        this.calculateListData();
+        this.randomizeOrderList();
         this.log(type,'type');
         this.log(list,'list');
         this.apiDomain = apiDomain;
@@ -234,9 +237,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(callback)callback();
     };
 
-
-
-
     this.recorderShow = function(altFunction,callback ){
         if(!altFunction){
             $('#vrtProducer').css('visibility','visible');
@@ -381,7 +381,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         return hash;
     };
 
-    this.calculateStreamCode = function (){
+    this.calculateListData = function (){
 
         for(var i = 0; i<this.mediaCount; i++){
             var d = new Date();
@@ -393,9 +393,20 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 pre = this.producerStreamName.substring(0,l);
             }
             this.videoList[i].streamCode = pre +'_'+ i +'_' + this.clearname(this.createHashCode(n));
+            this.videoList[i].order = i;
         }
     };
 
+    this.randomizeOrderList = function(){
+        if(this.randomOrder===true && this.mediaCount>1){
+            this.videoList =  this.shuffle(this.videoList);
+        }
+    }
+
+    this.shuffle = function(o){ //v1.0
+        for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+        return o;
+    };
 
     //mediaInfo, instance of this.videoList
     this.buildVideoSources = function(mediaInfo) {
