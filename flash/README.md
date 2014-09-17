@@ -100,7 +100,11 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
     
     - `STREAM NAME` string: a simple string used as recording name
     
-    - `API DOMAIN`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)                     
+    - `API DOMAIN`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
+                         
+    - `OPTION` object: contains a list of properties
+        - `randomOrder` (*true*|*false* - default: *false*): display videos in a random order  
+                             
                     
 4. Implement in you code the listeners for the following events:
 
