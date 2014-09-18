@@ -43,13 +43,8 @@
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
-            var options = {debug:true,debugChrono: true,debugEvt:true
-                //htmlRecorderPre: '<div class="pure-u-1 pure-u-md-1-2"><div class="l-box"><h3 class="information-head">Recorder</h3><p>',
-                //htmlRecorderClass: '',
-                //htmlRecorderPost: '</p></div></div>',
-                //htmlVideoPre: '<div class="pure-u-1 pure-u-md-1-2"><div class="l-box"><h3 class="information-head">Video</h3><p>',
-                //htmlVideoClass: '',
-                //htmlVideoPost:  '</p></div></div>',
+            var options = {debug:true,debugChrono: true,debugEvt:true,randomOrder : true /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
+
             };
             var vrt = new Vrt(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
                     vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options
@@ -69,7 +64,6 @@
 
             $('#alerts').on('click',function(){
                 alertMessage();
-
             });
 
 
@@ -85,12 +79,17 @@
                 $(vrt).trigger('vrt_event_start_video_session');
             });
             // watch next video
-            $(vrt).on('vrt_event_video_step_completed',function(e, data){
+            $(vrt).on('vrt_event_video_step_completed',function(evt, data){
                 alertMessage();
-                $('#next').show();
+                //$('#next').show();
                 if(data.responseId){
                     alertMessage('Facevideo uploaded with response id: '+ data.responseId);
                 }
+                vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform');
+            });
+            $(vrt).on('vrt_event_frame_close',function(evt, data){
+                alertMessage();
+                $('#next').show();
             });
             $('#next').on('click',function(){
                 alertMessage();

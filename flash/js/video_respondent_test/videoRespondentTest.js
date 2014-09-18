@@ -360,6 +360,48 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             window.vrt.closeSession();
         });
 
+        $(window.vrt).on('vrt_event_frame_open', function(e, data) {
+            vrt.log('EVT vrt_event_frame_open');
+            var w = ' width="600" ';
+            if(data.width){
+                w = data.width;
+                w =  ' width="'+w+'" ';
+            }
+            var h = ' height="500" ';
+            if(data.height){
+                h = data.height;
+                h =  ' height="'+h+'" ';
+            }
+            var style = ' style="border:none" ';
+            var src =  '';
+            if(data.src){
+                src =  ' src="'+data.src+'" ';
+            }
+            var base_html = '<div id="vrtFrame" style="display: none"><iframe '+ h +' '+ w +' allowTransparency="true" frameborder="0" '+style+' '+src+'>';
+            var inner_html = '';
+            if(data.html){
+                inner_html =  data.html;
+            }
+            var close_html = '</iframe><div id="vrtFrameCloseWrapper" style="width: 100%; "><div id="vrtFrameClose" style="text-align: right; width: 100%; letter-spacing: normal">X Close and proceed</div></div></div>'
+
+            $('#vrtWrapper').prepend(base_html+inner_html+close_html);
+            $('#vrtFrame').vrtCenter();
+            $('#vrtFrame').show();
+        });
+
+        $('#vrtWrapper').on('click','#vrtFrameClose', function(){
+           vrt.closeFrame();
+        });
+
+    };
+
+    this.openFrame = function(src, html, width, height){
+        $(vrt).trigger('vrt_event_frame_open', [{src : src, html: html, width: width, height: height}]);
+    };
+
+    this.closeFrame = function(){
+        $('#vrtFrame').hide();
+        $(window.vrt).trigger('vrt_event_frame_close');
     };
 
     this.vrtTrigLoadend = function(evtname){
@@ -466,8 +508,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(el).css('z-index',0);
     };
 
-
-
     //TODO skipVideo
     this.skipVideo = function(){
 
@@ -538,6 +578,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.logChrono(3,'API UPLOD FILES', false);
         $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId}]);
     };
+
 
     this.nextStep = function(){
         this.log('nextStep');
