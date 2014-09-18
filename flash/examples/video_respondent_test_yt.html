@@ -92,7 +92,7 @@
                 if(data.responseId){
                     alertMessage('Facevideo uploaded with response id: '+ data.responseId);
                 }
-                vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform');
+                vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform', null, null, null, 'button-choose pure-button', null);
             });
             $(vrt).on('vrt_event_frame_close',function(evt, data){
                 alertMessage();

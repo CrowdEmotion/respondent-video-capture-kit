@@ -382,7 +382,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if(data.html){
                 inner_html =  data.html;
             }
-            var close_html = '</iframe><div id="vrtFrameCloseWrapper" style="width: 100%; "><div id="vrtFrameClose" style="text-align: right; width: 100%; letter-spacing: normal">X Close and proceed</div></div></div>'
+            var cssClass =  '';
+            if(data.cssClass){
+                cssClass =  data.cssClass;
+            }
+
+            var style =  '';
+            if(data.style){
+                style =  data.style;
+            }
+
+            var close_html = '</iframe><div id="vrtFrameCloseWrapper" style="width: 100%; "><button id="vrtFrameClose" class="'+cssClass+'" style="'+style+'">X Close and proceed</button></div></div>'
 
             $('#vrtWrapper').prepend(base_html+inner_html+close_html);
             $('#vrtFrame').vrtCenter();
@@ -395,8 +405,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     };
 
-    this.openFrame = function(src, html, width, height){
-        $(vrt).trigger('vrt_event_frame_open', [{src : src, html: html, width: width, height: height}]);
+    this.openFrame = function(src, html, width, height, cssClass, style){
+        $(vrt).trigger('vrt_event_frame_open', [{src : src, html: html, width: width, height: height, cssClass:cssClass, style:style}]);
     };
 
     this.closeFrame = function(){
