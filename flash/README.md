@@ -124,10 +124,14 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
     - `vrt_event_flash_old`:                   the Flash version included is too old (Flash 11.1.0 is required)
     - `vrt_event_flash_no`:                    there is no Flash included
     - `vrt_event_producer_no_camera_found`:    no camera found
+    - `vrt_event_frame_open`:                  use this event to open a frame OR user the `openFrame()` method 
+    - `vrt_event_frame_close`:                 triggere by the `closeFrame()` method 
          
-5. List of usable methods 
-    -  `recorderHide`:                          hide the recorder
-    -  `recorderShow`:                          show the recorder
+5. List of usable methods
+    -  `recorderHide()`:                          hide the recorder
+    -  `recorderShow()`:                          show the recorder
+    -  `openFrame()` (`src`,`html`,`width`,`height`) : open a frame with the `src` parameter, use `width` and `height` to set the frame dimension. include a close button
+    -  `closeFrame()` :                           close a frame opened with the `openFrame` method
      
      
  
