@@ -43,19 +43,12 @@
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
-            var options = {debug:true,debugChrono: true,debugEvt:true,randomOrder : false
-                //htmlRecorderPre: '<div class="pure-u-1 pure-u-md-1-2"><div class="l-box"><h3 class="information-head">Recorder</h3><p>',
-                //htmlRecorderClass: '',
-                //htmlRecorderPost: '</p></div></div>',
-                //htmlVideoPre: '<div class="pure-u-1 pure-u-md-1-2"><div class="l-box"><h3 class="information-head">Video</h3><p>',
-                //htmlVideoClass: '',
-                //htmlVideoPost:  '</p></div></div>',
+            var options = {debug:true,debugChrono: true,debugEvt:true,randomOrder : true /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
+
             };
             var vrt = new Vrt(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
                     vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options
             );
-
-            var form_link = 'https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform';
 
             var alertMessage = function(msg){
                 if(msg==undefined || msg==null){
@@ -92,17 +85,22 @@
                 if(data.responseId){
                     alertMessage('Facevideo uploaded with response id: '+ data.responseId);
                 }
-                vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform', null, null, null, 'button-choose pure-button', null);
+                vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform',
+                        {btnCssClass:'button-choose pure-button', btnPosition:'top',btnText:'Next',btnStyle:'position: static; margin-bottom: 1em;'}
+                );
             });
             $(vrt).on('vrt_event_frame_close',function(evt, data){
                 alertMessage();
-                $('#next').show();
+                $(vrt).trigger('vrt_event_user_next_video');
+                //$('#next').show();
             });
+            /*
             $('#next').on('click',function(){
                 alertMessage();
                 $('#next').hide();
                 $(vrt).trigger('vrt_event_user_next_video');
             });
+            */
             //end session
             $(vrt).on('vrt_event_video_session_complete',function(){
                 alertMessage();
@@ -159,15 +157,17 @@
 </div>
 
 <div class="content-wrapper">
-    <div class="information pure-g smallline">
+    <div id="introzone" class="information pure-g smallline">
+
         <div id="alerts" class="pure-u-1 pure-u-md-1"></div>
-    </div>
-    <div class="information pure-g smallline">
+
+
         <div id="buttons"  class="pure-u-1 pure-u-md-1">
             <button id="start" class="hide button-choose pure-button">Start Session</button>
             <button id="next"  class="hide button-choose pure-button">Next video</button>
             <button id="end"  class="hide button-choose pure-button">End</button>
         </div>
+
     </div>
 
     <div class="information pure-g">

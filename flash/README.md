@@ -130,7 +130,9 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
 5. List of usable methods
     -  `recorderHide()`:                          hide the recorder
     -  `recorderShow()`:                          show the recorder
-    -  `openFrame()` (`src`,`html`,`width`,`height`,`cssClass`,`style`) : open a frame with the `src` parameter, use `width` and `height` to set the frame dimension. include a close button with custom `cssClass` and `style`
+    -  `openFrame` ( `src`, `options`) :         open a frame with the `src` parameter, use `options.width` and `options.height` to set the frame dimension. 
+                                                   Include a close button with `options.showBtnClose` set to `true`. Customize button with `options.cssClass`, `options.btnStyle` and `options.btnText`.
+                                                   Set position of the button with `options.btnPosition` set to `top` or `bottom`.
     -  `closeFrame()` :                           close a frame opened with the `openFrame` method
      
      

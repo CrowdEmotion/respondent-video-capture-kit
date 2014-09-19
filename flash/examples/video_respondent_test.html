@@ -85,17 +85,22 @@
                 if(data.responseId){
                     alertMessage('Facevideo uploaded with response id: '+ data.responseId);
                 }
-                vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform', null, null, null, 'button-choose pure-button', null);
+                vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform',
+                        {btnCssClass:'button-choose pure-button', btnPosition:'top',btnText:'Next',btnStyle:'position: static; margin-bottom: 1em;'}
+                );
             });
             $(vrt).on('vrt_event_frame_close',function(evt, data){
                 alertMessage();
-                $('#next').show();
+                $(vrt).trigger('vrt_event_user_next_video');
+                //$('#next').show();
             });
+            /*
             $('#next').on('click',function(){
                 alertMessage();
                 $('#next').hide();
                 $(vrt).trigger('vrt_event_user_next_video');
             });
+            */
             //end session
             $(vrt).on('vrt_event_video_session_complete',function(){
                 alertMessage();
@@ -152,15 +157,17 @@
 </div>
 
 <div class="content-wrapper">
-    <div class="information pure-g smallline">
-        <div id="alerts" class="pure-u-1 pure-u-md-1"></div>
-    </div>
-    <div class="information pure-g smallline">
-        <div id="buttons"  class="pure-u-1 pure-u-md-1">
-            <button id="start" class="hide button-choose pure-button">Start Session</button>
-            <button id="next"  class="hide button-choose pure-button">Next video</button>
-            <button id="end"  class="hide button-choose pure-button">End</button>
-        </div>
+    <div id="introzone" class="information pure-g smallline">
+
+            <div id="alerts" class="pure-u-1 pure-u-md-1"></div>
+
+
+            <div id="buttons"  class="pure-u-1 pure-u-md-1">
+                <button id="start" class="hide button-choose pure-button">Start Session</button>
+                <button id="next"  class="hide button-choose pure-button">Next video</button>
+                <button id="end"  class="hide button-choose pure-button">End</button>
+            </div>
+
     </div>
 
     <div class="information pure-g">

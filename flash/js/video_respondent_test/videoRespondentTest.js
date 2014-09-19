@@ -372,27 +372,45 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 h = data.height;
                 h =  ' height="'+h+'" ';
             }
-            var style = ' style="border:none" ';
             var src =  '';
             if(data.src){
                 src =  ' src="'+data.src+'" ';
             }
-            var base_html = '<div id="vrtFrame" style="display: none"><iframe '+ h +' '+ w +' allowTransparency="true" frameborder="0" '+style+' '+src+'>';
+            var cssClass =  '';
+            if(data.btnCssClass){
+                cssClass =  data.btnCssClass;
+            }
+            var btnText = 'Close and proceed';
+            if(data.btnText){
+                btnText = data.btnText;
+            }
+            var style =  '';
+            if(data.btnStyle){
+                style =  data.btnStyle;
+            }
+            var btn = '<div id="vrtFrameCloseWrapper" style="width: 100%; "><button id="vrtFrameClose" class="'+cssClass+'" style="'+style+'">'+btnText+'</button></div>';
+            var btnTop = '';
+            var btnBottom = '';
+            if(data.showBtnClose===false){
+                btn = '';
+            }
+            if(data.btnPosition=='top'){
+                btnTop = btn;
+            }else{
+                btnBottom = btn;
+            }
+
+
+            var base_html = '<div id="vrtFrame" style="display: none">'+btnTop+'<div id="vrtFrameWrapper"><iframe '+ h +' '+ w +' allowTransparency="true" frameborder="0" '+style+' '+src+'>';
             var inner_html = '';
             if(data.html){
                 inner_html =  data.html;
             }
-            var cssClass =  '';
-            if(data.cssClass){
-                cssClass =  data.cssClass;
-            }
 
-            var style =  '';
-            if(data.style){
-                style =  data.style;
-            }
 
-            var close_html = '</iframe><div id="vrtFrameCloseWrapper" style="width: 100%; "><button id="vrtFrameClose" class="'+cssClass+'" style="'+style+'">X Close and proceed</button></div></div>'
+
+
+            var close_html = '</iframe></div>'+btnBottom+'</div>';
 
             $('#vrtWrapper').prepend(base_html+inner_html+close_html);
             $('#vrtFrame').vrtCenter();
@@ -405,8 +423,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     };
 
-    this.openFrame = function(src, html, width, height, cssClass, style){
-        $(vrt).trigger('vrt_event_frame_open', [{src : src, html: html, width: width, height: height, cssClass:cssClass, style:style}]);
+    this.openFrame = function(src, options){
+
+        $(vrt).trigger('vrt_event_frame_open', [{src : src, html: options.html, width: options.width, height: options.height, showBtnClose: options.showBtnClose,
+                                        btnCssClass: options.btnCssClass, btnStyle: options.btnStyle, btnText:options.btnText, btnPosition: options.btnPosition}]);
     };
 
     this.closeFrame = function(){

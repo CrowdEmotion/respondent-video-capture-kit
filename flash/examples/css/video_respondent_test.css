@@ -175,7 +175,6 @@ p {
     color: #333;
     border-radius: 2em;
     font-weight: bold;
-    position: relative;
     bottom: -1.5em;
 }
 
@@ -217,7 +216,7 @@ p {
  */
 @media (min-width: 480px) {
     .banner {
-        height: 100px;
+        height: 80px;
     }
     .banner-head {
         font-size: 3em;
@@ -225,11 +224,12 @@ p {
 }
 
 #alerts{
-    line-height: 35px;
+    line-height: 36px;
 }
 
 .smallline{
-    height: 50px;
+    width: 600px;
+    margin-bottom: 10px;
 }
 
 .button-b {
@@ -239,5 +239,8 @@ p {
 
 .centered {
 
+
+}
+#buttons{
 
 }
