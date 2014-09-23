@@ -287,12 +287,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         */
         $(window.vrt).on('vrtstep_loaded', function() {
             vrt.log('EVT vrtstep_loaded');
-            vrt.showVisibility('#videoDiv');
+
             // OLD && NEW
             vrt.log('>>EVT vrtstep_loaded');
-            $('#videoDiv').css('visibility','visible');
+            //$('#videoDiv').css('visibility','visible');
+
             //TODO open_video_window();  // HACK else the Flash player is not instantiated
             vrt.producerSetupConnection(function(){vrt.producerConnection()});
+
         });
         $(window.vrt).on('vrtstep_playerStateChange', function(e, data) {
             vrt.log('EVT vrtstep_playerStateChange '+data.state+' time '+data.time[4]+' '+data.time[5]+' '+data.time[6]);
@@ -329,7 +331,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 }
              */
 
-            setTimeout(function(){vrt.player.video_play();},1500);
+            setTimeout(
+                function(){
+                    vrt.player.video_play(vrt.showVisibility('#videoDiv'));
+                }
+                ,1500);
 
             //vrt.player.video_play();
             window.onload = CreateTimer("vrt_timer_recorder", 10);
@@ -534,7 +540,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(el).css('z-index',-1000);
     };
     this.showVisibility = function(el){
-        $(el).css('visibility','hidden');
+        $(el).css('visibility','visible');
         $(el).css('z-index',0);
     };
 

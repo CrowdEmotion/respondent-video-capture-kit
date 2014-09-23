@@ -55,7 +55,7 @@ function VjsInterface() {
     this.inheritFrom();
 
 
-    this.video_play = function () {
+    this.video_play = function (cb) {
 
         if (this.player) {
             this.log("player [VJSnew]: play");
@@ -77,7 +77,7 @@ function VjsInterface() {
             // this.player.currentTime(0);
             //vrt.logChrono(1,'player', true);
             this.player.play();
-
+            if(cb)cb();
         }else{
 
         }
@@ -92,9 +92,13 @@ function VjsInterface() {
         if (this.player) {
             this.log("player [VJSnew]: stop");
             this.logTime('video_stop');
+            this.player.src();
             try{
-                if(!this.player.ended() && !this.player.paused())
+                if(!this.player.ended() && !this.player.paused()){
                     this.player.pause();
+                }else{
+
+                }
             }catch(e){
                 this.log(">> ERROR player [VJSnew]: stop")
                 this.log(e);
