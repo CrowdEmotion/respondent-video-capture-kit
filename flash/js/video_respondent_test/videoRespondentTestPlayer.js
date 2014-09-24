@@ -143,14 +143,6 @@ function VjsInterface() {
         this.player.on('seeked',         function() {   vrt.log("EVT seeked")});
         this.player.on('waiting',        function() {   vrt.log("EVT waiting")});
 
-        /*
-         vjsplayer.on('ended', function() {
-         console.log('vjsplayer ended');
-         vjsplayer.src('');
-         });
-         */
-        //vrt.player_is_ready(false);
-        //if(cb)cb();
         $(vrt).trigger('vrtstep_loaded');
     };
 
@@ -159,65 +151,28 @@ function VjsInterface() {
     this.on_player_play = function (cb) {
         vrt.log("EVT on_player_play");
         vrt.logTime('vjs on_player_play');
-        //vrt.logChrono(1,'player',true);
         $(vrt).trigger('vrtstep_play',{caller:'on_player_play'});
-        //vrt.player_started_playing();
-        //vrt.startRecording();
-
-        //vrt.player_started_playing();
-        //vrt.startRecording();
-
-        //if(cb)cb(); //showVideoBox();
     };
 
     this.on_player_firstplay = function (cb) {
         vrt.log("EVT on_player_firstplay");
         vrt.logTime('vjs on_player_firstplay');
-        //vrt.logChrono(1,'player',true);
-        //$(vrt).trigger('vrtstep_play', {caller:'on_player_firstplay'});
-        //vrt.player_started_playing();
-        //vrt.startRecording();
-
-        //vrt.player_started_playing();
-        //vrt.startRecording();
-
-        //if(cb)cb(); //showVideoBox();
     };
-
 
     this.loadeddata = function (cb) {
         vrt.log("EVT loadeddata");
         vrt.logTime('vjs loadeddata');
-        //vrt.logChrono(1,'player',true);
         $(vrt).trigger('vrtstep_play',{caller:'loadeddata'});
         this.loadeddata = true;
-        //$(vrt).trigger('vrtstep_play');
-
-        //$(vrt).trigger('vrtstep_play');
-        /*
-         vrt.player_is_ready(true);
-         vrt.player_started_playing();
-         vrt.startRecording();
-         */
-        //if(cb)cb(); //showVideoBox();
     };
+
     this.loadedalldata = function (cb) {
         vrt.log("EVT loadedalldata");
         vrt.logTime('vjs loadedalldata');
         this.loadeddata = true;
-        //$(vrt).trigger('vrtstep_play');
-
-        //$(vrt).trigger('vrtstep_play');
-        /*
-        vrt.player_is_ready(true);
-        vrt.player_started_playing();
-        vrt.startRecording();
-        */
-        //if(cb)cb(); //showVideoBox();
     };
 
     this.on_player_error = function (e) {
-
         vrt.log('>>'+e);
         vrt.logTime('on_player_error')
     };
@@ -237,7 +192,7 @@ function VjsInterface() {
         vrt.logTime('loadPlayer');
         //TODO if(((videojs.options.techOrder && videojs.options.techOrder[0] == 'flash')) open_video_window();  // HACK else the Flash player is not instantiated
 
-        // load player only one time
+        // load player only first time
         if(!this.player) {
 
             var p_w = this.width;
@@ -257,8 +212,6 @@ function VjsInterface() {
             $(vrt).trigger('vrtstep_loaded');
         }
     };
-
-
 
     this.timeout_alert = 0,
     this.videos_preload = null,
@@ -366,7 +319,7 @@ function YtInterface() {
     this.inheritFrom = PlayerInterface;
     this.inheritFrom();
 
-    this.video_play = function () {
+    this.video_play = function (cb) {
         this.log('>>STEP video play '+ vrt.media_path);
         vrt.logTime('YtInterface video_play');
         if (this.player) {
@@ -391,6 +344,7 @@ function YtInterface() {
              */
 
             this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
+            if(cb)cb();
         }else{
 
         }
@@ -556,15 +510,11 @@ window.onytplayerStateChange = function (newState) {
 
     $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}])
     if (newState == 3 || newState == 1) {
-        //vrt.startRecording();
+
     }
 
     if (newState == 1) {
-        //vrt.logChrono(1,'player',true);
         $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange'})
-        //OLD
-        //vrt.startRecording();
-        //this.player_started_playing();
     }
 
 };

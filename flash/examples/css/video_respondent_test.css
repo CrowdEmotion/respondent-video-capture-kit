@@ -58,7 +58,7 @@ p {
     display: table-cell;
     vertical-align: middle;
     margin-bottom: 0;
-    font-size: 2em;
+    font-size: 1.4em;
     color: #909090;
     font-weight: 500;
     text-shadow: 0 1px 1px black;
@@ -202,7 +202,7 @@ p {
 @media(min-width: 767px) {
 
     .banner-head {
-        font-size: 4em;
+        font-size: 1.5em;
     }
     .pricing-table {
         margin-bottom: 0;
@@ -219,8 +219,14 @@ p {
         height: 80px;
     }
     .banner-head {
-        font-size: 3em;
+        font-size: 1.5em;
     }
+}
+
+.banner-head span{
+    border-radius: 4px;
+    background: rgba(255,255,255, 0.8) repeat 0 0;
+    padding: 10px;
 }
 
 #alerts{
