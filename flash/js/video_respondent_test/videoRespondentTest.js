@@ -34,7 +34,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.recorderCenter =true;
     this.randomOrder = false;
 
-
     //Various
     this.flash_allowed = false;
     this.ww = 0;            //windows width
@@ -45,11 +44,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.exitcode = null;
     this.mainStyle =  '';
 
-
-
     //steps && user actions
     this.click_start = false;
-    this.is_recording_started = false;
+    this.isRecording = false;
+    this.isPlaying = false;
     this.currentMedia = -1;
     this.mediaCount = 0;
 
@@ -63,13 +61,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     //api client values
     this.ceclient;
     this.apiUsername, this.apiPassword, this.apiDomain;
+    this.eventList = {};
 
 
     this.initialized = function(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options){
 
         if(options == undefined || options == null) options = {player : {}};
-
-
 
         if(options && options.fullscreen) {this.videoFullscreen = options.fullscreen && this.checkSafariMinVer(false,6)} else {  this.videoFullscreen = false };
         (options && options.skip !=undefined)? this.canSkip = options.skip : this.canSkip = false;
@@ -286,6 +283,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
            player loaded data
          2 webpr connection
 
+         vrtstep_loaded
+         vrt_event_connection_setup
+         >>STEP video play
+         vrt_event_connect_start
+         vrtstep_play
+
         */
         $(window.vrt).on('vrtstep_loaded', function() {
             vrt.log('EVT vrtstep_loaded');
@@ -304,23 +307,30 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on('vrtstep_play', function(e, data) {
             vrt.log('EVT vrtstep_play caller'+data.caller);
-            vrt.logChrono(1,'player', true);
-            vrt.setup_stop_playing();
+            if(vrt.isPlaying==false){
+                vrt.isPlaying=true;
+                vrt.logChrono(1, true, 'player');
+                vrt.setup_stop_playing();
+            }
+
         });
-        //vrtstep_connect
+
+        $(window.vrt).on('vrt_event_connect_start', function() {
+            vrt.log('EVT vrt_event_connect_start ' + vrt.logTime());
+        });
+
         $(window.vrt).on('vrtstep_connect', function() {
-            vrt.log('EVT vrtstep_connect');
+            vrt.log('EVT vrtstep_connect  ' + vrt.logTime());
         });
 
         $(window.vrt).on('vrt_event_connection_setup', function() {
-            var latency = this.playerConnectionLatency();
-
+            //vrt.logChronoReset();
+            var latency = vrt.playerConnectionLatency();
             vrt.log('EVT vrt_event_connection_setup latency'+ latency + ' time '+this.logTime());
             setTimeout(function(){vrt.producerConnection();},latency);
-
             vrt.player.video_play(vrt.showVisibility('#videoDiv'));
-            window.onload = CreateTimer("vrt_timer_recorder", 10);
         });
+
         $(window.vrt).on('vrtstep_disconnect', function() {
                 vrt.log('EVT vrtstep_disconnect');
         });
@@ -344,59 +354,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         $(window.vrt).on('vrt_event_frame_open', function(e, data) {
             vrt.log('EVT vrt_event_frame_open');
-            var w = ' width="600" ';
-            if(data.width){
-                w = data.width;
-                w =  ' width="'+w+'" ';
-            }
-            var h = ' height="500" ';
-            if(data.height){
-                h = data.height;
-                h =  ' height="'+h+'" ';
-            }
-            var src =  '';
-            if(data.src){
-                src =  ' src="'+data.src+'" ';
-            }
-            var cssClass =  '';
-            if(data.btnCssClass){
-                cssClass =  data.btnCssClass;
-            }
-            var btnText = 'Close and proceed';
-            if(data.btnText){
-                btnText = data.btnText;
-            }
-            var style =  '';
-            if(data.btnStyle){
-                style =  data.btnStyle;
-            }
-            var btn = '<div id="vrtFrameCloseWrapper" style="width: 100%; "><button id="vrtFrameClose" class="'+cssClass+'" style="'+style+'">'+btnText+'</button></div>';
-            var btnTop = '';
-            var btnBottom = '';
-            if(data.showBtnClose===false){
-                btn = '';
-            }
-            if(data.btnPosition=='top'){
-                btnTop = btn;
-            }else{
-                btnBottom = btn;
-            }
-
-
-            var base_html = '<div id="vrtFrame" style="display: none">'+btnTop+'<div id="vrtFrameWrapper"><iframe '+ h +' '+ w +' allowTransparency="true" frameborder="0" '+style+' '+src+'>';
-            var inner_html = '';
-            if(data.html){
-                inner_html =  data.html;
-            }
-
-
-
-
-            var close_html = '</iframe></div>'+btnBottom+'</div>';
-
-            $('#vrtWrapper').prepend(base_html+inner_html+close_html);
-            $('#vrtFrame').vrtCenter();
-            $('#vrtFrame').show();
+            vrt.createFrame(data);
         });
 
         $('#vrtWrapper').on('click','#vrtFrameClose', function(){
@@ -427,7 +385,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.playerConnectionLatency = function(){
 
         if(vrt.videoType=='youtube'){
-            return 1000;
+            return 0;
         }else{
             return 0;
         }
@@ -535,6 +493,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.facevideoUpload = function(url,cb){
         this.log(url,'fileUpload','a');
+        this.log('!! '+url);
         this.apiClientUploadLink(url, cb);
     };
 
@@ -570,7 +529,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.player = window.vjsInterface;
         }
 
-
         var preloadfunc = this.player.preloadPlayer();
 
         this.dopreload(preloadfunc);
@@ -595,7 +553,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.stepComplete = function(res){
-        vrt.logChrono(3,'API UPLOD FILES', false);
+        vrt.logChrono(3, false, 'API UPLOD FILES');
         $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId}]);
     };
 
@@ -604,7 +562,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log('nextStep');
         this.log('>>STEP nextStep ' + this.currentMedia);
         if (this.currentMedia++ < this.mediaCount-1) {
-
+            this.logChronoReset();
             this.log(this.currentMedia,'currentMedia');
             this.log('nextStep=' + this.currentMedia);
 
@@ -702,10 +660,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.startRecording = function() {
         this.log('startRecording');
-        //if (!this.is_recording_started) {
+        //if (!this.isRecording) {
             this.log('Producer recording starting');
             this.producerConnection();
-            this.is_recording_started = true;
+            this.isRecording = true;
         //}
     };
 
@@ -813,28 +771,80 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.chronoStart = [];
     this.chronoEnd = [];
     this.chronoMessagge = [];
-    this.logChrono = function(pos, msg, start){
-        if(!this.debugChrono)return'';
+    this.chronoALertStart = false;
+    this.chronoALertEnd = false;
+    this.chronoType = ['recording','playing','producer_saving','api_upload'];
+
+    this.logChronoReset = function(){
+        this.chronoStart = [];
+        this.chronoEnd = [];
+        this.chronoMessagge = [];
+        this.chronoALertStart = false;
+        this.chronoALertEnd = false;
+    };
+
+    this.logChrono = function (pos, start, msg){
+
+        if(msg == undefined) msg = vrt.chronoType[pos];
+
+        var echo = false;
+        (this.debugChrono==undefined)? '': echo = this.debugChrono  ;
+
         var startm='end';
         (start==true)? startm = 'start':'';
+        var timeCheck = vrt.logTime();
 
         if(start){
             vrt.chronoMessagge[pos] = msg;
-            vrt.chronoStart[pos] = vrt.logTime();
-            if (console && console.log) console.log('CHRONO '+pos+': ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6]);
+            vrt.chronoStart[pos] = timeCheck;
+            if (echo && console && console.log) console.log('CHRONO '+pos+': ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6]);
         }else{
-            vrt.chronoEnd[pos] = vrt.logTime();
-            if (console && console.log) console.log('CHRONO '+pos+': '+startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6]);
-            if (console && console.log) console.log('CHRONO '+pos+': '+ msg +' RESULTS: '
+            vrt.chronoEnd[pos] = timeCheck;
+            if (echo && console && console.log) console.log('CHRONO '+pos+': '+startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6]);
+            if (echo && console && console.log) console.log('CHRONO '+pos+': '+ msg +' RESULTS: '
                 + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7])
             );
+        };
+
+        $(vrt).trigger('vrt_eventList', [{event: this.chronoType[pos], position:startm, time: timeCheck[7], timeFull: timeCheck}]);
+
+
+        if(vrt.chronoStart[0] && vrt.chronoStart[1] && vrt.chronoALertStart==false){
+            vrt.chronoALertStart=true;
+            var after = vrt.chronoStart[0], before = vrt.chronoStart[1];
+            var start_first = 'player';
+            if(after[7]<before[7]){
+                before = vrt.chronoStart[0];
+                after = vrt.chronoStart[1];
+                start_first = 'recorder';
+            }
+            var difft = after[7]-before[7];
+            if (echo && console && console.log) console.log('CHRONO DIFF START '+ start_first +' start first by '+ (difft));
+            this.eventList.startFirst = start_first;
+            this.eventList.startFirstDiff = difft;
+            $(vrt).trigger('vrt_eventList_startFirst', [{startFirst: start_first, timeDiff: difft}]);
+        }
+
+        if(vrt.chronoEnd[0] && vrt.chronoEnd[1] && vrt.chronoALertEnd==false && vrt.chronoEnd[0][7] && vrt.chronoEnd[1][7]){
+            vrt.chronoALertEnd=true;
+            var after = vrt.chronoEnd[0], before = vrt.chronoEnd[1];
+            var end_first = 'player';
+            if(after[7]<before[7]){
+                before = vrt.chronoEnd[0];
+                after = vrt.chronoEnd[1];
+                end_first = 'recorder';
+            }
+            var difft = after[7]-before[7];
+            if (echo && console && console.log) console.log('CHRONO DIFF END '+ end_first +' end first by '+ (difft));
+            this.eventList.endFirst = end_first;
+            this.eventList.endFirstDiff = difft;
+            $(vrt).trigger('vrt_eventList_endFirst', [{endFirst: end_first, timeDiff: difft}]);
         }
 
     };
 
     this.get_time_diff = function( datetimes, datetimee )
     {
-
         var datetime = datetimes;
         var now = datetimee;
 
@@ -894,22 +904,27 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.setup_stop_playing =function() {
-        this.log('>>STEP vrt setup stop playing');
         var time =this.media_length * 1000 + this.avgPreLoadTime+ 100;
+        this.log('!!STEP vrt setup stop playing' + time);
         this.stop_handle = setTimeout(vrt.stop_playing,time );
     };
 
     this.stop_playing =function() {
         vrt.log('>>STEP vrt stop play');
         vrt.logTime('stop_playing');
-        vrt.logChrono(1,'player',false);
+        vrt.logChrono(1, false, 'player');
         vrt.player.video_stop();
-
+        vrt.isPlaying=false;
         clearTimeout(vrt.stop_handle);
         this.exitcode = 1;
-        this.producer.disconnect();
+        if(vrt.eventList.startFirst == 'player' && vrt.eventList.startFirstDiff < 200){
+            setTimeout(function(){vrt.producer.disconnect();},vrt.eventList.startFirstDiff);
+        }else{
+            this.producer.disconnect();
+        }
+
         $('#videoDiv').css('visibility','hidden');
-        //this.is_recording_started = false;
+        //this.isRecording = false;
     }
 
     // WEBPRODUCER FUNCTION
@@ -997,8 +1012,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('connect', function () {
+                vrt.isRecording = true
                 vrt.log('!!PRODUCER connect');
-                vrt.logChrono(0,'PRODUCER RECORDING', true);
+                vrt.logChrono(0, true, 'PRODUCER RECORDING');
                 vrt.log('>>STEP producer connect');
                 vrt.logTime('producer connected');
 
@@ -1011,7 +1027,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 this.setStreamFPS(15);
                 vrt.log('FPS ', this.getStreamFPS());
 
-                vrt.log("===WEBP We are now streaming live on our channel" + vrt.is_recording_started);
+                vrt.log("===WEBP We are now streaming live on our channel" + vrt.isRecording);
                 vrt.log(this.getStreamName());
 
                 $(vrt).trigger('vrtstep_connect');
@@ -1030,31 +1046,33 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.on('save', function (url) {
                 vrt.log('!!PRODUCER save');
                 vrt.logTime('webpr save');
-                vrt.logChrono(2,'PRODUCER SAVING', false);
+                vrt.logChrono(2, false, 'PRODUCER SAVING');
                 vrt.log('>>STEP producer save');
                 vrt.log("===WEBP Save: The file has been saved to " + url);
                 vrt.hideVideoBox();
                 vrt.postPartecipate();
-                vrt.logChrono(3,'API UPLOD FILES', true);
+                vrt.logChrono(3, true, 'API UPLOD FILES');
                 vrt.facevideoUpload(url, vrt.stepComplete);
-                //vrt.is_recording_started = false;
+                //vrt.isRecording = false;
             });
 
             this.on('error', function (reason) {
+                vrt.isRecording = false;
                 vrt.log('!!PRODUCER error'+reason);
                 vrt.logTime('webpr error');
                 vrt.log(">>===WEBP ERROR: " + reason);
             });
 
             this.on('disconnect', function () {
+                vrt.isRecording = false;
                 vrt.log('!!PRODUCER disconnect');
-                vrt.logChrono(0,'PRODUCER RECORDING', false);
-                vrt.logChrono(2,'PRODUCER SAVING', true);
+                vrt.logChrono(0, false, 'PRODUCER RECORDING');
+                vrt.logChrono(2, true, 'PRODUCER SAVING');
                 vrt.logTime('webpr disconnect');
                 vrt.log('>>STEP producer disconnected');
                 vrt.trigger('vrtstep_disconnect');
                 // OLD
-                // vrt.is_recording_started = false;
+                // vrt.isRecording = false;
 
                 // TODO trigger event: producer disconnect w/ exit code
 
@@ -1063,6 +1081,60 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
     }
 
+    this.createFrame = function(data){
+
+        var w = ' width="600" ';
+        if(data.width){
+            w = data.width;
+            w =  ' width="'+w+'" ';
+        }
+        var h = ' height="500" ';
+        if(data.height){
+            h = data.height;
+            h =  ' height="'+h+'" ';
+        }
+        var src =  '';
+        if(data.src){
+            src =  ' src="'+data.src+'" ';
+        }
+        var cssClass =  '';
+        if(data.btnCssClass){
+            cssClass =  data.btnCssClass;
+        }
+        var btnText = 'Close and proceed';
+        if(data.btnText){
+            btnText = data.btnText;
+        }
+        var style =  '';
+        if(data.btnStyle){
+            style =  data.btnStyle;
+        }
+        var btn = '<div id="vrtFrameCloseWrapper" style="width: 100%; "><button id="vrtFrameClose" class="'+cssClass+'" style="'+style+'">'+btnText+'</button></div>';
+        var btnTop = '';
+        var btnBottom = '';
+        if(data.showBtnClose===false){
+            btn = '';
+        }
+        if(data.btnPosition=='top'){
+            btnTop = btn;
+        }else{
+            btnBottom = btn;
+        }
+
+
+        var base_html = '<div id="vrtFrame" style="display: none">'+btnTop+'<div id="vrtFrameWrapper"><iframe '+ h +' '+ w +' allowTransparency="true" frameborder="0" '+style+' '+src+'>';
+        var inner_html = '';
+        if(data.html){
+            inner_html =  data.html;
+        }
+
+
+        var close_html = '</iframe></div>'+btnBottom+'</div>';
+
+        $('#vrtWrapper').prepend(base_html+inner_html+close_html);
+        $('#vrtFrame').vrtCenter();
+        $('#vrtFrame').show();
+    };
 
     //API
 
