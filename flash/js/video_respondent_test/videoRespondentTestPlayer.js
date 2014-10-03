@@ -152,7 +152,7 @@ function VjsInterface() {
         vrt.log("EVT on_player_play");
         vrt.logTime('vjs on_player_play');
         //TODO CHECK THIS, double event
-        $(vrt).trigger('vrtstep_play',{caller:'on_player_play'});
+       // $(vrt).trigger('vrtstep_play',{caller:'on_player_play'});
     };
 
     this.on_player_firstplay = function (cb) {
