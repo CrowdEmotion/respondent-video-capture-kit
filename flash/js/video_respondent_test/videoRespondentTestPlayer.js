@@ -151,6 +151,7 @@ function VjsInterface() {
     this.on_player_play = function (cb) {
         vrt.log("EVT on_player_play");
         vrt.logTime('vjs on_player_play');
+        //TODO CHECK THIS, double event
         $(vrt).trigger('vrtstep_play',{caller:'on_player_play'});
     };
 
@@ -498,23 +499,20 @@ window.onYouTubePlayerReady =function() {
     vrt.player.player.addEventListener("onError", "onytplayerError");
 
     $(vrt).trigger('vrtstep_loaded');
-    //vrt.player_is_ready();
-
 };
 
 window.onytplayerStateChange = function (newState) {
     vrt.logTime('onytplayerStateChange '+newState);
-    //if(console.log)console.log("player state [YT]: " + state2string(newState));
 
     // TODO sync recording when buffering
 
     $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}])
-    if (newState == 3 || newState == 1) {
-
+    if (newState == 3) {
+        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange3'})
     }
 
     if (newState == 1) {
-        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange'})
+        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange1'})
     }
 
 };

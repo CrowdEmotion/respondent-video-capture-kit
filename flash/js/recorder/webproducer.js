@@ -13,11 +13,11 @@ var WebProducer = function (options) {
     this.methods = [
         'setCredentials', 'getCredentials',
         'setUrl', 'getUrl',
-        'setStreamName', 'getStreamName',
         'setStreamWidth', 'getStreamWidth',
         'setStreamHeight', 'getStreamHeight',
         'setStreamFPS', 'getStreamFPS',
         'connect', 'disconnect',
+        'publish', 'unpublish',
         'countCameras', 'isCameraMuted',
         'setMirroredPreview', 'getMirroredPreview',
         'setAudioStreamActive', 'getAudioStreamActive'];
@@ -56,6 +56,7 @@ WebProducer.prototype = {
             width, height,
             swfVersionStr, xiSwfUrlStr,
             flashvars, params, attributes);
+        // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
         swfobject.createCSS("#"+id, "display:block;text-align:left;");
 
         var self = this;
@@ -67,7 +68,8 @@ WebProducer.prototype = {
     get_http_base_url: function () {
         var port = '8082';
         var host = this.getUrl().split('/')[2].split(':')[0];
-        return ['http://', host, ':', port, '/'].join('');
+        var ret = ['http://', host, ':', port, '/'].join('');
+        return ret;
     },
 
     get_http_api_base_url: function () {
@@ -86,25 +88,20 @@ WebProducer.prototype = {
             };
         });
 
-        this.on('disconnect', function () {
-            self.on_disconnect();
-        });
-
+        this.on('unpublish', function (streamName) { self.on_unpublish(streamName); });
     },
 
-    on_disconnect: function () {
+    on_unpublish: function (streamName) {
         var self = this;
-        var fileName = self.getStreamName() + '.mp4';
-        var port = '8082';
-        var host = self.getUrl().split('/')[2].split(':')[0];
+        var fileName = streamName + '.mp4';
         var destinationUrl = [
             self.get_http_base_url(), 'contents/', fileName
         ].join('');
         // When the server has successfully transcoded the file a sentinel
         // file will be created to signal that transcoding has been successfully
         // completed.
-        self._content_ready(function () {
-           self.fire('save', destinationUrl, self.getStreamName());
+        self._content_ready(streamName, function () {
+            self.fire('save', destinationUrl, streamName);
         });
     },
 
@@ -115,12 +112,12 @@ WebProducer.prototype = {
         }
     },
 
-    _content_ready: function (cb) {
+    _content_ready: function (streamName, cb) {
         // we poll the server to until the transcoded mp4 is ready, then cb
         this._ensure_jQuery();
         var url = [
             this.get_http_api_base_url(), 'jsonp/contents/',
-            this.getStreamName(), '/ready'
+            streamName, '/ready'
         ].join('');
 
         var poll = function () {

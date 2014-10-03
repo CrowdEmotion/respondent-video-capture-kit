@@ -50,6 +50,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.isPlaying = false;
     this.currentMedia = -1;
     this.mediaCount = 0;
+    this.streamName = '';
+    this.stop_handle;
+    this.stop_handle_rec;
 
     //player values
     this.vjs = false;
@@ -264,38 +267,19 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             window.vrt.vrtTrigLoadend('vrt_init_ok');
         });
         $(window.vrt).on('producer_init_ok', function() {
+            vrt.producerSetupConnection( vrt.producerConnection );
             window.vrt.vrtTrigLoadend('producer_init_ok');
         });
         $(window.vrt).on('api_init_ok', function() {
             window.vrt.vrtTrigLoadend('api_init_ok');
         });
 
-        //internal event: steps
-        /*
-        OLD && YT
-         1 player load
-         2 webpr connection
-         3 player play
 
-       VJ
-         1 player load
-         3 player play
-           player loaded data
-         2 webpr connection
-
-         vrtstep_loaded
-         vrt_event_connection_setup
-         >>STEP video play
-         vrt_event_connect_start
-         vrtstep_play
-
-        */
         $(window.vrt).on('vrtstep_loaded', function() {
             vrt.log('EVT vrtstep_loaded');
             vrt.log('>>EVT vrtstep_loaded');
+            vrt.player.video_play(vrt.showVisibility('#videoDiv'));
             //TODO open_video_window();  // HACK else the Flash player is not instantiated
-            vrt.producerSetupConnection();
-
         });
         $(window.vrt).on('vrtstep_playerStateChange', function(e, data) {
             vrt.log('EVT vrtstep_playerStateChange '+data.state+' time '+data.time[4]+' '+data.time[5]+' '+data.time[6]);
@@ -306,8 +290,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         });
         $(window.vrt).on('vrtstep_play', function(e, data) {
-            vrt.log('EVT vrtstep_play caller'+data.caller);
+            vrt.log('EVT vrtstep_play caller '+data.caller);
             if(vrt.isPlaying==false){
+                streamName = this.videoList[this.currentMedia].streamCode;
+
+                vrt.producer.publish(streamName);
                 vrt.isPlaying=true;
                 vrt.logChrono(1, true, 'player');
                 vrt.setup_stop_playing();
@@ -315,20 +302,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         });
 
-        $(window.vrt).on('vrt_event_connect_start', function() {
-            vrt.log('EVT vrt_event_connect_start ' + vrt.logTime());
-        });
-
         $(window.vrt).on('vrtstep_connect', function() {
-            vrt.log('EVT vrtstep_connect  ' + vrt.logTime());
+            vrt.log('EVT vrtstep_connect ' + vrt.logTime());
+
         });
 
-        $(window.vrt).on('vrt_event_connection_setup', function() {
-            //vrt.logChronoReset();
-            var latency = vrt.playerConnectionLatency();
-            vrt.log('EVT vrt_event_connection_setup latency'+ latency + ' time '+this.logTime());
-            setTimeout(function(){vrt.producerConnection();},latency);
-            vrt.player.video_play(vrt.showVisibility('#videoDiv'));
+        $(window.vrt).on('vrt_event_publish', function() {
+            vrt.log('EVT vrt_event_publish  ' + vrt.logTime());
         });
 
         $(window.vrt).on('vrtstep_disconnect', function() {
@@ -383,7 +363,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.playerConnectionLatency = function(){
-
+        return 0;
         if(vrt.videoType=='youtube'){
             return 0;
         }else{
@@ -553,7 +533,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.stepComplete = function(res){
-        vrt.logChrono(3, false, 'API UPLOD FILES');
+        //vrt.logChrono(3, false, 'API UPLOD FILES');
         $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId}]);
     };
 
@@ -614,18 +594,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.proceedToShow = function () {
         this.log('proceedToShow');
-
-
         this.player.loadPlayer(this.options.player);
-
-        // OLD
-        /*
-        if (this.is_player_ready){
-            this.player_is_ready();
-        }
-
-        this.player_is_ready()
-        */
     };
 
     this.player_is_ready = function(){
@@ -668,34 +637,25 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.producerSetupConnection = function(cb) {
-        this.log('>>STEP producer setup  connection')
-        this.log('producerConnection/tryToConnect');
 
-        //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
-        var streamName = this.videoList[this.currentMedia].streamCode; // stream name will reflect in the recorded filename
-
-        this.log('>>STEP STREAM HERE');
         this.log(streamUrl);
-        this.log('filename ' + this.producerStreamName);
+        this.log('!! filename ' + this.producerStreamName);
         var url = 'rtmp://' + this.producerStreamUrl + ':1935/live'; // "live/" is the RTMP application name, always the same.
-        this.log('url ' + url);
+        this.log('!! url ' + url);
 
         this.producer.setUrl(url);
-        this.producer.setStreamName(streamName);
         this.producer.setStreamWidth(this.producerStreamWidth);
         this.producer.setStreamHeight(this.producerStreamHeight);
 
-        //this.logTime('producer start connection');
-        //this.producer.connect();
-        if(cb)cb();
         $(vrt).trigger('vrt_event_connection_setup');
+
+        if(cb)cb();
     };
 
     this.producerConnection = function() {
-        this.log('>>STEP producer connection')
-        this.logTime('producer start connection');
+        vrt.log('>>STEP producer connection')
+        vrt.producer.connect();
         $(vrt).trigger('vrt_event_connect_start');
-        this.producer.connect();
     };
 
     this.hideVideobox = function(cb){
@@ -773,7 +733,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.chronoMessagge = [];
     this.chronoALertStart = false;
     this.chronoALertEnd = false;
-    this.chronoType = ['recording','playing','producer_saving','api_upload'];
+    this.chronoType = ['recording','playing','producer_saving','api_upload','','publish'];
 
     this.logChronoReset = function(){
         this.chronoStart = [];
@@ -907,25 +867,26 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         var time =this.media_length * 1000 + this.avgPreLoadTime+ 100;
         this.log('!!STEP vrt setup stop playing' + time);
         this.stop_handle = setTimeout(vrt.stop_playing,time );
+        this.stop_handle_rec = setTimeout(vrt.stop_rec,time );
     };
 
     this.stop_playing =function() {
         vrt.log('>>STEP vrt stop play');
-        vrt.logTime('stop_playing');
         vrt.logChrono(1, false, 'player');
         vrt.player.video_stop();
         vrt.isPlaying=false;
         clearTimeout(vrt.stop_handle);
         this.exitcode = 1;
-        if(vrt.eventList.startFirst == 'player' && vrt.eventList.startFirstDiff < 200){
-            setTimeout(function(){vrt.producer.disconnect();},vrt.eventList.startFirstDiff);
-        }else{
-            this.producer.disconnect();
-        }
 
         $('#videoDiv').css('visibility','hidden');
         //this.isRecording = false;
-    }
+    };
+    this.stop_rec =function() {
+        vrt.producer.unpublish();
+        //vrt.isRec=false;
+        clearTimeout(vrt.stop_handle_rec);
+        //this.isRecording = false;
+    };
 
     // WEBPRODUCER FUNCTION
     this.webProducerInit = function(){
@@ -1011,54 +972,49 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             });
 
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
+            this.on('publish',function(){
+                vrt.log('!!PRODUCER publish');
+                vrt.logChrono(0, true, 'PRODUCER RECORDING');
+            });
+            this.on('unpublish',function(){
+                vrt.log('!!PRODUCER publish');
+                vrt.logChrono(0, false, 'PRODUCER RECORDING');
+            });
+            this.on('disconnect',function(){
+                //vrt.logChrono(0, false, 'PRODUCER RECORDING');
+            });
+
             this.on('connect', function () {
                 vrt.isRecording = true
                 vrt.log('!!PRODUCER connect');
-                vrt.logChrono(0, true, 'PRODUCER RECORDING');
-                vrt.log('>>STEP producer connect');
-                vrt.logTime('producer connected');
 
                 this.setMirroredPreview(true);
                 vrt.log('Is preview mirrored ? ', this.getMirroredPreview());
                 this.setAudioStreamActive(false);
                 vrt.log('Is audio streaming active ? ', this.getAudioStreamActive());
-
-                vrt.log('connected','producerConnStatus');
                 this.setStreamFPS(15);
                 vrt.log('FPS ', this.getStreamFPS());
-
-                vrt.log("===WEBP We are now streaming live on our channel" + vrt.isRecording);
-                vrt.log(this.getStreamName());
-
                 $(vrt).trigger('vrtstep_connect');
-                /*OLD
-                if (!vrt.player_starts_recorder) {
-                    $('#videoDiv').css('visibility','visible');
-                    //TODO open_video_window();  // HACK else the Flash player is not instantiated
-                    vrt.player.video_play();
-                    //vrt.showVideoBox();
-                    vrt.setup_stop_playing();
-                }
-                */
+
 
             });
 
             this.on('save', function (url) {
                 vrt.log('!!PRODUCER save');
                 vrt.logTime('webpr save');
-                vrt.logChrono(2, false, 'PRODUCER SAVING');
+                //vrt.logChrono(2, false, 'PRODUCER SAVING');
                 vrt.log('>>STEP producer save');
                 vrt.log("===WEBP Save: The file has been saved to " + url);
                 vrt.hideVideoBox();
                 vrt.postPartecipate();
-                vrt.logChrono(3, true, 'API UPLOD FILES');
+                //vrt.logChrono(3, true, 'API UPLOD FILES');
                 vrt.facevideoUpload(url, vrt.stepComplete);
                 //vrt.isRecording = false;
             });
 
             this.on('error', function (reason) {
                 vrt.isRecording = false;
-                vrt.log('!!PRODUCER error'+reason);
+                vrt.log('!!PRODUCER error '+reason);
                 vrt.logTime('webpr error');
                 vrt.log(">>===WEBP ERROR: " + reason);
             });
@@ -1066,8 +1022,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.on('disconnect', function () {
                 vrt.isRecording = false;
                 vrt.log('!!PRODUCER disconnect');
-                vrt.logChrono(0, false, 'PRODUCER RECORDING');
-                vrt.logChrono(2, true, 'PRODUCER SAVING');
+                //vrt.logChrono(2, true, 'PRODUCER SAVING');
                 vrt.logTime('webpr disconnect');
                 vrt.log('>>STEP producer disconnected');
                 vrt.trigger('vrtstep_disconnect');
