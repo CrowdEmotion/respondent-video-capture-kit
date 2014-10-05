@@ -81,6 +81,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.debugEvt !=undefined)? this.debugEvt = options.debugEvt : this.debugEvt = false;
         (options && options.debugTime !=undefined)? this.debugTime = options.debugTime : this.debugTime = false;
         (options && options.debugChrono !=undefined)? this.debugChrono = options.debugChrono : this.debugChrono = false;
+        (options && options.debugChronoHtml !=undefined)? this.debugChronoHtml = options.debugChronoHtml : this.debugChrono = false;
         (options && options.debugImportant !=undefined)? this.debugImportant = options.debugImportant : this.debugImportant = false;
         (options && options.debugVImportant !=undefined)? this.debugVImportant = options.debugVImportant : this.debugVImportant = false;
         (options && options.producerStreamWidth)? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
@@ -747,8 +748,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         if(msg == undefined) msg = vrt.chronoType[pos];
 
-        var echo = false;
+
+        var echo = false ; var echoHtml = false; var str = ''; var strend = '';
         (this.debugChrono==undefined)? '': echo = this.debugChrono  ;
+        (this.debugChronoHtml==undefined)? '': echoHtml = this.debugChronoHtml  ;
 
         var startm='end';
         (start==true)? startm = 'start':'';
@@ -757,14 +760,20 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(start){
             vrt.chronoMessagge[pos] = msg;
             vrt.chronoStart[pos] = timeCheck;
-            if (echo && console && console.log) console.log('CHRONO '+pos+': ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6]);
+            str = 'CHRONO '+pos+': ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6];
+            if (echo && console && console.log) str;
+
         }else{
             vrt.chronoEnd[pos] = timeCheck;
-            if (echo && console && console.log) console.log('CHRONO '+pos+': '+startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6]);
-            if (echo && console && console.log) console.log('CHRONO '+pos+': '+ msg +' RESULTS: '
-                + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7])
-            );
+            str = 'CHRONO '+pos+': '+startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6];
+            strend += 'CHRONO '+pos+': '+ msg +' RESULTS: ' + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7])
+            if (echo && console && console.log) console.log(str);
+            if (echo && console && console.log) console.log(strend);
         };
+
+        if(echoHtml && pos==1) $('#vrt_timer_player').append('<br/>'+str +'<br/>'+ strend);
+        if(echoHtml && pos==0) $('#vrt_timer_recorder').append('<br/>'+str +'<br/>'+ strend);
+        str = ''; strend = '';
 
         $(vrt).trigger('vrt_eventList', [{event: this.chronoType[pos], position:startm, time: timeCheck[7], timeFull: timeCheck}]);
 
@@ -780,6 +789,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
             var difft = after[7]-before[7];
             if (echo && console && console.log) console.log('CHRONO DIFF START '+ start_first +' start first by '+ (difft));
+
             this.eventList.startFirst = start_first;
             this.eventList.startFirstDiff = difft;
             $(vrt).trigger('vrt_eventList_startFirst', [{startFirst: start_first, timeDiff: difft}]);
