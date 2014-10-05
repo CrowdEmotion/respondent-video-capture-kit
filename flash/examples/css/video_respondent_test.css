@@ -250,3 +250,6 @@ p {
 #buttons{
 
 }
+#vrt_timer_player,#vrt_timer_recorder{
+    letter-spacing: 0;
+}
