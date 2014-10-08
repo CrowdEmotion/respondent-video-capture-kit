@@ -12,6 +12,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.debugEvt = false;
     this.debugTime = false;
     this.debugChrono = false;
+    this.debugChronoHtml = false;
     this.debugVImportant = false;
     this.options = {};
 
@@ -63,7 +64,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     //api client values
     this.ceclient;
-    this.apiUsername, this.apiPassword, this.apiDomain;
+    this.apiUsername;
+    this.apiPassword;
+    this.apiDomain;
     this.eventList = {};
 
 
@@ -81,7 +84,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.debugEvt !=undefined)? this.debugEvt = options.debugEvt : this.debugEvt = false;
         (options && options.debugTime !=undefined)? this.debugTime = options.debugTime : this.debugTime = false;
         (options && options.debugChrono !=undefined)? this.debugChrono = options.debugChrono : this.debugChrono = false;
-        (options && options.debugChronoHtml !=undefined)? this.debugChronoHtml = options.debugChronoHtml : this.debugChrono = false;
+        (options && options.debugChronoHtml !=undefined)? this.debugChronoHtml = options.debugChronoHtml : this.debugChronoHtml = false;
         (options && options.debugImportant !=undefined)? this.debugImportant = options.debugImportant : this.debugImportant = false;
         (options && options.debugVImportant !=undefined)? this.debugVImportant = options.debugVImportant : this.debugVImportant = false;
         (options && options.producerStreamWidth)? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
@@ -751,7 +754,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         var echo = false ; var echoHtml = false; var str = ''; var strend = '';
         (this.debugChrono==undefined)? '': echo = this.debugChrono  ;
-        (this.debugChronoHtml==undefined)? '': echoHtml = this.debugChronoHtml  ;
+        //(this.debugChronoHtml==undefined)? '': echoHtml = this.debugChronoHtml  ;
 
         var startm='end';
         (start==true)? startm = 'start':'';
@@ -761,18 +764,18 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.chronoMessagge[pos] = msg;
             vrt.chronoStart[pos] = timeCheck;
             str = 'CHRONO '+pos+': ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6];
-            if (echo && console && console.log) str;
+            if (echo && console && console.log) console.log(str);
 
         }else{
             vrt.chronoEnd[pos] = timeCheck;
             str = 'CHRONO '+pos+': '+startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6];
-            strend += 'CHRONO '+pos+': '+ msg +' RESULTS: ' + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7])
+            strend = 'CHRONO '+pos+': '+ msg +' RESULTS: ' + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7])
             if (echo && console && console.log) console.log(str);
             if (echo && console && console.log) console.log(strend);
         };
 
-        if(echoHtml && pos==1) $('#vrt_timer_player').append('<br/>'+str +'<br/>'+ strend);
-        if(echoHtml && pos==0) $('#vrt_timer_recorder').append('<br/>'+str +'<br/>'+ strend);
+        //if(echoHtml && pos==1) $('#vrt_timer_player').append('<br/>'+str +'<br/>'+ strend);
+        //if(echoHtml && pos==0) $('#vrt_timer_recorder').append('<br/>'+str +'<br/>'+ strend);
         str = ''; strend = '';
 
         $(vrt).trigger('vrt_eventList', [{event: this.chronoType[pos], position:startm, time: timeCheck[7], timeFull: timeCheck}]);
@@ -780,14 +783,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         if(vrt.chronoStart[0] && vrt.chronoStart[1] && vrt.chronoALertStart==false){
             vrt.chronoALertStart=true;
-            var after = vrt.chronoStart[0], before = vrt.chronoStart[1];
+            var afters = vrt.chronoStart[0], befores = vrt.chronoStart[1];
             var start_first = 'player';
-            if(after[7]<before[7]){
-                before = vrt.chronoStart[0];
-                after = vrt.chronoStart[1];
+            if(afters[7]<befores[7]){
+                befores = vrt.chronoStart[0];
+                afters = vrt.chronoStart[1];
                 start_first = 'recorder';
             }
-            var difft = after[7]-before[7];
+            var difft = afters[7]-befores[7];
             if (echo && console && console.log) console.log('CHRONO DIFF START '+ start_first +' start first by '+ (difft));
 
             this.eventList.startFirst = start_first;
@@ -987,7 +990,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.logChrono(0, true, 'PRODUCER RECORDING');
             });
             this.on('unpublish',function(){
-                vrt.log('!!PRODUCER publish');
+                vrt.log('!!PRODUCER unpublish');
                 vrt.logChrono(0, false, 'PRODUCER RECORDING');
             });
             this.on('disconnect',function(){
@@ -1010,11 +1013,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             });
 
             this.on('save', function (url) {
-                vrt.log('!!PRODUCER save');
-                vrt.logTime('webpr save');
+                vrt.log('!!PRODUCER save ' + url);
                 //vrt.logChrono(2, false, 'PRODUCER SAVING');
-                vrt.log('>>STEP producer save');
-                vrt.log("===WEBP Save: The file has been saved to " + url);
                 vrt.hideVideoBox();
                 vrt.postPartecipate();
                 //vrt.logChrono(3, true, 'API UPLOD FILES');

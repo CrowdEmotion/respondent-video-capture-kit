@@ -43,8 +43,7 @@
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
-            var options = {debug:true,debugChrono: true,debugEvt:true, debugVImportant:true, randomOrder : true /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
-
+            var options = {debug:true,debugChrono: true, debugChronoHtml: false, debugEvt:true, debugVImportant:true, randomOrder : true /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
             };
             var vrt = new Vrt(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
                     vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options
@@ -151,10 +150,10 @@
 
 <body>
 <div class="banner">
-    <h1 class="banner-head">
-        Video Respondent Test Demo
-    </h1>
-</div>
+    <div class="banner-head">
+        <span>Video Respondent Test Demo</span>
+    </div>
+    </div>
 
 <div class="content-wrapper">
     <div id="introzone" class="information pure-g smallline">
@@ -176,6 +175,11 @@
     <div id="vrt" style="" ></div>
     <!-- VIDEO  RESPONDENT TEST PAGE - BODY - START -->
 
+
+    </div>
+
+    <div class="information pure-g">
+        <div id="notice"></div>
     </div>
 
 </div>
