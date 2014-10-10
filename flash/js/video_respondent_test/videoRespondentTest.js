@@ -1022,6 +1022,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 //vrt.isRecording = false;
             });
 
+            this.on('save-metadata', function (url) {
+                console.log("The metadata file has been saved to "+ url);
+            });
+
             this.on('error', function (reason) {
                 vrt.isRecording = false;
                 vrt.log('!!PRODUCER error '+reason);

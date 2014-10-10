@@ -1,6 +1,9 @@
+"use strict";
 
 var WebProducer = function (options) {
-  if (!options || !options.id) return alert('You must provide an id for the web producer');
+  if (!options || !options.id) {
+    return alert('You must provide an id for the web producer');
+  }
   this.id = options.id;
   this.width = options.width || 320;
   this.height = options.height || 240;
@@ -35,8 +38,9 @@ WebProducer.log = function (id) {
 
 WebProducer.js_event = function (producerId, eventName, arg1, arg2) {
   var producer = WebProducer[producerId];
-  if (producer.trace)
+  if (producer.trace) {
     WebProducer.log(producerId, eventName, arg1, arg2);
+  }
   WebProducer[producerId].fire(eventName, arg1, arg2);
 };
 
@@ -94,6 +98,7 @@ WebProducer.prototype = {
   },
 
   on_publish: function (streamName) {
+    this.publishStartTime = Date.now();
     this.streamName = streamName;
   },
 
@@ -123,6 +128,16 @@ WebProducer.prototype = {
       // we use jquery for jsonp
       alert('please, include jQuery first!');
     }
+  },
+
+  _CORS_support: function () {
+    if (window.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest()) {
+      return true;
+    }
+    if (typeof window.XDomainRequest !== "undefined"){
+      return true;
+    }
+    return false;
   },
 
   _content_ready: function (streamName, cb) {
@@ -158,12 +173,12 @@ WebProducer.prototype = {
     }).then(cb);
   },
 
-  addTimedMetadataCORS: function (metadata, cb) {
+  addTimedMetadataCORS: function (metadata, success, error) {
     var url = [
       this.get_http_api_base_url(), 'timedmetadata/', this.streamName, '/append'
     ].join('');
     var data = {
-      ts: Date.now(),
+      ts: Date.now() - this.publishStartTime,
       data: metadata
     };
     var dfr = jQuery.ajax({
@@ -172,7 +187,7 @@ WebProducer.prototype = {
       contentType: 'application/json',
       data: JSON.stringify(data),
       type: 'post'
-    }).then(cb);
+    }).fail(error).done(success);
     return dfr;
   },
 
@@ -181,7 +196,7 @@ WebProducer.prototype = {
       this.get_http_api_base_url(), 'timedmetadata/', this.streamName, '/append/jsonp'
     ].join('');
     var data = {
-      ts: Date.now(),
+      ts: Date.now() - this.publishStartTime,
       data: metadata
     };
     data = "data=" + encodeURIComponent(JSON.stringify(data));
@@ -206,6 +221,10 @@ WebProducer.prototype = {
   },
 
   addTimedMetadata: function (metadata, success, error) {
+    if (this._CORS_support()) {
+      this.addTimedMetadataCORS(metadata, success, error);
+      return;
+    }
     this.addTimedMetadataJSONP(metadata, success, error);
   },
   
