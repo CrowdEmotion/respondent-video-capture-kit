@@ -45,6 +45,42 @@ function PlayerInterface() {
         else
             return true;
     }
+    /*
+    CE  RECORDER        YOUTUBE                         VIDEJS
+    10                   case -1:return 'unstarted';
+    11                   case 1: return 'playing';
+    12                   case 0: return 'ended';
+    13                   case 2: return 'paused';
+    14                   case 3: return 'buffering';
+    15                   case 5: return 'video cued';
+    16                   various
+    17                   idle
+    20                   publish
+    21                   unpublish
+    */
+    this.statusMap = function(status, type){
+        if(status >= 20) return status;
+        if(type = 'yt'){
+            if(status==-1){
+                return 10;
+            }
+            if(status==0){
+                return 12;
+            }
+            if(status==1){
+                return 11;
+            }
+            if(status==2){
+                return 13;
+            }
+            if(status==3){
+                return 14;
+            }
+            if(status==5){
+                return 15;
+            }
+        }
+    }
 }
 
 // TODO video.js implementation
@@ -506,7 +542,11 @@ window.onytplayerStateChange = function (newState) {
 
     // TODO sync recording when buffering
 
+    $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(newState)});
+
     $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}])
+
+
     if (newState == 3) {
         $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange3'})
     }
@@ -514,5 +554,8 @@ window.onytplayerStateChange = function (newState) {
     if (newState == 1) {
         $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange1'})
     }
+
+
+
 
 };

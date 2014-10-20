@@ -44,6 +44,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.media_path = null; //media played
     this.exitcode = null;
     this.mainStyle =  '';
+    this.timeRecStart = -1;
 
     //steps && user actions
     this.click_start = false;
@@ -289,6 +290,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.log('EVT vrtstep_playerStateChange '+data.state+' time '+data.time[4]+' '+data.time[5]+' '+data.time[6]);
         });
 
+        $(window.vrt).on('vrtevent_player_ts', function(e, data) {
+            vrt.producer.addTimedMetadataJSONP(
+                {'player_ts': Date.now(), 'ts': vrt.getTimeStampDiff(), 'status':data.status},
+                function () {console.log('Time metadata has been sent', arguments)},
+                function () {console.log('ERRO: Time metadata has not been sent', arguments)}
+            );
+        });
+
+
         $(window.vrt).on('vrtstep_loadplay', function() {
             vrt.log('EVT vrtstep_loadplay');
 
@@ -308,6 +318,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         $(window.vrt).on('vrtstep_connect', function() {
             vrt.log('EVT vrtstep_connect ' + vrt.logTime());
+
 
         });
 
@@ -747,6 +758,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.chronoALertEnd = false;
     };
 
+
+    this.getTimeStampDiff = function(){
+        var timeCheck = vrt.logTime();
+        if(this.timeRecStart == -1) return -1;
+        return timeCheck[7] - this.timeRecStart;
+    };
+
     this.logChrono = function (pos, start, msg){
 
         if(msg == undefined) msg = vrt.chronoType[pos];
@@ -759,6 +777,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         var startm='end';
         (start==true)? startm = 'start':'';
         var timeCheck = vrt.logTime();
+        if(pos==0 && start == true){
+            this.timeRecStart = timeCheck[7];
+        }
+        if(pos==0 && start == false){
+            this.timeRecStart = -1;
+        }
 
         if(start){
             vrt.chronoMessagge[pos] = msg;
@@ -986,10 +1010,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('publish',function(){
+                $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(20)});
                 vrt.log('!!PRODUCER publish');
                 vrt.logChrono(0, true, 'PRODUCER RECORDING');
+
             });
             this.on('unpublish',function(){
+                $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(21)});
                 vrt.log('!!PRODUCER unpublish');
                 vrt.logChrono(0, false, 'PRODUCER RECORDING');
             });
