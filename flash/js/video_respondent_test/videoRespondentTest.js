@@ -186,6 +186,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
 
         var html=" <div id='vrtWrapper' class='vrtWrap' style='"+this.options.mainStyle+"'> " +
+                "<div id='vrtFrameWr'></div>" +
                 ((this.options.htmlRecorderPre)? this.options.htmlRecorderPre : '') +
                 "       <div id='vrtProducer' class='vrtWrap "+this.options.htmlRecorderClass+"' style='"+this.options.recStyle+"'>                      "+
                 "           <div id='producer'></div>                                                                   "+
@@ -307,7 +308,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.log('EVT vrtstep_play caller '+data.caller);
             if(vrt.isPlaying==false){
                 streamName = this.videoList[this.currentMedia].streamCode;
-
                 vrt.producer.publish(streamName);
                 vrt.isPlaying=true;
                 vrt.logChrono(1, true, 'player');
@@ -918,6 +918,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $('#videoDiv').css('visibility','hidden');
         //this.isRecording = false;
     };
+
     this.stop_rec =function() {
         vrt.producer.unpublish();
         //vrt.isRec=false;
@@ -1127,7 +1128,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         var close_html = '</iframe></div>'+btnBottom+'</div>';
 
-        $('#vrtWrapper').prepend(base_html+inner_html+close_html);
+        $('#vrtFrameWr').html(base_html+inner_html+close_html);
         $('#vrtFrame').vrtCenter();
         $('#vrtFrame').show();
     };
