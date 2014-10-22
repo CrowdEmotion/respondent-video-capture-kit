@@ -45,6 +45,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.exitcode = null;
     this.mainStyle =  '';
     this.timeRecStart = -1;
+    this.timePlayerStart = -1;
 
     //steps && user actions
     this.click_start = false;
@@ -293,9 +294,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         $(window.vrt).on('vrtevent_player_ts', function(e, data) {
             vrt.producer.addTimedMetadataJSONP(
-                {'player_ts': Date.now(), 'ts': vrt.getTimeStampDiff(), 'status':data.status},
+                {   'time': Date.now(),
+                    'player_ts': vrt.getTimeStampPlayerDiff(),
+                    'rec_ts': vrt.getTimeStampRecDiff(),
+                    'status':data.status
+                },
                 function () {console.log('Time metadata has been sent', arguments)},
-                function () {console.log('ERRO: Time metadata has not been sent', arguments)}
+                function () {console.log('ERROR: Time metadata has not been sent', arguments)}
             );
         });
 
@@ -757,9 +762,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.chronoALertStart = false;
         this.chronoALertEnd = false;
     };
+    this.getTimeStampPlayerDiff = function(){
+        var timeCheck = vrt.logTime();
+        if(this.timePlayerStart == -1) return -1;
+        return timeCheck[7] - this.timePlayerStart;
+    };
 
-
-    this.getTimeStampDiff = function(){
+    this.getTimeStampRecDiff = function(){
         var timeCheck = vrt.logTime();
         if(this.timeRecStart == -1) return -1;
         return timeCheck[7] - this.timeRecStart;
@@ -782,6 +791,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
         if(pos==0 && start == false){
             this.timeRecStart = -1;
+            this.timePlayerStart = -1
+        }
+        if(pos==1 && start == true){
+            this.timePlayerStart = timeCheck[7];
+        }
+        if(pos==1 && start == false){
+            //this.timePlayerStart = -1; //correct position but json file stop at end of producer recording
         }
 
         if(start){

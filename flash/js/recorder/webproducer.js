@@ -200,7 +200,7 @@ WebProducer.prototype = {
             this.get_http_api_base_url(), 'timedmetadata/', this.streamName, '/append/jsonp'
         ].join('');
         var data = metadata;
-        data.ts = data.ts || Date.now() - this.publishStartTime;
+        //data.ts = data.ts || Date.now() - this.publishStartTime;
         data = "data=" + encodeURIComponent(JSON.stringify(data));
 
         var dfr = new $.Deferred();
