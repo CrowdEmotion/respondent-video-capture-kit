@@ -249,6 +249,10 @@ function VjsInterface() {
         vrt.logTime('player_dispose');
     };
 
+    this.getCurrentTime = function(){
+        return vrt.player.player.currentTime();
+    }
+
     this.loadPlayer = function (options) {
         vrt.logTime('loadPlayer');
         //TODO if(((videojs.options.techOrder && videojs.options.techOrder[0] == 'flash')) open_video_window();  // HACK else the Flash player is not instantiated
@@ -496,7 +500,9 @@ function YtInterface() {
         }
     };
 
-
+    this.getCurrentTime = function(){
+        return vrt.player.player.getCurrentTime();
+    }
 
     this.onytplayerError = function (newState) {
         this.log("player error [YT]: " + state2string(newState));

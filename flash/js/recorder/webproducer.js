@@ -184,7 +184,7 @@ WebProducer.prototype = {
             this.get_http_api_base_url(), 'timedmetadata/', this.streamName, '/append'
         ].join('');
         var data = metadata;
-        data.ts = data.ts || Date.now() - this.publishStartTime;
+        //data.ts = data.ts || Date.now() - this.publishStartTime;
         var dfr = jQuery.ajax({
             url : url,
             dataType: 'json',
