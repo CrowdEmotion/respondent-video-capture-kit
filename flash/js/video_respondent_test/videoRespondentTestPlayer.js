@@ -77,9 +77,7 @@ function PlayerInterface() {
             if(status=='ended'){ r = 12; }
             if(status=='paused'){ r = 13; }
         }
-        console.log('statusMap');
-        console.log(arguments);
-        console.log(r);
+        console.log('statusMap: ' + status + ' to ' + r);
         return r;
     }
 }
@@ -146,8 +144,9 @@ function VjsInterface() {
             //producer hideVideoBox();
             //vjsplayer.currentTime(vjsplayer.duration());  // 1000000 ?
             //vjsplayer.src('');
-            if(cb)cb();
+
         }
+        if(cb)cb();
     };
 
 
@@ -412,7 +411,7 @@ function YtInterface() {
         }
     };
 
-    this.video_stop = function () {
+    this.video_stop = function (cb) {
         this.log('>>STEP player stop');
         vrt.logTime('YtInterface video_stop');
 
@@ -424,6 +423,7 @@ function YtInterface() {
             //swfobject.removeSWF('ytPlayer');
             //this.player = null;
         }
+        if(cb)cb();
     };
 
     this.video_after_close_window = function () {

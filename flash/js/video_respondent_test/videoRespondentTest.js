@@ -791,13 +791,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
         if(pos==0 && start == false){
             this.timeRecStart = -1;
-            this.timePlayerStart = -1
         }
         if(pos==1 && start == true){
             this.timePlayerStart = timeCheck[7];
         }
         if(pos==1 && start == false){
-            //this.timePlayerStart = -1; //correct position but json file stop at end of producer recording
+            this.timePlayerStart = -1;
         }
 
         if(start){
@@ -923,10 +922,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.stop_handle_rec = setTimeout(vrt.stop_rec,time );
     };
 
+    this.logChrono
     this.stop_playing =function() {
         vrt.log('>>STEP vrt stop play');
-        vrt.logChrono(1, false, 'player');
-        vrt.player.video_stop();
+        vrt.player.video_stop(function(){vrt.logChrono(1, false, 'player');});
         vrt.isPlaying=false;
         clearTimeout(vrt.stop_handle);
         this.exitcode = 1;
