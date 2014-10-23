@@ -293,7 +293,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
 
         $(window.vrt).on('vrtevent_player_ts', function(e, data) {
-            vrt.producer.addTimedMetadataJSONP(
+            vrt.producer.addTimedMetadata(
                 {   'time': Date.now(),
                     'player_ts': vrt.getTimeStampPlayerDiff(),
                     'rec_ts': vrt.getTimeStampRecDiff(),
