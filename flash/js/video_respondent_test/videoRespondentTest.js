@@ -277,6 +277,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             for (var i = 0; i < ar.length; i++) {
                 vrt.addTS(ar[i]);
             }
+            vrt.bufferTS = [];
         }
         if (cb)cb();
     }
