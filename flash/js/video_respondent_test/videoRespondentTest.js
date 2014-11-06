@@ -71,6 +71,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.apiPassword;
     this.apiDomain;
     this.eventList = {};
+    this.results = {apilogin:null,flash:{present:null,version:null}};
 
 
     this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
@@ -82,7 +83,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         } else {
             this.videoFullscreen = false
         }
-        ;
+
         (options && options.skip != undefined) ? this.canSkip = options.skip : this.canSkip = false;
         (options && options.vrtID) ? this.vrtID = options.vrtID : this.vrtID = 'vrt';
         (options && options.producerID) ? this.producerID = options.producerID : this.producerID = 'producer';
@@ -151,15 +152,22 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log('EVT flash' + this.playerVersion.major);
         // TODO move Flash version check on the first page
         if (this.playerVersion.major == 0) {
+            this.results.flash.present = false;
             $(window.vrt).trigger('vrt_event_flash_no');
             this.log('EVT no flash');
+        }else{
+            this.results.flash.present = true;
+            $(window.vrt).trigger('vrt_event_flash_is_present');
         }
 
         if (swfobject.getFlashPlayerVersion("11.1.0")) {
+            this.results.flash.version = true;
+            $(window.vrt).trigger('vrt_event_flash_version_ok');
             this.loadProducer();
         } else {
-            $(window.vrt).trigger('vrt_event_flash_old');
+            this.results.flash.version = false;
             this.log('Flash is old=' + this.playerVersion.major + '.' + this.playerVersion.minor);
+            $(window.vrt).trigger('vrt_event_flash_old');
         }
 
 
@@ -359,6 +367,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(window.vrt).on('vrt_event_user_session_complete', function () {
             window.vrt.closeSession();
         });
+        $(window.vrt).on('vrt_event_logchrono', function (e,data) {
+            vrt.log('EVT vrt_event_logchrono');
+            if (console && console.log) console.log(data);
+        });
+
 
         $(window.vrt).on('vrt_event_frame_open', function (e, data) {
             vrt.log('EVT vrt_event_frame_open');
@@ -616,6 +629,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
             this.log('>>STEP  YT path ' + this.media_path);
 
+            $(window.vrt).trigger('vrt_event_video_session_proceedToShow');
             this.proceedToShow();
             //$(vrt).trigger('vrt_event_video_session_complete');
         } else {
@@ -812,18 +826,25 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         return timeCheck[7] - this.timeRecStart;
     };
 
+    //0 recorder, 1 player
     this.logChrono = function (pos, start, msg){
 
         if(msg == undefined) msg = vrt.chronoType[pos];
 
 
         var echo = false ; var echoHtml = false; var str = ''; var strend = '';
-        (this.debugChrono==undefined)? '': echo = this.debugChrono  ;
+
         //(this.debugChronoHtml==undefined)? '': echoHtml = this.debugChronoHtml  ;
 
         var startm='end';
         (start==true)? startm = 'start':'';
         var timeCheck = vrt.logTime();
+
+        $(vrt).trigger('vrt_event_logchrono_'+this.chronoType[pos]+'_'+startm, [{time:timeCheck[7]}]);
+
+
+        console.log('vrt_event_logchrono_'+this.chronoType[pos]+'_'+startm+'    '+timeCheck[7]);
+        if(this.debugChrono==undefined){}else{echo = this.debugChrono  ;}
         if(pos==0 && start == true){
             this.timeRecStart = timeCheck[7];
         }
@@ -836,7 +857,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(pos==1 && start == false){
             this.timePlayerStart = -1;
         }
-
+        //$(vrt).trigger('vrt_event_logchrono', [{pos : pos, start: start, time:timeCheck[7]}]);
         if(start){
             vrt.chronoMessagge[pos] = msg;
             vrt.chronoStart[pos] = timeCheck;
@@ -1000,6 +1021,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
 
         this.producer.once('ready', function () {
+            $(window.vrt).trigger('vrt_event_producer_ready');
             var vrt = window.vrt;
             if(vrt.recorderCenter===true)  $('#producer').vrtCenter();
             vrt.logTime('webpr ready');
@@ -1020,9 +1042,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.log("===WEBP We have " + numCameras + " camera(s) available");
             if (numCameras == 0){
                 $(window.vrt).trigger('vrt_event_producer_no_camera_found');
-            }
-            if (numCameras == undefined){
+            }else if (numCameras == undefined){
                 $(window.vrt).trigger('vrt_event_producer_no_camera_found');
+            }else{
+                $(window.vrt).trigger('vrt_event_producer_camera_found');
             }
 
             // checking user permissions on camera
@@ -1073,17 +1096,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.on('publish',function(){
                 vrt.isRecording = true;
                 $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(20)});
-                vrt.log('!!PRODUCER publish');
                 vrt.logChrono(0, true, 'PRODUCER RECORDING');
+                vrt.log('!!PRODUCER publish');
 
             });
             this.on('unpublish',function(){
                 $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(21)});
-                vrt.log('!!PRODUCER unpublish');
                 vrt.logChrono(0, false, 'PRODUCER RECORDING');
                 vrt.isRecording = false;
                 vrt.bufferTS = [];
                 clearTimeout(vrt.stop_polling_player_pos);
+                vrt.log('!!PRODUCER unpublish');
             });
             this.on('disconnect',function(){
                 //vrt.logChrono(0, false, 'PRODUCER RECORDING');
@@ -1211,11 +1234,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.ceclient.logout(
                 this.ceclient.login(this.apiUsername,this.apiPassword,
                     function(ret){
+                        vrt.apiClientRes(ret);
                         if(ret){
                             if(console.log)console.log('Api login OK + success');
+                            vrt.results.apilogin = true;
                             if(cbSuccess) cbSuccess();
                         }else{
                             if(console.log)console.log('Api login FAIL + danger');
+                            vrt.results.apilogin = false;
                             if(cbFail) cbFail();
                         }
                     })
@@ -1226,6 +1252,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log('>>STEP api logout')
         this.ceclient.logout();
     };
+
+    this.apiClientRes = function(res){
+        vrt.results.apilogin = res;
+        return res;
+    };
+
 
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
 };

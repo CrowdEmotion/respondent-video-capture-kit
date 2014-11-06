@@ -632,6 +632,9 @@ javaRest.user.login = function (email, password, callback) {
             javaRest.userId = response.userId;
             javaRest.cookie.set('email', email);
             response.success = true;
+            if(response.userId==undefined){
+                response.success = false;
+            }
             callback(response)
 
         },
