@@ -121,7 +121,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log(list, 'list');
         this.apiDomain = apiDomain;
         this.apiUsername = apiUser;
-        this.apiPassword = apiPassword;
+        this.apiPassword = apiPassword;2
     }
 
 
@@ -328,6 +328,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.log('EVT vrtstep_play caller ' + data.caller);
             if (vrt.isPlaying == false) {
                 streamName = this.videoList[this.currentMedia].streamCode;
+                $(window.vrt).trigger('vrt_event_streamname', [{streamname:streamName}]);
                 vrt.producer.publish(streamName);
                 vrt.isPlaying = true;
                 vrt.logChrono(1, true, 'player');

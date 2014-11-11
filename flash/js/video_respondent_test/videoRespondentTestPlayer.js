@@ -501,7 +501,11 @@ function YtInterface() {
     };
 
     this.getCurrentTime = function(){
-        return vrt.player.player.getCurrentTime();
+        if(vrt.player.player) {
+            return vrt.player.player.getCurrentTime();
+        }else{
+            return 0;
+        }
     }
 
     this.onytplayerError = function (newState) {
