@@ -1,6 +1,6 @@
 
 
-function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options) {
+function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options, customData) {
 
 
     //User settings
@@ -15,6 +15,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.debugChronoHtml = false;
     this.debugVImportant = false;
     this.options = {};
+    this.customData = null;
 
     //Producer
     this.playerVersion = null;
@@ -71,10 +72,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.apiPassword;
     this.apiDomain;
     this.eventList = {};
+    this.responseId =null;
     this.results = {apilogin:null,flash:{present:null,version:null}};
 
 
-    this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
+    this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options, customData) {
 
         if (options == undefined || options == null) options = {player: {}};
 
@@ -108,7 +110,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.playerCentered != undefined) ? this.options.player.centered = options.playerCentered : this.options.player.centered = true;
         (options && options.playerWidth != undefined) ? this.options.player.width = options.playerWidth : this.options.player.Width = 640;
         (options && options.playerHeight != undefined) ? this.options.player.height = options.playerHeight : this.options.player.height = 400;
-
+        (customData && customData!=undefined) ? this.options.customData = customData :  '' ;
 
         this.mediaCount = list.length;
         this.videoType = type;
@@ -121,13 +123,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log(list, 'list');
         this.apiDomain = apiDomain;
         this.apiUsername = apiUser;
-        this.apiPassword = apiPassword;2
-    }
+        this.apiPassword = apiPassword;
+    };
 
 
-    this.init = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
+    this.init = function() {
         this.log('>>STEP: vrt init');
-        this.log(arguments);
+        //this.log(arguments);
 
         window.vrt = this;
 
@@ -170,18 +172,16 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $(window.vrt).trigger('vrt_event_flash_old');
         }
 
-
         this.ceclient = new CEClient();
-
 
         this.apiClientSetup(
             function () {
                 $(window.vrt).trigger('api_init_ok');
-                if (console.log)console.log('apiClientSetup api login success')
+                if (console.log)console.log('apiClientSetup api login success');
             },
             function () {
                 $(window.vrt).trigger('vrt_event_api_login_fail');
-                if (console.log)console.log('apiClientSetup api login error')
+                if (console.log)console.log('apiClientSetup api login error');
             }
         );
 
@@ -1221,6 +1221,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     //API
 
+    this.apiClienCreateCustomData= function(data, cb){
+        this.log('>>STEP insert custom data');
+        this.log(data);
+        this.ceclient.createCustomData(data,cb);
+    };
+
     this.apiClientUploadLink = function(streamFileName, cb){
         this.log('>>STEP api file upload ' + streamFileName);
         this.log('EVT upload api file upload ' + streamFileName);
@@ -1260,7 +1266,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
 
-    this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
+    this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options, customData);
 };
 
 var vrtTimer;

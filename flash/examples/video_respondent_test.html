@@ -43,10 +43,13 @@
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
+            var user_id = getParameterByName('user_id');
+            (user_id)? '' : user_id = makeRandomString();
+
             var options = {debug:true,debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true, randomOrder : true /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
             };
             var vrt = new Vrt(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
-                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options
+                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options, {user_id:user_id}
             );
 
             var alertMessage = function(msg){
@@ -140,6 +143,11 @@
 
             vrt.init();
         });
+
+        function getParameterByName(name) {
+            var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+            return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+        }
     </script>
     <!-- EXAMPLE OF IMPLEMENTATION END -->
     <style>

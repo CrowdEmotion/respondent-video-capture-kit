@@ -59,6 +59,18 @@ function CEClient() {
 
     };
 
+    this.createCustomData = function (data, cb) {
+        var ceclient = this;
+
+
+        javaRest.response.createCustomData(data, function (res){
+            ceclient.responseId = res.responseId;
+            if(cb) cb(res);
+        });
+
+
+    };
+
     this.uploadForm = function (form_id) {
 
         javaRest.facevideo.uploadForm(form_id);
@@ -506,6 +518,7 @@ javaRest.cookie.set = function (name, value) {
 
 
 javaRest.user = {};
+javaRest.response = {};
 
 
 /**
@@ -747,6 +760,25 @@ javaRest.user.updateName = function (value, callback) {
             // Clear user cache
             javaRest.user.download()
         })
+};
+
+javaRest.response.createCustomData = function(data, callback) {
+
+    javaRest.postAuth(
+        'customData',
+        {'data': data},
+        function(response) {
+            if (callback) {
+                callback(response);
+            }
+        },
+        function(jqXHR, textStatus) {
+            console.log(jqXHR);
+            if (callback) {
+                callback(jqXHR);
+            }
+        }
+    )
 };
 
 javaRest.facevideo = {};
