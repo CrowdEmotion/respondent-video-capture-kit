@@ -46,10 +46,15 @@
             var user_id = getParameterByName('user_id');
             (user_id)? '' : user_id = makeRandomString();
 
-            var options = {debug:true,debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true, randomOrder : true /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
+            var options = {
+                debug:true, debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true,
+                randomOrder : true,
+                customData:{user_id:user_id}, customDataInsertMediaName: true, customDataInsertMediaId: true
+                /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
             };
+
             var vrt = new Vrt(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
-                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options, {user_id:user_id}
+                    vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options
             );
 
             var alertMessage = function(msg){

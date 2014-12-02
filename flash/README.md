@@ -86,6 +86,8 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
         - `length` integer number of seconds, describe how long the video will be seen by users
             
         - `name` a simple string with name
+
+        - `id`  a numeric or string value, if missing, `id` = `name` ( _not mandatory_ )
             
         Example:
         
@@ -107,6 +109,9 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
         - `playerCentered` (*true*|*false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
         - `playerWidth` (integer - default 640): set the width of the videos
         - `playerHeight` (integer - default 400): set the height of the videos
+        - `customData` (*true*|*false*|javascript object) (eg: {user_id:user_id}), insert any custom data by users
+        - `customDataInsertMediaName`  (*true*|*false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
+        - `customDataInsertMediaId` (*true*|*false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
                              
                     
 4. Implement in you code the listeners for the following events:

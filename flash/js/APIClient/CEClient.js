@@ -55,16 +55,17 @@ function CEClient() {
             ceclient.responseId = res.responseId;
             if(cb) cb(res);
         });
-
-
     };
 
-    this.createCustomData = function (data, cb) {
-        var ceclient = this;
+    /**
+     *
+     * @param responseId    int
+     * @param data          object|json
+     */
+    this.writeCustomData = function(responseId, data, cb){
 
 
-        javaRest.response.createCustomData(data, function (res){
-            ceclient.responseId = res.responseId;
+        javaRest.response.writeCustomData(responseId, data, function (res){
             if(cb) cb(res);
         });
 
@@ -108,6 +109,13 @@ function CEClient() {
             }
         );
     };
+    /**
+     *
+     * Add custom data to the response
+     * @param responseId    numeric id
+     * @param data  json|object  string is written as data1=XXX,data2=YYY
+     *
+     */
 
 
     this.readTimeseries = function (responseId, metricId, cb, normalize) {
@@ -240,7 +248,7 @@ javaRest.protocol = "https";
 //Production domain
 javaRest.domain = "api.crowdemotion.co.uk";
 //Sandbox domain
-//javaRest.domain = "api-sandbox.crowdemotion.co.uk";
+javaRest.domainSandbox = "api-sandbox.crowdemotion.co.uk";
 javaRest.version = "v1";
 javaRest.debug = false;
 javaRest.token = null;
@@ -257,7 +265,10 @@ function javaRest(debug, http_fallback, domain) {
     javaRest.debug = debug;
     javaRest.domain = domain;
 
-    if(http_fallback) {
+    if(http_fallback === null) {
+        javaRest.protocol = 'http';
+    }
+    if(http_fallback === true) {
         var connection = javaRest.httpGet('https://'+javaRest.domain+'/');
 
         if (connection) {
@@ -762,11 +773,101 @@ javaRest.user.updateName = function (value, callback) {
         })
 };
 
-javaRest.response.createCustomData = function(data, callback) {
+javaRest.response.readCustomData = function(id, callback) {
+
+};
+
+javaRest.HashTable = function(obj)
+{
+    this.length = 0;
+    this.items = {};
+    for (var p in obj) {
+        if (obj.hasOwnProperty(p)) {
+            this.items[p] = obj[p];
+            this.length++;
+        }
+    }
+
+    this.setItem = function(key, value)
+    {
+        var previous = undefined;
+        if (this.hasItem(key)) {
+            previous = this.items[key];
+        }
+        else {
+            this.length++;
+        }
+        this.items[key] = value;
+        return previous;
+    }
+
+    this.getItem = function(key) {
+        return this.hasItem(key) ? this.items[key] : undefined;
+    }
+
+    this.hasItem = function(key)
+    {
+        return this.items.hasOwnProperty(key);
+    }
+
+    this.removeItem = function(key)
+    {
+        if (this.hasItem(key)) {
+            previous = this.items[key];
+            this.length--;
+            delete this.items[key];
+            return previous;
+        }
+        else {
+            return undefined;
+        }
+    }
+
+    this.keys = function()
+    {
+        var keys = [];
+        for (var k in this.items) {
+            if (this.hasItem(k)) {
+                keys.push(k);
+            }
+        }
+        return keys;
+    }
+
+    this.values = function()
+    {
+        var values = [];
+        for (var k in this.items) {
+            if (this.hasItem(k)) {
+                values.push(this.items[k]);
+            }
+        }
+        return values;
+    }
+
+    this.each = function(fn) {
+        for (var k in this.items) {
+            if (this.hasItem(k)) {
+                fn(k, this.items[k]);
+            }
+        }
+    }
+
+    this.clear = function()
+    {
+        this.items = {}
+        this.length = 0;
+    }
+}
+
+javaRest.response.writeCustomData = function(id, data, callback) {
+
+    var dataApi = new javaRest.HashTable(data);
+    dataApi = {'data':dataApi.items}
 
     javaRest.postAuth(
-        'customData',
-        {'data': data},
+        'response/'+id+'/metadata',
+        dataApi,
         function(response) {
             if (callback) {
                 callback(response);
@@ -778,7 +879,7 @@ javaRest.response.createCustomData = function(data, callback) {
                 callback(jqXHR);
             }
         }
-    )
+    );
 };
 
 javaRest.facevideo = {};

@@ -1,6 +1,6 @@
 
 
-function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options, customData) {
+function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options) {
 
 
     //User settings
@@ -15,7 +15,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.debugChronoHtml = false;
     this.debugVImportant = false;
     this.options = {};
-    this.customData = null;
 
     //Producer
     this.playerVersion = null;
@@ -41,6 +40,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.ww = 0;            //windows width
     this.wh = 0;            //windows height
     this.media_id = null;   //media played
+    this.media_name = null;   //media played
+    this.media_name_real = null;   //media played
     this.media_length = 0;  //media played
     this.media_path = null; //media played
     this.exitcode = null;
@@ -76,7 +77,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.results = {apilogin:null,flash:{present:null,version:null}};
 
 
-    this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options, customData) {
+    this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
 
         if (options == undefined || options == null) options = {player: {}};
 
@@ -110,7 +111,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.playerCentered != undefined) ? this.options.player.centered = options.playerCentered : this.options.player.centered = true;
         (options && options.playerWidth != undefined) ? this.options.player.width = options.playerWidth : this.options.player.Width = 640;
         (options && options.playerHeight != undefined) ? this.options.player.height = options.playerHeight : this.options.player.height = 400;
-        (customData && customData!=undefined) ? this.options.customData = customData :  '' ;
 
         this.mediaCount = list.length;
         this.videoType = type;
@@ -403,8 +403,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             'player_ts': vrt.getTimeStampPlayerDiff(),
             'rec_ts': vrt.getTimeStampRecDiff(),
             'status': data.status,
-            "content_id": this.media_id,
-            "player_position" : vrt.player.getCurrentTime()
+            'content_id': this.media_id,
+            'player_position' : vrt.player.getCurrentTime()
         };
     };
 
@@ -443,8 +443,29 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             return 0;
         }
     }
+    this.makeRandomString = function() {
+        return Math.random().toString(36).substring(2, 15) +
+            Math.random().toString(36).substring(2, 15);
+    }
 
-    this.createHashCode = function (s){
+    this.createHashCode = function (str){
+        var asString =  false; var seed = undefined;
+        var i, l,
+            hval = (seed === undefined) ? 0x811c9dc5 : seed;
+
+        for (i = 0, l = str.length; i < l; i++) {
+            hval ^= str.charCodeAt(i);
+            hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+        }
+        if( asString ){
+            // Convert to 8 digit hex string
+            return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+        }
+        return hval >>> 0;
+        /*
+        return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
+        */
+        /*
         var hash = 0;
         s = s.toString();
         if (s.length == 0) return s;
@@ -454,6 +475,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             hash = hash & hash; // Convert to 32bit integer
         }
         return hash;
+        */
     };
 
     this.calculateListData = function (){
@@ -548,6 +570,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.apiClientUploadLink(url, cb);
     };
 
+    this.externalDataSave = function(id, data,cb){
+        this.log('externalDataSave' + id);
+        this.log(data);
+        this.apiClientSaveCustomData(id, data, cb);
+    };
+
+
     //TODO hideVideoBox
     this.hideVideoBox= function(cb){
         if(cb)cb();
@@ -604,8 +633,30 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.stepComplete = function(res){
-        //vrt.logChrono(3, false, 'API UPLOD FILES');
-        $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId}]);
+
+        if(window.vrt.options && window.vrt.options.customData){
+            if(window.vrt.options.customData===true){
+                window.vrt.options.customData = {};
+            }
+            if(window.vrt.options.customDataInsertMediaId && window.vrt.options.customDataInsertMediaId===true){
+                window.vrt.options.customData.media_id = window.vrt.media_id;
+            }
+            if(window.vrt.options.customDataInsertMediaName && window.vrt.options.customDataInsertMediaName===true){
+                window.vrt.options.customData.media_name = window.vrt.media_name_real;
+            }
+            window.vrt.apiClientSaveCustomData(res.responseId, window.vrt.options.customData,
+                function() {
+                    $(window.vrt).trigger('vrt_event_video_step_completed', [{
+                        responseId: res.responseId,
+                        insertedCustomData: true
+                    }])
+                }
+            );
+        }else{
+            $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId,insertedCustomData:false}]);
+        }
+
+
     };
 
 
@@ -621,13 +672,23 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 // TODO trigger event: media info
             }
 
-            this.media_id = this.clearname(this.videoList[this.currentMedia].name); //was media_info[current_media].id
+            this.media_name = this.clearname(this.videoList[this.currentMedia].name);
+            this.media_name_real = this.videoList[this.currentMedia].name;
+
+            if(this.videoList[this.currentMedia].id){
+                this.media_id = this.videoList[this.currentMedia].id;
+            }else{
+                this.media_id = this.media_name;
+            }
+
             this.media_length = this.videoList[this.currentMedia].length;
+
             if(this.videoType=='youtube'){
                 this.media_path = this.youtubeParser(this.videoList[this.currentMedia].path);
             }else{
                 this.media_path = this.videoList[this.currentMedia].path;
             }
+
             this.log('>>STEP  YT path ' + this.media_path);
 
             $(window.vrt).trigger('vrt_event_video_session_proceedToShow');
@@ -1221,10 +1282,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     //API
 
-    this.apiClienCreateCustomData= function(data, cb){
+    this.apiClientSaveCustomData= function(id, data, cb){
         this.log('>>STEP insert custom data');
         this.log(data);
-        this.ceclient.createCustomData(data,cb);
+        this.ceclient.writeCustomData(id, data,cb);
     };
 
     this.apiClientUploadLink = function(streamFileName, cb){
@@ -1237,7 +1298,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         this.log('Api login in progress');
         this.log('>>STEP api init')
-        this.ceclient.init(true, false, this.apiDomain);
+        this.ceclient.init(true, true, this.apiDomain);
         this.ceclient.logout(
                 this.ceclient.login(this.apiUsername,this.apiPassword,
                     function(ret){
@@ -1266,7 +1327,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
 
-    this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options, customData);
+    this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
 };
 
 var vrtTimer;
