@@ -200,6 +200,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
 
         var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " +
+            "<div id='vrtLoader'></div>" +
             "<div id='vrtFrameWr'></div>" +
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
@@ -563,10 +564,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.skipVideo = function(){
 
     };
-
     this.facevideoUpload = function(url,cb){
         this.log(url,'fileUpload','a');
         this.log('!! '+url);
+
         this.apiClientUploadLink(url, cb);
     };
 
@@ -646,13 +647,16 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
             window.vrt.apiClientSaveCustomData(res.responseId, window.vrt.options.customData,
                 function() {
+                    window.vrt.loader('postVideo','default',false);
                     $(window.vrt).trigger('vrt_event_video_step_completed', [{
                         responseId: res.responseId,
                         insertedCustomData: true
                     }])
+
                 }
             );
         }else{
+            window.vrt.loader('postVideo','default',false);
             $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId,insertedCustomData:false}]);
         }
 
@@ -1056,7 +1060,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.player.video_stop(function(){vrt.logChrono(1, false, 'player');});
         vrt.isPlaying=false;
         clearTimeout(vrt.stop_handle);
-        this.exitcode = 1;
+        vrt.exitcode = 1;
+        vrt.loader('postVideo','default',true);
 
         $('#videoDiv').css('visibility','hidden');
         //this.isRecording = false;
@@ -1325,6 +1330,32 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.results.apilogin = res;
         return res;
     };
+
+    //**** LAYOUT **/
+    this.loaderHtml = function (){
+        return ' <div id="vrtLoaderInner"> <div id="circleG"> <div id="circleG_1" class="circleG"> </div> <div id="circleG_2" class="circleG"> </div> <div id="circleG_3" class="circleG"> </div> </div> </div>';
+    }
+
+    this.loaderCss = function (){
+        return ' <style> #vrtLoader{width: 100%} #vrtLoaderInner{margin: 10px auto;} #circleG{width:87.5px}.circleG{background-color:#FFF;float:left;height:19px;margin-left:10px;width:19px;-moz-animation-name:bounce_circleG;-moz-animation-duration:1.35s;-moz-animation-iteration-count:infinite;-moz-animation-direction:linear;-moz-border-radius:13px;-webkit-animation-name:bounce_circleG;-webkit-animation-duration:1.35s;-webkit-animation-iteration-count:infinite;-webkit-animation-direction:linear;-webkit-border-radius:13px;-ms-animation-name:bounce_circleG;-ms-animation-duration:1.35s;-ms-animation-iteration-count:infinite;-ms-animation-direction:linear;-ms-border-radius:13px;-o-animation-name:bounce_circleG;-o-animation-duration:1.35s;-o-animation-iteration-count:infinite;-o-animation-direction:linear;-o-border-radius:13px;animation-name:bounce_circleG;animation-duration:1.35s;animation-iteration-count:infinite;animation-direction:linear;border-radius:13px}#circleG_1{-moz-animation-delay:.27s;-webkit-animation-delay:.27s;-ms-animation-delay:.27s;-o-animation-delay:.27s;animation-delay:.27s}#circleG_2{-moz-animation-delay:.63s;-webkit-animation-delay:.63s;-ms-animation-delay:.63s;-o-animation-delay:.63s;animation-delay:.63s}#circleG_3{-moz-animation-delay:.8099999999999999s;-webkit-animation-delay:.8099999999999999s;-ms-animation-delay:.8099999999999999s;-o-animation-delay:.8099999999999999s;animation-delay:.8099999999999999s}@-moz-keyframes bounce_circleG{50%{background-color:#2E2E2E}}@-webkit-keyframes bounce_circleG{50%{background-color:#2E2E2E}}@-ms-keyframes bounce_circleG{50%{background-color:#2E2E2E}}@-o-keyframes bounce_circleG{50%{background-color:#2E2E2E}}@keyframes bounce_circleG{50%{background-color:#2E2E2E}}  </style>';
+    }
+    this.loader = function(name, type,show){
+        if(!name) name = 'vrtkLoader'; if(!type) type = 'default'; if(show===undefined) show = false;
+
+        var lhtml =  this.loaderHtml();
+        var lcss =  this.loaderCss();
+
+        if(show===true && ($('#vrtLoader').html()=='')){
+            $('#vrtLoader').html(lcss + lhtml);
+            $('#circleG').vrtCenter();
+        };
+        if(show===false){
+            $('#vrtLoader').html('');
+        };
+
+
+    };
+
 
 
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
