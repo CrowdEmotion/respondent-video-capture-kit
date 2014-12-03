@@ -1,0 +1,1 @@
+In thi directory, from terminal, command ```grunt```

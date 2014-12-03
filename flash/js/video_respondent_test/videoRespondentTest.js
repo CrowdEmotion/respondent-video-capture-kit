@@ -612,7 +612,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         var preloadfunc = this.player.preloadPlayer();
 
         this.dopreload(preloadfunc);
-    }
+    };
 
     this.afterpreload = function (success) {
 

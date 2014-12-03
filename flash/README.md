@@ -48,23 +48,17 @@ Components:
 
 ### Example
 
-For a fast implementation, please look at HTML file [video_respondent_test.html](./examples/video_respondent_test.html)
+For a fast implementation, please look at HTML file [examples/video_respondent_test.html](./examples/video_respondent_test.html) 
+or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) (streaming YouTube videos)
 
 ### Implement VRT
 
-1. In the head of your page, include all the files under these folders:
-    - js/APIClient/
-    - js/external/
-    - js/recorder/
-    - js/video/ [^]
-    - js/video_respondent_test/
-
-[^]: required only if you don't use YouTube
-
+1. In the head of your page, include all these files:
+			```js/vrtk.min.js``` 	 
+			```js/vrtk.min.css``` 	 
+ 
 2. Include this html code in the body of your page
-     ```
-     <div id="vrt"></div>
-     ```
+     ```<div id="vrt"></div>```
      
 3. Include the following code in the head of your page
      ```
@@ -109,7 +103,7 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
         - `playerCentered` (*true*|*false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
         - `playerWidth` (integer - default 640): set the width of the videos
         - `playerHeight` (integer - default 400): set the height of the videos
-        - `customData` (*true*|*false*|javascript object) (eg: {user_id:user_id}), insert any custom data by users
+        - `customData` (*true*|*false*|javascript object) (eg: {user_id:user_id}), insert any custom data by users in  js object format
         - `customDataInsertMediaName`  (*true*|*false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
         - `customDataInsertMediaId` (*true*|*false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
                              
@@ -140,7 +134,13 @@ For a fast implementation, please look at HTML file [video_respondent_test.html]
                                                    Set position of the button with `options.btnPosition` set to `top` or `bottom`.
     -  `closeFrame()` :                           close a frame opened with the `openFrame` method
      
-     
- 
+##NOTE
+
+```vrtk.min.js``` and ```vtk.min.css`` are compressed files that contains all js/css files in these folders:
+    - js/APIClient/
+    - js/external/
+    - js/recorder/
+    - js/video/ [^]
+    - js/video_respondent_test/
  
 
