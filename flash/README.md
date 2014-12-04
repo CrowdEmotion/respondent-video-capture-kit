@@ -70,7 +70,8 @@ or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.htm
              });
      </SCRIPT>
      ```       
-    - `VIDEOTYPE` string: youtube|customserver - video stimuli are hosted on YouTube or custom server
+    - `VIDEOTYPE` string: ```youtube``` or ```customserver``` - choose if your video stimuli are hosted by YouTube or custom server
+
     - `VIDEODATA` array: list of video stimuli. 
         
         Each object must include 3 properties:
@@ -99,13 +100,13 @@ or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.htm
     - `API DOMAIN`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
                          
     - `OPTION` object: contains a list of properties
-        - `randomOrder` (*true*|*false* - default: *false*): display videos in a random order  
-        - `playerCentered` (*true*|*false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
-        - `playerWidth` (integer - default 640): set the width of the videos
-        - `playerHeight` (integer - default 400): set the height of the videos
-        - `customData` (*true*|*false*|javascript object) (eg: {user_id:user_id}), insert any custom data by users in  js object format
-        - `customDataInsertMediaName`  (*true*|*false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
-        - `customDataInsertMediaId` (*true*|*false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
+        - `randomOrder` (*true* | *false* - default: *false*): display videos in a random order  
+        - `playerCentered` (*true* | *false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
+        - `playerWidth` (*integer* - default 640): set the width of the videos
+        - `playerHeight` (*integer* - default 400): set the height of the videos
+        - `customData` (*true* | *false* | *javascript object* ) (eg: {user_id:user_id}), insert any custom data by users in  js object format
+        - `customDataInsertMediaName`  (*true* | *false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
+        - `customDataInsertMediaId` (*true* | *false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
                              
                     
 4. Implement in you code the listeners for the following events:
