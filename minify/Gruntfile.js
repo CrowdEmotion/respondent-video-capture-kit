@@ -9,7 +9,7 @@ module.exports = function(grunt) {
         uglify : {
             default : {
                 options: {
-                    banner: '/* VRTK crowdemotion.co.uk */ ',
+                    banner: '/* Playcorder crowdemotion.co.uk */ ',
                     mangle : false,
                     compress: false
                 },

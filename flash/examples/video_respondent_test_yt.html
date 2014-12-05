@@ -19,7 +19,7 @@
 
 
     <!-- VIDEO  RESPONDENT TEST PAGE - HEAD - START  -->
-    <!-- Configuration file  - use the ../js/examples/videoRespondentTestConf.js as example-->
+    <!-- Configuration file  - use the ../js/examples/videoRespondentTestConfYTDev.js as example-->
     <script type="text/javascript" charset="utf-8" src="../js/examples/videoRespondentTestConfYTDev.js"></script>
 
     <!-- Mandatory files -->
@@ -30,8 +30,16 @@
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
-            var options = {debug:true,debugChrono: true, debugChronoHtml: false, debugEvt:true, debugVImportant:true, randomOrder : true /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
+            var user_id = getParameterByName('user_id');
+            (user_id)? '' : user_id = makeRandomString();
+
+            var options = {
+                debug:true, debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true,
+                randomOrder : true,
+                customData:{user_id:user_id}, customDataInsertMediaName: true, customDataInsertMediaId: true, customDataInsertMediaPath : true
+                /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
             };
+
             var vrt = new Vrt(vrtConf.videoType,vrtConf.videoData,vrtConf.streamDomain,vrtConf.streamName,
                     vrtConf.apiDomain,vrtConf.apiUsername, vrtConf.apiPassword,options
             );
@@ -127,6 +135,11 @@
 
             vrt.init();
         });
+
+        function getParameterByName(name) {
+            var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+            return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+        }
     </script>
     <!-- EXAMPLE OF IMPLEMENTATION END -->
     <style>

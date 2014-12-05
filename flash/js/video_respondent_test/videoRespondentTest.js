@@ -44,6 +44,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.media_name_real = null;   //media played
     this.media_length = 0;  //media played
     this.media_path = null; //media played
+    this.media_path_full = null; //media played
     this.exitcode = null;
     this.mainStyle = '';
     this.timeRecStart = -1;
@@ -645,6 +646,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if(window.vrt.options.customDataInsertMediaName && window.vrt.options.customDataInsertMediaName===true){
                 window.vrt.options.customData.media_name = window.vrt.media_name_real;
             }
+            if(window.vrt.options.customDataInsertMediaPath && window.vrt.options.customDataInsertMediaPath===true) {
+                window.vrt.options.customData.media_path = window.vrt.media_path_full;
+            }
             window.vrt.apiClientSaveCustomData(res.responseId, window.vrt.options.customData,
                 function() {
                     window.vrt.loader('postVideo','default',false);
@@ -692,6 +696,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }else{
                 this.media_path = this.videoList[this.currentMedia].path;
             }
+
+            this.media_path_full = this.videoList[this.currentMedia].path;
 
             this.log('>>STEP  YT path ' + this.media_path);
 

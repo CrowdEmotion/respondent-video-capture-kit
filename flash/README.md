@@ -1,7 +1,7 @@
-# Respondent Video Capture Kit (RVCK) - Flash version
+# Playcorder - Flash version
 
 
-CrowdEmotion RVCK includes two different functionalities:
+CrowdEmotion Playcorder includes two different functionalities:
 
  - recorder (example: examples/recorder.html) include a GUI interface with the Flash recorder
  - video respondent test (example: examples/video_respondent_test.html) include the Flash recorder and a video player
@@ -107,6 +107,7 @@ or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.htm
         - `customData` (*true* | *false* | *javascript object* ) (eg: {user_id:user_id}), insert any custom data by users in  js object format
         - `customDataInsertMediaName`  (*true* | *false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
         - `customDataInsertMediaId` (*true* | *false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
+        - `customDataInsertMediaPath`  (*true* | *false* - default: *false*) if `true`, insert media path value inside custom data with `media_path` key
                              
                     
 4. Implement in you code the listeners for the following events:
