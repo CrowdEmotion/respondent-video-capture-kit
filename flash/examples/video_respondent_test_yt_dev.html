@@ -126,10 +126,12 @@
             //no api login
             $(vrt).on('vrt_event_api_login_fail',function(){
                 alertMessage('Error: API login fail');
+                alert('No API login');
             });
             //no camera
             $(vrt).on('vrt_event_producer_no_camera_found',function(){
                 alertMessage('Error: No webcam found');
+                alert('Your computer have no webcam')
             });
             //camera blocked
             $(vrt).on('vrt_event_producer_camera_blocked',function(){
@@ -142,10 +144,12 @@
             //no Flash
             $(vrt).on('vrt_event_flash_no', function(){
                 alertMessage('Error: no Adobe Flash founded');
+                alert('No Flash detected on your computer');
             });
             //old Flash version
             $(vrt).on('vrt_event_flash_old', function(){
                 alertMessage('Error: the version of Adobe Flash is old');
+                alert('the version of Adobe Flash on your computer is old');
             });
 
             vrt.init();
