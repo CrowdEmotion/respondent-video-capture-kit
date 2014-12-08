@@ -53,6 +53,8 @@ or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.htm
 
 ### Implement Playcorder
 
+0. Requirements: Playcorder use jquery library, tested on 1.9.1 version, download at [here](http://jquery.com/download/)
+
 1. In the head of your page, include all these files:
 			```js/vrtk.min.js``` 	 
 			```js/vrtk.min.css``` 	 
