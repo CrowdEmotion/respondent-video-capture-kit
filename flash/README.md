@@ -4,10 +4,10 @@
 CrowdEmotion Playcorder includes two different functionalities:
 
  - recorder (example: examples/recorder.html) include a GUI interface with the Flash recorder
- - video respondent test (example: examples/video_respondent_test.html) include the Flash recorder and a video player
+ - playcorder (example: examples/video_respondent_test.html) include the Flash recorder and a video player
 
 
-## RECORDER Page Description
+## Recorder Page Description
 
 This page is an example how to record and upload a video.
  
@@ -34,9 +34,9 @@ Components:
 1. After clicking on "stop recording", wait until your video is uploaded
 
 
-## VIDEO RESPONDENT TEST Page (VRT) description
+## Playcorder page description
 
-VRT include all components to play a video stimuli, record user face and upload a video for analysis.
+Playcorder include all components to play a video stimuli, record user face and upload a video for analysis.
 
 Components:
 
@@ -51,7 +51,7 @@ Components:
 For a fast implementation, please look at HTML file [examples/video_respondent_test.html](./examples/video_respondent_test.html) 
 or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) (streaming YouTube videos)
 
-### Implement VRT
+### Implement Playcorder
 
 1. In the head of your page, include all these files:
 			```js/vrtk.min.js``` 	 
