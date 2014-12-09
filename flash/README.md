@@ -48,21 +48,28 @@ Components:
 
 ### Example
 
-For a fast implementation, please look at HTML file [examples/video_respondent_test.html](./examples/video_respondent_test.html) 
-or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) (streaming YouTube videos)
+For a fast implementation, please look at HTML files:
+ 1. [examples/video_respondent_test.html](./examples/video_respondent_test.html) for streamig normal videos, or
+ 2. [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) for streaming YouTube videos
 
 ### Implement Playcorder
 
-0. Requirements: Playcorder use jquery library, tested on 1.9.1 version, download at [here](http://jquery.com/download/)
+1. Requirements: Playcorder use the _JQuery_ library, tested on 1.9.1 version.
+            1. Download JQuery [here](http://jquery.com/download/)
+            2. Include *JQuery* in the *head* of you html page
 
-1. In the head of your page, include all these files:
-			```js/vrtk.min.js``` 	 
-			```js/vrtk.min.css``` 	 
- 
-2. Include this html code in the body of your page
+1. Include the Webproducer, a Flash object for recording video.
+            1. Copy the file  ```swf/producer.swf``` in your file system
+
+
+1. In the *head* of your html page, include all these files:
+			1. ```js/vrtk.min.js```
+			2. ```js/vrtk.min.css```
+
+1. Include this html code in the *body* of your page
      ```<div id="vrt"></div>```
      
-3. Include the following code in the head of your page
+1. Include the following code in the *head* of your page
      ```
      <SCRIPT>
       $(document).ready(function(){
@@ -112,7 +119,7 @@ or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.htm
         - `customDataInsertMediaPath`  (*true* | *false* - default: *false*) if `true`, insert media path value inside custom data with `media_path` key
                              
                     
-4. Implement in you code the listeners for the following events:
+1. Implement in you code the listeners for the following events:
 
     - `vrt_event_preview_loaded`:              all objects are loaded
     - `vrt_event_producer_camera_ok`:          the user camera is ok
@@ -128,9 +135,13 @@ or [examples/video_respondent_test_yt.html](./examples/video_respondent_test.htm
     - `vrt_event_flash_no`:                    there is no Flash included
     - `vrt_event_producer_no_camera_found`:    no camera found
     - `vrt_event_frame_open`:                  use this event to open a frame OR user the `openFrame()` method 
-    - `vrt_event_frame_close`:                 triggere by the `closeFrame()` method 
+    - `vrt_event_frame_close`:                 triggere by the `closeFrame()` method
+
+    Example ```  $(window.vrt).on('vrt_event_producer_camera_blocked', function () {
+                            alert('The webcam is blocked');
+                        }); ```
          
-5. List of usable methods
+1. List of usable methods
     -  `recorderHide()`:                          hide the recorder
     -  `recorderShow()`:                          show the recorder
     -  `openFrame` ( `src`, `options`) :         open a frame with the `src` parameter, use `options.width` and `options.height` to set the frame dimension. 
