@@ -92,6 +92,8 @@
                 //$('#next').show();
                 if(data.responseId){
                     alertMessage('Facevideo uploaded with response id: '+ data.responseId);
+                    var d = new Date();
+                    window.vrt.apiClientSaveCustomData( data.responseId , {time: d.getTime()} );
                 }
                 vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform',
                         {btnCssClass:'button-choose pure-button', btnPosition:'top',btnText:'Next',btnStyle:'position: static; margin-bottom: 1em;'}

@@ -148,8 +148,47 @@ For a fast implementation, please look at HTML files:
                                                    Include a close button with `options.showBtnClose` set to `true`. Customize button with `options.cssClass`, `options.btnStyle` and `options.btnText`.
                                                    Set position of the button with `options.btnPosition` set to `top` or `bottom`.
     -  `closeFrame()` :                           close a frame opened with the `openFrame` method
-     
-##NOTE
+
+## Code examples
+#### Adding custom data
+Custom data could be added in two ways
+1. using the method _apiClientSaveCustomData()_ 
+2. setting the option _customData_ inside vrt object
+##### 1. method _apiClientSaveCustomData()_ 
+_apiClientSaveCustomData()_ can be used every time a face video is uploaded through the API
+```
+window.vrt.apiClientSaveCustomData( api_response_id , data_object, callback_function)
+```
+```api_response_id``` is an integer value provided by CrowdEmotion API after a video upload
+
+```data_object``` is a js script object with custom values, like  ```{user_id:333;user_name:’john’}```
+
+```callback_function``` is the function called at end of _apiClientSaveCustomData()_
+
+##### 2. Options
+When the vrt object is created, some options are available
+```
+
+var videoData = [{'path': 'http://yt.be/v/7126', 
+	'length': 5, 
+	'name' : '30 sec 1', 
+	id:1}];
+var userData = {user_id:12}
+var options = {customData: userData,
+customDataInsertMediaName: true, 
+customDataInsertMediaId: true, 
+customDataInsertMediaPath : true };
+
+var vrt = new Vrt(‘youtube’,videoData,streamDomain,streamName,
+				apiDomain,apiUsername, apiPassword,options );
+```
+
+At end of each video session, _vrt_ object will save the values inside the variable _videoData_ and _userData_ according to the variable _options_
+
+Check the file for an example```/flash/example/video_respondent_test_dev.html```
+
+
+##NOTES
 
 ```vrtk.min.js``` and ```vtk.min.css`` are compressed files that contains all js/css files in these folders:
     - js/APIClient/
