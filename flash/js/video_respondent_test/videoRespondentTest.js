@@ -331,7 +331,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if (vrt.isPlaying == false) {
                 streamName = this.videoList[this.currentMedia].streamCode;
                 $(window.vrt).trigger('vrt_event_streamname', [{streamname:streamName}]);
-                vrt.producer.publish(streamName);
+                try {
+                    vrt.producer.publish(streamName);
+                }catch(err){
+                    vrt.log('exception in producer.publish');
+                    vrt.log(err);
+                    $(window.vrt).trigger('vrt_event_recorder_error', [{data:err}]);
+                }
                 vrt.isPlaying = true;
                 vrt.logChrono(1, true, 'player');
                 vrt.setup_stop_playing();
@@ -389,7 +395,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.newTS = function(data){
         var dataTS = vrt.createTS(data);
-        if (vrt.isRecording == true) {
+        if (vrt.isRecording == true && vrt.streamName!='' && vrt.streamName!=null && vrt.streamName!=undefined) {
             vrt.saveBufferedTS(
                 function () {
                     vrt.addTS(dataTS)

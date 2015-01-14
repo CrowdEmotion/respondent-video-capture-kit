@@ -264,6 +264,7 @@ function javaRest(debug, http_fallback, domain) {
 
     javaRest.debug = debug;
     javaRest.domain = domain;
+    javaRest.protocol = 'http';
 
     if(http_fallback === null) {
         javaRest.protocol = 'http';
@@ -276,7 +277,6 @@ function javaRest(debug, http_fallback, domain) {
         } else {
             javaRest.protocol = 'http';
         }
-
     }
 }
 
