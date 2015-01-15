@@ -336,7 +336,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 }catch(err){
                     vrt.log('exception in producer.publish');
                     vrt.log(err);
-                    $(window.vrt).trigger('vrt_event_recorder_error', [{data:err}]);
+                    $(window.vrt).trigger('vrt_event_producer_error', [{data:err}]);
                 }
                 vrt.isPlaying = true;
                 vrt.logChrono(1, true, 'player');
