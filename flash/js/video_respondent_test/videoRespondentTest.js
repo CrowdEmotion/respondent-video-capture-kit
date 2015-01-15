@@ -334,8 +334,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 try {
                     vrt.producer.publish(streamName);
                 }catch(err){
-                    vrt.log('exception in producer.publish');
-                    vrt.log(err);
+                    vrt.llog('exception in producer.publish');
+                    vrt.llog(err);
                     $(window.vrt).trigger('vrt_event_producer_error', [{data:err}]);
                 }
                 vrt.isPlaying = true;
@@ -830,6 +830,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.popOverCe = function(type){};
 
     // LOG FUNCTIONS
+    this.llog = function (msg) {
+        if (window.console && console.log) console.log(msg);
+    };
+
     this.log = function (msg , display ,mode) {
 
         if(!this.debug) return'';
