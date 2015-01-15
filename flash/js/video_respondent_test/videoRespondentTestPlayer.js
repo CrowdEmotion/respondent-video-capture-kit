@@ -105,7 +105,12 @@ function VjsInterface() {
 
             //this.log( media_path_pre + '  ' + media_path );
             if (typeof (this.player) !== 'undefined' && this.player.src) {
-                this.player.src([{ type: "video/mp4", src: vrt.media_path }]);
+                var source = vrt.media_path;
+                if(source.slice(-3)=='flv') {
+                    this.player.src([{type: "video/flv", src: vrt.media_path}]);
+                }else {
+                    this.player.src([{type: "video/mp4", src: vrt.media_path}]);
+                }
             }
 
             this.log( 'video_play' );
