@@ -14,6 +14,7 @@ var WebProducer = function (options) {
   var path = options.path || '';
   this.createElement(this.id, this.width, this.height, path);
   this.port = options.port||'8082';
+  // these method calls are forwarded directly to the flash component
   this.methods = [
       'setCredentials', 'getCredentials',
       'setUrl', 'getUrl',
@@ -32,6 +33,8 @@ var WebProducer = function (options) {
       'getStreamInfoDroppedFrames', 'getStreamInfoCurrentBytesPerSecond',
       'getStreamInfoVideoLossRate', 'getStreamInfoString'
       ];
+
+  this.flash_methods_prepare();
 };
 
 WebProducer.log = function (id) {
@@ -59,6 +62,28 @@ WebProducer.extend = function (source) {
 
 
 WebProducer.prototype = {
+  flash_methods_prepare: function () {
+    // Forward known methods to flash
+    var self = this;
+    this.methods.forEach(function (method) {        
+      if (self[method]) { return; } // we don't overwrite existing definitions
+      self[method] = function () {
+        return self.flash_method_call(method, arguments);
+      };
+    });
+  },
+
+  flash_method_call: function (method, args) {
+    var self = this;
+    var value;
+    try {
+      value = self.el[method].apply(self.el, args);
+    } catch (e) {
+      console.log('ERROR ' , e, ' on method ', method,' with ', this);
+    }
+    return value;
+  },
+  
   createElement: function (id, width, height, path) {
     var self = this;
     var swfVersionStr = "11.4.0";
@@ -110,23 +135,11 @@ WebProducer.prototype = {
     }
     return false;
   },
-  
+
   on_ready: function () {
     this.el = document.getElementById(this.id);
     this.flash = this.el;
-    var methods = this.methods;
     var self = this;
-    methods.forEach(function (method) {        
-      self[method] = function () {
-        var value = undefined;
-        try {
-          value = self.el[method].apply(self.el, arguments);
-        } catch (e) {
-          console.log('ERROR ' , e, ' on method ', method,' with ', this);
-        }
-        return value;
-      };
-    });
 
     this.on('publish', function (streamName) {
       streamName = streamName.split('?')[0];
@@ -310,6 +323,61 @@ var JobsMixin = {
 };
 
 WebProducer.extend(JobsMixin);
+
+
+var LoadBalancingMixin = {
+  load_balancing_original_rtmp_url: null,
+
+  setUrl: function (url) {
+    var self = this;
+    self.load_balancing_original_rtmp_url = url;
+    var method = 'setUrl';
+    return self.flash_method_call(method, [url]);
+  },
+
+  _get_info: function (cb) {
+    // we poll the server to until the transcoded mp4 is ready, then cb
+    var url = [
+      this.get_http_api_base_url(), 'info/jsonp'
+    ].join('');
+    
+    var dfr = jQuery.ajax({
+      url: url,
+      dataType: 'jsonp'
+    });
+    dfr.done(function (result) { cb(result); });
+    dfr.fail(function () { cb({}); });
+    return dfr;
+  },
+  
+  connect: function () {
+    var self = this;
+    // need to re-set the producer url because 
+    // get_http_api_base_url uses getUrl()
+    self.flash_method_call('setUrl', [self.load_balancing_original_rtmp_url]);
+
+    var url = self.getUrl();
+
+    var tmp = url.split('://')[1];
+    tmp = tmp.split('/')[0];
+
+    var host_original = tmp.split(':')[0];
+    
+    self._get_info(function (info) {
+      if (info && info.ip && (info.ip.length > 0)) {
+        console.log('got some infos', info);
+        var ip = info.ip;
+        var url_new = url.replace(host_original, ip);
+        console.log('swapping urls', host_original, ip);
+        self.setUrl(url_new);
+      }
+      url = self.getUrl();
+      self.flash_method_call('connect', []);
+    });
+  },
+};
+
+WebProducer.extend(LoadBalancingMixin);
 
 
 var EventEmitterMixin = {
