@@ -655,6 +655,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if(window.vrt.options.customDataInsertMediaPath && window.vrt.options.customDataInsertMediaPath===true) {
                 window.vrt.options.customData.media_path = window.vrt.media_path_full;
             }
+            if(window.vrt.options.customDataInsertMediaLength && window.vrt.options.customDataInsertMediaLength===true) {
+                window.vrt.options.customData.media_length = window.vrt.media_length;
+            }
             window.vrt.apiClientSaveCustomData(res.responseId, window.vrt.options.customData,
                 function() {
                     window.vrt.loader('postVideo','default',false);
