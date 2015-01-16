@@ -60,6 +60,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.streamName = '';
     this.stop_handle;
     this.stop_handle_rec;
+    this.swfPath = '../swf/';
 
     //player values
     this.vjs = false;
@@ -105,6 +106,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.avgPreLoadTime) ? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
         (options && options.recorderCenter != undefined) ? this.recorderCenter = options.recAutoHide : this.recorderCenter = true;
         (options && options.randomOrder != undefined) ? this.randomOrder = options.randomOrder : this.randomOrder = false;
+        (options && options.swfPath != undefined) ? this.swfPath = options.swfPath : this.swfPath = '../swf/';
 
         this.options = options;
         if (options.player == undefined || options.player == null) options.player = {};
@@ -166,7 +168,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (swfobject.getFlashPlayerVersion("11.1.0")) {
             this.results.flash.version = true;
             $(window.vrt).trigger('vrt_event_flash_version_ok');
-            this.loadProducer();
+            this.loadProducer(vrt.swfPath);
         } else {
             this.results.flash.version = false;
             this.log('Flash is old=' + this.playerVersion.major + '.' + this.playerVersion.minor);
@@ -814,14 +816,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(cb)cb();
     };
 
-    this.loadProducer = function(){
+    this.loadProducer = function(swfPath){
         this.log('loadProducer');
         this.log('>>STEP producer init')
 
         //$('#'+this.producerID).css('display', 'inline-block');
         //$('#'+this.producerID).addClass('rotating-loader');
 
-        this.webProducerInit();
+        this.webProducerInit(swfPath);
     };
 
     // TODO popOverCe
@@ -1089,7 +1091,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     // WEBPRODUCER FUNCTION
-    this.webProducerInit = function(){
+    this.webProducerInit = function(path){
         this.log("===WEBP Webpr_init");
         vrt.logTime('webProducerInit');
         vrt.log('!!PRODUCER webProducerInit');
@@ -1098,7 +1100,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             width: this.producerWidth, // these are sizes of the player on the page
             height: this.producerHeight, // not related to the stream resolution
             trace: false, // would enable debug logs in js console
-            path: '../swf/'
+            path: path
         });
 
         this.producer.once('ready', function () {
