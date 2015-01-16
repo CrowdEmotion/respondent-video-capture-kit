@@ -491,13 +491,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         for(var i = 0; i<this.mediaCount; i++){
             var d = new Date();
             var n = d.getTime();
-            var pre = '';
-            if(this.producerStreamName){
-                var l = 4;
-                if(this.producerStreamName.length<4) l = this.producerStreamName.length;
-                pre = this.producerStreamName.substring(0,l);
-            }
-            this.videoList[i].streamCode = pre +'_'+ i +'_' + this.clearname(this.createHashCode(n));
+            var pre = this.createHashCode(''+this.producerStreamName);
+            this.videoList[i].streamCode = pre +'_'+ i +'_' + n;
             this.videoList[i].order = i;
         }
     };
