@@ -1,5 +1,4 @@
-
-
+//PlayCorder object
 function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options) {
 
 
@@ -15,6 +14,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.debugChronoHtml = false;
     this.debugVImportant = false;
     this.options = {};
+    this.apiHttps;
+    this.fatalError = false;
 
     //Producer
     this.playerVersion = null;
@@ -106,6 +107,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.avgPreLoadTime) ? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
         (options && options.recorderCenter != undefined) ? this.recorderCenter = options.recAutoHide : this.recorderCenter = true;
         (options && options.randomOrder != undefined) ? this.randomOrder = options.randomOrder : this.randomOrder = false;
+        (options && options.apiHttps !== undefined) ? this.apiHttps = options.apiHttps : this.apiHttps = true;
         (options && options.swfPath != undefined) ? this.swfPath = options.swfPath : this.swfPath = '../swf/';
 
         this.options = options;
@@ -452,11 +454,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }else{
             return 0;
         }
-    }
+    };
+
     this.makeRandomString = function() {
         return Math.random().toString(36).substring(2, 15) +
             Math.random().toString(36).substring(2, 15);
-    }
+    };
 
     this.createHashCode = function (str){
         var asString =  false; var seed = undefined;
@@ -1319,7 +1322,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         this.log('Api login in progress');
         this.log('>>STEP api init')
-        this.ceclient.init(true, true, this.apiDomain);
+        this.ceclient.init(true, this.apiHttps, this.apiDomain);
         this.ceclient.logout(
                 this.ceclient.login(this.apiUsername,this.apiPassword,
                     function(ret){

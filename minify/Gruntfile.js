@@ -15,6 +15,7 @@ module.exports = function(grunt) {
                 },
                 src: ['../flash/js/external/swfobject.js',
                     '../flash/js/recorder/webproducer.js',
+                    '../flash/js/recorder/browsercompatibility.js',
                     '../flash/js/APIClient/sha256.js',
                     '../flash/js/APIClient/enc-base64-min.js'
                 , '../flash/js/APIClient/store.js',

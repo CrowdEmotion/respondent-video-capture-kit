@@ -225,7 +225,7 @@ function CEClient() {
      * @param msg
      */
     function ce_log(msg) {
-        if (window.console) {
+        if (window.console && console.log) {
             var now = Date.now();
             console.log('CE JS API [' + now + ', ' + String("000000" + (now - this.last_ms)).slice(-6) + ']: ' +  msg);
             console.log(msg);
@@ -264,9 +264,9 @@ function javaRest(debug, http_fallback, domain) {
 
     javaRest.debug = debug;
     javaRest.domain = domain;
-    javaRest.protocol = 'http';
+    javaRest.protocol = 'https';
 
-    if(http_fallback === null) {
+    if(http_fallback === false) {
         javaRest.protocol = 'http';
     }
     if(http_fallback === true) {
@@ -923,7 +923,7 @@ javaRest.facevideo.info = function(response_id, callback) {
             }
         },
         function(jqXHR, textStatus) {
-            console.log(jqXHR);
+            //console.log(jqXHR);
             if (callback) {
                 callback(jqXHR);
             }
@@ -948,7 +948,7 @@ javaRest.facevideo.upload = function(file, callback) {
             }
         },
         function(jqXHR, textStatus) {
-            console.log(jqXHR);
+            //console.log(jqXHR);
             callback(jqXHR)
         }
     )
