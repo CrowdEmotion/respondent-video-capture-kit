@@ -358,10 +358,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(window.vrt).on('vrtstep_play', function (e, data) {
             vrt.log('EVT vrtstep_play caller ' + data.caller);
             if (vrt.isPlaying == false) {
-                streamName = this.videoList[this.currentMedia].streamCode;
-                $(window.vrt).trigger('vrt_event_streamname', [{streamname:streamName}]);
+                vrt.streamName = this.videoList[this.currentMedia].streamCode;
+                $(window.vrt).trigger('vrt_event_streamname', [{streamname:vrt.streamName}]);
                 try {
-                    vrt.producer.publish(streamName);
+                    vrt.producer.publish(vrt.streamName);
                 }catch(err){
                     vrt.llog('exception in producer.publish');
                     vrt.llog(err);
