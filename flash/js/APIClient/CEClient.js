@@ -259,7 +259,7 @@ javaRest.userId = null;
  */
 function javaRest(debug, http_fallback, domain) {
     if(debug==undefined) debug = false;
-    if(http_fallback==undefined) http_fallback = false;
+    if(http_fallback===undefined) http_fallback = false;
     if(!domain) domain = "api.crowdemotion.co.uk";
 
     javaRest.debug = debug;

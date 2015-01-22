@@ -52,6 +52,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.timeRecStart = -1;
     this.timePlayerStart = -1;
     this.bufferTS = [];
+    this.stepCompleted = false;
 
     //steps && user actions
     this.click_start = false;
@@ -301,25 +302,22 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.vrtOn = function () {
 
         $(window.vrt).on('vrt_event_error', function (e, data) {
-            if (data.type == 'blocking')window.vrt.fatalError = true;
-
             if (data.type == 'blocking') {
                 vrt.llog('blocking error: ' + data.error + ' in ' + data.component + '');
                 window.vrt.fatalError = true;
-            }
-            else if (data.type == 'user_bloking') {
+            }else if(data.type == 'user_bloking') {
                 vrt.llog('blocking error by user: ' + data.error + ' in ' + data.component + '');
                 window.vrt.userError = true;
             }else {
                 vrt.llog('error' + data.error + ' in ' + data.component + '');
             }
             if (window.vrt.fatalError == true) {
-
+                window.vrt.stepCompleted = true;
                 if (vrt.player.player && vrt.player.player.dispose) {
                     vrt.player.player.dispose();
                 }
                 $(window.vrt).trigger('vrt_event_fatal_error');
-                $(window.vrt).trigger('vrt_event_video_session_complete');
+                //$(window.vrt).trigger('vrt_event_video_session_complete');
             }
         });
 
@@ -341,6 +339,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.log('>>EVT vrtstep_loaded');
             vrt.player.video_play(vrt.showVisibility('#videoDiv'));
             //TODO open_video_window();  // HACK else the Flash player is not instantiated
+        });
+        $(window.vrt).on('vrt_event_user_skip_video', function () {
+            vrt.skip_video();
         });
         $(window.vrt).on('vrtstep_playerStateChange', function (e, data) {
             vrt.log('EVT vrtstep_playerStateChange ' + data.state + ' time ' + data.time[4] + ' ' + data.time[5] + ' ' + data.time[6]);
@@ -391,14 +392,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         //external event
         $(window.vrt).on('vrt_event_start_video_session', function () {
             if (window.vrt.recAutoHide == false) {
-                window.vrt.setupPlayer()
+                window.vrt.setupPlayer();
             } else {
                 window.vrt.recorderHide(null, window.vrt.setupPlayer());
             }
         });
 
         $(window.vrt).on('vrt_event_user_next_video', function () {
-            window.vrt.nextStep()
+            window.vrt.skip_video();
         });
 
         $(window.vrt).on('vrt_event_user_session_complete', function () {
@@ -593,10 +594,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(el).css('z-index',0);
     };
 
-    //TODO skipVideo
-    this.skipVideo = function(){
 
-    };
     this.facevideoUpload = function(url,cb){
         this.log(url,'fileUpload','a');
         this.log('!! '+url);
@@ -691,15 +689,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         responseId: res.responseId,
                         insertedCustomData: true
                     }])
-
                 }
             );
         }else{
             window.vrt.loader('postVideo','default',false);
             $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId,insertedCustomData:false}]);
         }
-
-
+        window.vrt.stepCompleted = true;
     };
 
 
@@ -707,6 +703,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log('nextStep');
         this.log('>>STEP nextStep ' + this.currentMedia);
         if (this.currentMedia++ < this.mediaCount-1) {
+            window.vrt.stepCompleted = false;
             this.logChronoReset();
             this.log(this.currentMedia,'currentMedia');
             this.log('nextStep=' + this.currentMedia);
@@ -1092,6 +1089,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.stop_handle_rec = setTimeout(vrt.stop_rec,time );
     };
 
+    this.skip_video = function(){
+        if(!window.vrt.stepCompleted) {
+            vrt.stop_playing();
+            vrt.stop_rec();
+        }else {
+            window.vrt.nextStep();
+        }
+    };
+
     this.setupPlaybackPositionPolling = function(){
         vrt.stop_polling_player_pos = setInterval(vrt.pollingPlayerPos, 500 );
     };
@@ -1107,9 +1113,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         clearTimeout(vrt.stop_handle);
         vrt.exitcode = 1;
         vrt.loader('postVideo','default',true);
-
         $('#videoDiv').css('visibility','hidden');
-        //this.isRecording = false;
     };
 
     this.stop_rec =function() {
@@ -1247,7 +1251,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.postPartecipate();
                 //vrt.logChrono(3, true, 'API UPLOD FILES');
                 vrt.facevideoUpload(url, vrt.stepComplete);
-
             });
 
             this.on('save-metadata', function (url) {

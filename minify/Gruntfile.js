@@ -3,13 +3,16 @@
  */
 module.exports = function(grunt) {
 
+    var w = new Date();
+    w = w.getFullYear()+'-'+ (w.getMonth()+1) +'-'+ w.getDate()+ ' '+w.getHours() +':'+ w.getMinutes();
+
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         uglify : {
             default : {
                 options: {
-                    banner: '/* Playcorder crowdemotion.co.uk */ ',
+                    banner: '/* Playcorder crowdemotion.co.uk '+w+' */ ',
                     mangle : false,
                     compress: false
                 },
