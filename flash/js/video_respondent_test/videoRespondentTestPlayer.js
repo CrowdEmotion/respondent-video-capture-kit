@@ -241,6 +241,7 @@ function VjsInterface() {
     this.on_player_error = function (e) {
         vrt.log("EVT YSP loadedalldata "+e);
         $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('error','videojs')});
+        $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error',type:'blocking'});
     };
 
     this.on_player_fullscreenchange = function (ev) {
@@ -514,8 +515,8 @@ function YtInterface() {
     }
 
     this.onytplayerError = function (newState) {
-        this.log("player error [YT]: " + state2string(newState));
-        this.alertAndRestart('YT');
+        this.log("player error [YT]: " +newState);
+        $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error'+ newState,type:'blocking'});
     };
 
     this.loadPlayer = function (options, cbSuccess) {
@@ -576,6 +577,10 @@ window.onYouTubePlayerReady =function() {
     vrt.player.player.addEventListener("onError", "onytplayerError");
 
     $(vrt).trigger('vrtstep_loaded');
+};
+
+window.onytplayerError = function (newState) {
+    $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error'+ newState,type:'blocking'});
 };
 
 window.onytplayerStateChange = function (newState) {

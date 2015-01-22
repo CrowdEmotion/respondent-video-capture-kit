@@ -1,5 +1,106 @@
 "use strict";
 
+var RemoteLogger = function (options) {
+  this.base_url = options.base_url;
+  this.name = options.name;
+  this.interval = options.interval || 5000;
+};
+
+RemoteLogger.prototype = {
+  logs: [],
+  logs_flushing: [],
+  name: "default_logger",
+  timer: null,
+  running: false,
+
+  setBaseUrl: function (url) {
+    this.base_url = url;
+  },
+  flush: function () {
+    var dfr1 = new $.Deferred();
+    if (this.logs.length === 0) {
+      // TODO: find something better than $.Deferred ? q ?
+      dfr1.resolve();
+      this.flush_schedule();
+      return dfr1;
+    }
+    if (!this._CORS_support()) {
+      dfr1.reject();
+      this.flush_schedule();
+      return dfr1;
+    }
+    if (!this.base_url) {
+      dfr1.reject();
+      this.flush_schedule();
+      return dfr1;
+    }
+
+    this.logs_flushing = this.logs;
+    this.logs = [];
+
+    var dfr = this.flushCORS(this.logs_flushing);
+    var self = this;
+    dfr.done(function () { self.flush_success.apply(self, arguments); });
+    dfr.fail(function () { self.flush_error.apply(self, arguments); });
+    return dfr;
+  },
+  flushCORS: function (data) {
+    var url = this.base_url + "remotelogging/" + this.name;
+    var dfr = jQuery.ajax({
+      url : url,
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      type: 'post'
+    });
+    return dfr;
+  },
+  flush_success: function () {
+    this.logs_flushing = [];
+    if (this.running) { this.flush_schedule(); }
+  },
+  flush_error: function () {
+    this.logs = this.logs.concat(this.logs_flushing);
+    this.logs_flushing = [];
+    if (this.running) { this.flush_schedule(); }
+  },
+  flush_schedule: function () {
+    var self = this;
+    this.timer = setTimeout(function () {
+      self.flush.apply(self, arguments);
+    }, this.interval);
+  },
+
+  start: function () {
+    this.flush_schedule();
+    this.running = true;
+  },
+  stop: function () {
+    clearTimeout(this.timer);
+    this.timer = false;
+    this.running = false;
+    this.flush();
+  },
+  log: function (data) {
+    // TODO: timestamp, append, flush
+    var log = {
+      timestamp: (new Date()).toISOString(),
+      data: data
+    };
+    this.logs.push(log);
+  },
+  _CORS_support: function () {
+    if (window.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest()) {
+      return true;
+    }
+    if (typeof window.XDomainRequest !== "undefined"){
+      return true;
+    }
+    return false;
+  }
+};
+
+
 var WebProducer = function (options) {
   if (!options || !options.id) {
     return alert('You must provide an id for the web producer');
@@ -10,33 +111,43 @@ var WebProducer = function (options) {
   this.el = null;
   this.trace = options.trace;
   this.streamName = null;
-  WebProducer[this.id] = this; 
+  WebProducer[this.id] = this;
   var path = options.path || '';
   this.createElement(this.id, this.width, this.height, path);
-  this.port = options.port||'8082';
+  this.port = options.port || '80';
   // these method calls are forwarded directly to the flash component
   this.methods = [
-      'setCredentials', 'getCredentials',
-      'setUrl', 'getUrl',
-      'setStreamWidth', 'getStreamWidth',
-      'setStreamHeight', 'getStreamHeight',
-      'setStreamFPS', 'getStreamFPS',
-      'setStreamQuality', 'getStreamQuality',
-      'setStreamBandwidth', 'getStreamBandwidth',
-      'connect', 'disconnect',
-      'publish', 'unpublish',
-      'countCameras', 'isCameraMuted',
-      'setMirroredPreview', 'getMirroredPreview',
-      'setAudioStreamActive', 'getAudioStreamActive',
-      'setStreamBufferTime', 'getStreamBufferTime',
-      'getStreamTime', 'getStreamBufferLength',
-      'getStreamInfoDroppedFrames', 'getStreamInfoCurrentBytesPerSecond',
-      'getStreamInfoVideoLossRate', 'getStreamInfoString'
-      ];
+    'setCredentials', 'getCredentials',
+    'setUrl', 'getUrl',
+    'setStreamWidth', 'getStreamWidth',
+    'setStreamHeight', 'getStreamHeight',
+    'setStreamFPS', 'getStreamFPS',
+    'setStreamQuality', 'getStreamQuality',
+    'setStreamBandwidth', 'getStreamBandwidth',
+    'connect', 'disconnect',
+    'publish', 'unpublish',
+    'countCameras', 'isCameraMuted',
+    'setMirroredPreview', 'getMirroredPreview',
+    'setAudioStreamActive', 'getAudioStreamActive',
+    'setStreamBufferTime', 'getStreamBufferTime',
+    'getStreamTime', 'getStreamBufferLength',
+    'getStreamInfoDroppedFrames', 'getStreamInfoCurrentBytesPerSecond',
+    'getStreamInfoVideoLossRate', 'getStreamInfoString',
+    'getStreamCurrentFPS', 'getCameraCurrentFPS'
+  ];
 
   this.flash_methods_prepare();
+
+  if (options.remote_logger_name) {
+    this.remoteLoggerActivate(options.remote_logger_name);
+    this.remoteLoggerLog('jsMethodCalled', 'constructor', [options]);
+    if (window.navigator && window.navigator.userAgent) {
+      this.remoteLoggerLog('userAgent', 'userAgent', navigator.userAgent, "", "");
+    }
+  }
 };
 
+/* this shoud be deprecated and we should use info/trace events instead */
 WebProducer.log = function (id) {
   if (console && console.log) {
     var producer = WebProducer[id];
@@ -51,7 +162,10 @@ WebProducer.js_event = function (producerId, eventName, arg1, arg2) {
   if (producer.trace) {
     WebProducer.log(producerId, eventName, arg1, arg2);
   }
-  WebProducer[producerId].fire(eventName, arg1, arg2);
+  producer.fire(eventName, arg1, arg2);
+
+  // log all the events
+  producer.remoteLoggerLog('flashEventTriggered', eventName, [arg1, arg2]);
 };
 
 WebProducer.extend = function (source) {
@@ -65,10 +179,11 @@ WebProducer.prototype = {
   flash_methods_prepare: function () {
     // Forward known methods to flash
     var self = this;
-    this.methods.forEach(function (method) {        
+    this.methods.forEach(function (method) {
       if (self[method]) { return; } // we don't overwrite existing definitions
       self[method] = function () {
-        return self.flash_method_call(method, arguments);
+        var args = Array.prototype.slice.call(arguments);
+        return self.flash_method_call(method, args);
       };
     });
   },
@@ -78,12 +193,14 @@ WebProducer.prototype = {
     var value;
     try {
       value = self.el[method].apply(self.el, args);
+      this.remoteLoggerLog('flashMethodCalled', method, args, value);
     } catch (e) {
       console.log('ERROR ' , e, ' on method ', method,' with ', this);
+      this.remoteLoggerLog('flashMethodError', method, args, e.message || e);
     }
     return value;
   },
-  
+
   createElement: function (id, width, height, path) {
     var self = this;
     var swfVersionStr = "11.4.0";
@@ -103,7 +220,7 @@ WebProducer.prototype = {
     swfobject.embedSWF(
         path + "producer.swf", id,
         width, height,
-        swfVersionStr, xiSwfUrlStr, 
+        swfVersionStr, xiSwfUrlStr,
         flashvars, params, attributes, check_already_ready);
     // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
     swfobject.createCSS("#"+id, "display:block;text-align:left;");
@@ -120,10 +237,31 @@ WebProducer.prototype = {
   },
 
   get_http_base_url: function () {
-    var port = '8082';
+    var port = this.port;
+    var protocol = "http://";
+    var usingHTTPS = window.location.href.indexOf('https') === 0;
+
+    if (usingHTTPS) {
+      port = 443;
+      protocol = "https://";
+    }
+
     var host = this.getUrl().split('/')[2].split(':')[0];
-    var ret = ['http://', host, ':', port, '/'].join('');
+    var ret = [protocol, host, ':', port, '/'].join('');
     return ret;
+  },
+
+  getStats: function () {
+    // srr http://help.adobe.com/it_IT/FlashPlatform/reference/actionscript/3/flash/net/NetStreamInfo.html
+    var stats = {
+      'bytesPerSecond': this.getStreamInfoCurrentBytesPerSecond(),
+      'droppedFrames': this.getStreamInfoDroppedFrames(),
+      'bufferLength': this.getStreamBufferLength(),
+      'videoLossRate': this.getStreamInfoVideoLossRate(),
+      'currentFPS': this.getStreamCurrentFPS(),
+      'cameraCurrentFPS': this.getCameraCurrentFPS()
+    };
+    return stats;
   },
 
   _CORS_support: function () {
@@ -193,18 +331,18 @@ var ContentsMixin = {
     var ret = [this.get_http_base_url(), 'api/'].join('');
     return ret;
   },
-  
+
   _content_ready: function (streamName, cb) {
     // we poll the server to until the transcoded mp4 is ready, then cb
     var url = [
       this.get_http_api_base_url(), 'contents/',
       streamName, '/ready'
     ].join('');
-    
+
     var poll = function () {
       jQuery.ajax({
-				url: url,
-				dataType: 'jsonp'
+        url: url,
+        dataType: 'jsonp'
       }).done(function (result) {
         if (result.error) {
           return setTimeout(poll, 1000);
@@ -330,6 +468,7 @@ var LoadBalancingMixin = {
 
   setUrl: function (url) {
     var self = this;
+    this.fire('url-changed', url);
     self.load_balancing_original_rtmp_url = url;
     var method = 'setUrl';
     return self.flash_method_call(method, [url]);
@@ -340,7 +479,7 @@ var LoadBalancingMixin = {
     var url = [
       this.get_http_api_base_url(), 'info/jsonp'
     ].join('');
-    
+
     var dfr = jQuery.ajax({
       url: url,
       dataType: 'jsonp'
@@ -349,7 +488,7 @@ var LoadBalancingMixin = {
     dfr.fail(function () { cb({}); });
     return dfr;
   },
-  
+
   connect: function () {
     var self = this;
     // need to re-set the producer url because 
@@ -362,7 +501,7 @@ var LoadBalancingMixin = {
     tmp = tmp.split('/')[0];
 
     var host_original = tmp.split(':')[0];
-    
+
     self._get_info(function (info) {
       if (info && info.ip && (info.ip.length > 0)) {
         console.log('got some infos', info);
@@ -372,13 +511,92 @@ var LoadBalancingMixin = {
         self.setUrl(url_new);
       }
       url = self.getUrl();
-      self.flash_method_call('connect', []);
+      self.flash_method_call('connect', []);
     });
   },
 };
 
 WebProducer.extend(LoadBalancingMixin);
 
+var LoggingMixin = {
+  remoteLogger: null,
+  remoteLoggerStatsTask: null,
+  remoteLoggerStatsTaskInterval: 5000,
+
+  remoteLoggerActivate: function (name) {
+    var options = {
+      base_url: null,
+      name: name
+    };
+    var remoteLogger = new RemoteLogger(options);
+    var producer = this;
+
+    this.on('publish', function () {
+      producer.remoteLoggerStatsTaskRun();
+    });
+    this.on('unpublish', function () {
+      producer.remoteLoggerStatsTaskStop();
+    });
+    this.on('disconnect', function () {
+      producer.remoteLoggerStatsTaskStop();
+    });
+
+    this.on('url-changed', function () {
+      var url = producer.get_http_api_base_url();
+      remoteLogger.setBaseUrl(url);
+    });
+    this.on('error', function () { remoteLogger.flush(); });
+    this.on('disconnect', function () {
+      remoteLogger.flush();
+      setTimeout(function () {
+        remoteLogger.flush();
+      }, 1000);
+    });
+
+    this.remoteLogger = remoteLogger;
+  },
+
+  remoteLoggerLog: function (type, name, input, output) {
+    if (!this.remoteLogger) { return; }
+    var ignoredMethods = [
+      'getUrl', 'getStreamBufferLength', 'getStreamInfoDroppedFrames',
+      'getStreamInfoCurrentBytesPerSecond', 'getStreamInfoVideoLossRate',
+      'getStreamCurrentFPS', 'getCameraCurrentFPS'
+    ];
+    if (ignoredMethods.indexOf(name) !== -1) {
+      return;
+    }
+
+    input = JSON.stringify(input);
+    output = JSON.stringify(output);
+    var args = Array.prototype.slice.call(arguments);
+    args[2] = input;
+    args[3] = output;
+    var message = args.join('|');
+    this.remoteLogger.log(message);
+  },
+
+  remoteLoggerLogStats: function () {
+    this.remoteLoggerLog('streamingStats', '5s', null, this.getStats());
+  },
+
+  remoteLoggerStatsTaskRun: function () {
+    this.remoteLoggerStatsTaskRunning = true;
+    var self = this;
+    var fn = function () { self.remoteLoggerLogStats(); };
+    var time = this.remoteLoggerStatsTaskInterval;
+    this.remoteLoggerStatsTask = setInterval(fn, time);
+  },
+
+  remoteLoggerStatsTaskStop: function () {
+    if (this.remoteLoggerStatsTask === null) { return; }
+    clearInterval(this.remoteLoggerStatsTask);
+    this.remoteLotterStatsTask = null;
+  }
+
+};
+
+WebProducer.extend(LoggingMixin);
 
 var EventEmitterMixin = {
   // Minimal event emitter prototype
@@ -408,7 +626,7 @@ var EventEmitterMixin = {
     var self = this;
     var wrapper = function () {
       self.off(event, wrapper);
-      fct.apply(this, arguments); 
+      fct.apply(this, arguments);
     };
     this.on(event, wrapper);
   }
@@ -518,4 +736,3 @@ if (!Array.prototype.indexOf) {
     return -1;
   };
 }
-

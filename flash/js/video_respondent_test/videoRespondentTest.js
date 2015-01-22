@@ -16,6 +16,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.options = {};
     this.apiHttps;
     this.fatalError = false;
+    this.userError = false;
 
     //Producer
     this.playerVersion = null;
@@ -289,7 +290,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         var ar = vrt.bufferTS;
         if (ar instanceof Array && ar.length > 0) {
             for (var i = 0; i < ar.length; i++) {
-                vrt.addTS(ar[i]);
+                setTimeout(vrt.addTS(ar[i]),100);
             }
             vrt.bufferTS = [];
         }
@@ -298,6 +299,29 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.vrtOnStartSequence = 0;
     this.vrtOn = function () {
+
+        $(window.vrt).on('vrt_event_error', function (e, data) {
+            if (data.type == 'blocking')window.vrt.fatalError = true;
+
+            if (data.type == 'blocking') {
+                vrt.llog('blocking error: ' + data.error + ' in ' + data.component + '');
+                window.vrt.fatalError = true;
+            }
+            else if (data.type == 'user_bloking') {
+                vrt.llog('blocking error by user: ' + data.error + ' in ' + data.component + '');
+                window.vrt.userError = true;
+            }else {
+                vrt.llog('error' + data.error + ' in ' + data.component + '');
+            }
+            if (window.vrt.fatalError == true) {
+
+                if (vrt.player.player && vrt.player.player.dispose) {
+                    vrt.player.player.dispose();
+                }
+                $(window.vrt).trigger('vrt_event_fatal_error');
+                $(window.vrt).trigger('vrt_event_video_session_complete');
+            }
+        });
 
         //internal event: start
         $(window.vrt).on('vrt_init_ok', function () {
@@ -398,8 +422,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.newTS = function(data){
+        if(vrt.streamName=='' || vrt.streamName==null || vrt.streamName==undefined) return ;
+
         var dataTS = vrt.createTS(data);
-        if (vrt.isRecording == true && vrt.streamName!='' && vrt.streamName!=null && vrt.streamName!=undefined) {
+        if (vrt.isRecording == true) {
             vrt.saveBufferedTS(
                 function () {
                     vrt.addTS(dataTS)
@@ -1103,7 +1129,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             width: this.producerWidth, // these are sizes of the player on the page
             height: this.producerHeight, // not related to the stream resolution
             trace: false, // would enable debug logs in js console
-            path: path
+            path: path,
+            remote_logger_name: window.vrt.producerStreamName
         });
 
         this.producer.once('ready', function () {
@@ -1232,6 +1259,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log('!!PRODUCER error '+reason);
                 vrt.logTime('webpr error');
                 vrt.log(">>===WEBP ERROR: " + reason);
+                $(window.vrt).trigger('vrt_event_error', {component:'producer',error:''+ reason,type:'blocking'});
             });
 
             this.on('disconnect', function () {

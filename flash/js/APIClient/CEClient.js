@@ -266,7 +266,7 @@ function javaRest(debug, http_fallback, domain) {
     javaRest.domain = domain;
     javaRest.protocol = 'https';
 
-    if(http_fallback === false) {
+    if(http_fallback === null) {
         javaRest.protocol = 'http';
     }
     if(http_fallback === true) {
