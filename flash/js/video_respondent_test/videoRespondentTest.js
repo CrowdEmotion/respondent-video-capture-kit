@@ -365,6 +365,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger('vrt_event_streamname', [{streamname:vrt.streamName}]);
                 vrt.llog('REC event before');
                 try {
+                    vrt.producer.remoteLogger.name = vrt.streamName;
                     vrt.producer.publish(vrt.streamName);
                 }catch(err){
                     vrt.llog('exception in producer.publish');
@@ -1228,8 +1229,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(20)});
                 vrt.logChrono(0, true, 'PRODUCER RECORDING');
                 vrt.log('!!PRODUCER publish');
-
             });
+
             this.on('unpublish',function(){
                 $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(21)});
                 vrt.logChrono(0, false, 'PRODUCER RECORDING');
