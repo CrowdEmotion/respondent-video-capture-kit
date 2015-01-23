@@ -53,6 +53,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.timePlayerStart = -1;
     this.bufferTS = [];
     this.stepCompleted = false;
+    this.timedOverPlayToEnd;
 
     //steps && user actions
     this.click_start = false;
@@ -111,6 +112,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.randomOrder != undefined) ? this.randomOrder = options.randomOrder : this.randomOrder = false;
         (options && options.apiHttps !== undefined) ? this.apiHttps = options.apiHttps : this.apiHttps = true;
         (options && options.swfPath != undefined) ? this.swfPath = options.swfPath : this.swfPath = '../swf/';
+        (options && options.timedOverPlayToEnd != undefined) ? this.timedOverPlayToEnd = options.timedOverPlayToEnd : this.timedOverPlayToEnd = false;
 
         this.options = options;
         if (options.player == undefined || options.player == null) options.player = {};
@@ -357,9 +359,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on('vrtstep_play', function (e, data) {
             vrt.log('EVT vrtstep_play caller ' + data.caller);
+            vrt.llog('REC event');
             if (vrt.isPlaying == false) {
                 vrt.streamName = this.videoList[this.currentMedia].streamCode;
                 $(window.vrt).trigger('vrt_event_streamname', [{streamname:vrt.streamName}]);
+                vrt.llog('REC event before');
                 try {
                     vrt.producer.publish(vrt.streamName);
                 }catch(err){
@@ -1084,17 +1088,22 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.setup_stop_playing =function() {
-        var time =this.media_length * 1000 + this.avgPreLoadTime+ 100;
-        this.log('!!STEP vrt setup stop playing' + time);
-        this.stop_handle = setTimeout(vrt.stop_playing,time );
-        this.stop_handle_rec = setTimeout(vrt.stop_rec,time );
+        if(this.timedOverPlayToEnd){
+            var time =this.media_length * 1000 + this.avgPreLoadTime+ 100;
+            this.log('!!STEP vrt setup stop playing' + time);
+            this.stop_handle = setTimeout(vrt.stop_playing,time );
+            this.stop_handle_rec = setTimeout(vrt.stop_rec,time );
+        }else{
+            this.stop_handle = setTimeout(function(){},0);
+            this.stop_handle_rec = setTimeout(function(){},0);
+        }
     };
 
-    this.skip_video = function(){
-        if(!window.vrt.stepCompleted) {
+    this.skip_video = function () {
+        if (!window.vrt.stepCompleted) {
             vrt.stop_playing();
             vrt.stop_rec();
-        }else {
+        } else {
             window.vrt.nextStep();
         }
     };
@@ -1119,6 +1128,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.stop_rec =function() {
         vrt.producer.unpublish();
+        vrt.llog('REC STOP');
         //vrt.isRec=false;
         clearTimeout(vrt.stop_handle_rec);
         //this.isRecording = false;
@@ -1247,10 +1257,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             this.on('save', function (url) {
                 vrt.log('!!PRODUCER save ' + url);
-                //vrt.logChrono(2, false, 'PRODUCER SAVING');
                 vrt.hideVideoBox();
                 vrt.postPartecipate();
-                //vrt.logChrono(3, true, 'API UPLOD FILES');
                 vrt.facevideoUpload(url, vrt.stepComplete);
             });
 

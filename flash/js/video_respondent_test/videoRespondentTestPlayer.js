@@ -126,7 +126,7 @@ function VjsInterface() {
     };
 
     this.videoEnd = function () {
-        this.log('ended');
+        this.log('video end');
     };
 
     this.video_stop = function (cb) {
@@ -181,6 +181,7 @@ function VjsInterface() {
         this.player.on('ended', function() {
             vrt.log('EVT YSP ended');
             $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('ended','videojs')});
+            vrt.player.on_player_end();
         });
         this.player.on('loadedalldata',  vrt.player.loadedalldata );
         this.player.on('loadeddata',     vrt.player.loadeddata );
@@ -196,7 +197,11 @@ function VjsInterface() {
         $(vrt).trigger('vrtstep_loaded');
     };
 
-
+    this.on_player_end = function (cb) {
+        if(!vrt.timedOverPlayToEnd){
+            vrt.skip_video();
+        }
+    };
 
     this.on_player_play = function (cb) {
         vrt.log("EVT YSP  on_player_play");
@@ -211,19 +216,18 @@ function VjsInterface() {
     this.loadeddata = function (cb) {
         vrt.log("EVT YSP loadeddata");
         if(vrt.player.isloadeddata==false) {
-            $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
-            $(vrt).trigger('vrtstep_play', {caller: 'loadeddata'});
             vrt.player.isloadeddata = true;
+            $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
+            $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
         }
-
     };
 
     this.loadedalldata = function (cb) {
         vrt.log("EVT YSP loadedalldata");
         if(vrt.player.isloadeddata==false) {
+            vrt.player.isloadeddata = true;
             $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
             $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
-            vrt.player.isloadeddata = true;
         }
     };
 
