@@ -483,9 +483,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
     };
 
-    this.makeRandomString = function() {
-        return Math.random().toString(36).substring(2, 15) +
-            Math.random().toString(36).substring(2, 15);
+    this.makeRandomString = function(limit) {
+        var limit = limit||15;
+        return Math.random().toString(36).substring(2, limit) +
+            Math.random().toString(36).substring(2, limit);
     };
 
     this.createHashCode = function (str){
@@ -524,7 +525,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             var d = new Date();
             var n = d.getTime();
             var pre = this.createHashCode(''+this.producerStreamName);
-            this.videoList[i].streamCode = pre +'_'+ i +'_' + n;
+            var rs = this.makeRandomString(8);
+            this.videoList[i].streamCode = pre +'_'+ i +'_' + n + '_' + rs;
             this.videoList[i].order = i;
         }
     };
@@ -533,7 +535,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(this.randomOrder===true && this.mediaCount>1){
             this.videoList =  this.shuffle(this.videoList);
         }
-    }
+    };
 
     this.shuffle = function(o){ //v1.0
         for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
@@ -750,10 +752,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.closeSession = function() {
         if (this.fullscreen_needed) this.videoEndFullscreen();
         this.playerDispose();
-
+        this.producer.disconnect();
+        $('#'+this.producer.id).hide();
         this.log('close_session');
-
-        // TODO finish session alert
     };
 
     // TODO videoEndFullscreen
@@ -1099,7 +1100,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.setupPlaybackPositionPolling = function(){
-        vrt.stop_polling_player_pos = setInterval(vrt.pollingPlayerPos, 500 );
+        vrt.stop_polling_player_pos = setInterval(vrt.pollingPlayerPos, 1000 );
     };
 
     this.pollingPlayerPos = function(){
@@ -1159,8 +1160,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.log("===WEBP We have " + numCameras + " camera(s) available");
             if (numCameras == 0){
                 $(window.vrt).trigger('vrt_event_producer_no_camera_found');
+                $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else if (numCameras == undefined){
                 $(window.vrt).trigger('vrt_event_producer_no_camera_found');
+                $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else{
                 $(window.vrt).trigger('vrt_event_producer_camera_found');
             }
@@ -1225,9 +1228,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 clearTimeout(vrt.stop_polling_player_pos);
                 vrt.log('!!PRODUCER unpublish');
             });
-            this.on('disconnect',function(){
-                //vrt.logChrono(0, false, 'PRODUCER RECORDING');
-            });
+
 
             this.on('connect', function () {
 
