@@ -546,6 +546,9 @@ var LoggingMixin = {
       remoteLogger.setBaseUrl(url);
     });
     this.on('error', function () { remoteLogger.flush(); });
+    this.on('unpublish', function () {
+      remoteLogger.flush();
+    });
     this.on('disconnect', function () {
       remoteLogger.flush();
       setTimeout(function () {
@@ -578,6 +581,9 @@ var LoggingMixin = {
 
   remoteLoggerLogStats: function () {
     this.remoteLoggerLog('streamingStats', '5s', null, this.getStats());
+    if (this.remoteLogger) {
+      this.remoteLogger.flush();
+    }
   },
 
   remoteLoggerStatsTaskRun: function () {
@@ -591,7 +597,7 @@ var LoggingMixin = {
   remoteLoggerStatsTaskStop: function () {
     if (this.remoteLoggerStatsTask === null) { return; }
     clearInterval(this.remoteLoggerStatsTask);
-    this.remoteLotterStatsTask = null;
+    this.remoteLoggerStatsTask = null;
   }
 
 };
@@ -736,3 +742,4 @@ if (!Array.prototype.indexOf) {
     return -1;
   };
 }
+
