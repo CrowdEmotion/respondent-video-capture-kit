@@ -3,7 +3,7 @@
 var RemoteLogger = function (options) {
   this.base_url = options.base_url;
   this.name = options.name;
-  this.interval = options.interval || 5000;
+  this.interval = options.interval || 1000;
 };
 
 RemoteLogger.prototype = {
@@ -521,7 +521,7 @@ WebProducer.extend(LoadBalancingMixin);
 var LoggingMixin = {
   remoteLogger: null,
   remoteLoggerStatsTask: null,
-  remoteLoggerStatsTaskInterval: 5000,
+  remoteLoggerStatsTaskInterval: 1000,
 
   remoteLoggerActivate: function (name) {
     var options = {
@@ -580,7 +580,7 @@ var LoggingMixin = {
   },
 
   remoteLoggerLogStats: function () {
-    this.remoteLoggerLog('streamingStats', '5s', null, this.getStats());
+    this.remoteLoggerLog('streamingStats', '1s', null, this.getStats());
     if (this.remoteLogger) {
       this.remoteLogger.flush();
     }
