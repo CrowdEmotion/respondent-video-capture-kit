@@ -7,7 +7,7 @@ var RemoteLogger = function (options) {
 };
 
 RemoteLogger.prototype = {
-  logs: [],
+  logs: [],
   logs_flushing: [],
   name: "default_logger",
   timer: null,
@@ -111,30 +111,31 @@ var WebProducer = function (options) {
   this.el = null;
   this.trace = options.trace;
   this.streamName = null;
-  WebProducer[this.id] = this;
+  WebProducer[this.id] = this; 
   var path = options.path || '';
-  this.createElement(this.id, this.width, this.height, path);
+  var style = options.style || "display:block;text-align:left;";
+  this.createElement(this.id, this.width, this.height, path, style);
   this.port = options.port || '80';
   // these method calls are forwarded directly to the flash component
   this.methods = [
-    'setCredentials', 'getCredentials',
-    'setUrl', 'getUrl',
-    'setStreamWidth', 'getStreamWidth',
-    'setStreamHeight', 'getStreamHeight',
-    'setStreamFPS', 'getStreamFPS',
-    'setStreamQuality', 'getStreamQuality',
-    'setStreamBandwidth', 'getStreamBandwidth',
-    'connect', 'disconnect',
-    'publish', 'unpublish',
-    'countCameras', 'isCameraMuted',
-    'setMirroredPreview', 'getMirroredPreview',
-    'setAudioStreamActive', 'getAudioStreamActive',
-    'setStreamBufferTime', 'getStreamBufferTime',
-    'getStreamTime', 'getStreamBufferLength',
-    'getStreamInfoDroppedFrames', 'getStreamInfoCurrentBytesPerSecond',
-    'getStreamInfoVideoLossRate', 'getStreamInfoString',
-    'getStreamCurrentFPS', 'getCameraCurrentFPS'
-  ];
+      'setCredentials', 'getCredentials',
+      'setUrl', 'getUrl',
+      'setStreamWidth', 'getStreamWidth',
+      'setStreamHeight', 'getStreamHeight',
+      'setStreamFPS', 'getStreamFPS',
+      'setStreamQuality', 'getStreamQuality',
+      'setStreamBandwidth', 'getStreamBandwidth',
+      'connect', 'disconnect',
+      'publish', 'unpublish',
+      'countCameras', 'isCameraMuted',
+      'setMirroredPreview', 'getMirroredPreview',
+      'setAudioStreamActive', 'getAudioStreamActive',
+      'setStreamBufferTime', 'getStreamBufferTime',
+      'getStreamTime', 'getStreamBufferLength',
+      'getStreamInfoDroppedFrames', 'getStreamInfoCurrentBytesPerSecond',
+      'getStreamInfoVideoLossRate', 'getStreamInfoString',
+      'getStreamCurrentFPS', 'getCameraCurrentFPS'
+      ];
 
   this.flash_methods_prepare();
 
@@ -200,8 +201,8 @@ WebProducer.prototype = {
     }
     return value;
   },
-
-  createElement: function (id, width, height, path) {
+  
+  createElement: function (id, width, height, path, style) {
     var self = this;
     var swfVersionStr = "11.4.0";
     var xiSwfUrlStr = "playerProductInstall.swf";
@@ -220,10 +221,10 @@ WebProducer.prototype = {
     swfobject.embedSWF(
         path + "producer.swf", id,
         width, height,
-        swfVersionStr, xiSwfUrlStr,
+        swfVersionStr, xiSwfUrlStr, 
         flashvars, params, attributes, check_already_ready);
     // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
-    swfobject.createCSS("#"+id, "display:block;text-align:left;");
+    swfobject.createCSS("#"+id, style);
   },
 
   check_already_ready: function () {
@@ -331,18 +332,18 @@ var ContentsMixin = {
     var ret = [this.get_http_base_url(), 'api/'].join('');
     return ret;
   },
-
+  
   _content_ready: function (streamName, cb) {
     // we poll the server to until the transcoded mp4 is ready, then cb
     var url = [
       this.get_http_api_base_url(), 'contents/',
       streamName, '/ready'
     ].join('');
-
+    
     var poll = function () {
       jQuery.ajax({
-        url: url,
-        dataType: 'jsonp'
+				url: url,
+				dataType: 'jsonp'
       }).done(function (result) {
         if (result.error) {
           return setTimeout(poll, 1000);
@@ -464,22 +465,33 @@ WebProducer.extend(JobsMixin);
 
 
 var LoadBalancingMixin = {
-  load_balancing_original_rtmp_url: null,
+  // Load balancing steps, ON CONNECT
+  // 1 - start from url_rtmp_original
+  //    rtmp://mediabox.crowdemotion.co.uk:1935/something
+  // 2 - conver it to http url to get instance infos
+  //    http(s)://mediabox.crowdemotion.co.uk/hub/info
+  // 3 - receive public ip and ipPrivate of the instance
+  // 4 - change original rtmp url host to the public ip and connect
+  // 5 - change http url to bouncer/[ipPrivate]
 
+  url_rtmp_original: null,
+  url_http_api: null,
+
+  url_get_host: function (url) {
+    var tmp = url.split('://')[1];
+    tmp = tmp.split('/')[0];
+    return tmp.split(':')[0];
+  },
+  
   setUrl: function (url) {
-    var self = this;
-    this.fire('url-changed', url);
-    self.load_balancing_original_rtmp_url = url;
-    var method = 'setUrl';
-    return self.flash_method_call(method, [url]);
+    this.url_rtmp_original = url;
   },
 
-  _get_info: function (cb) {
+  hub_info_get: function (cb) {
     // we poll the server to until the transcoded mp4 is ready, then cb
-    var url = [
-      this.get_http_api_base_url(), 'info/jsonp'
-    ].join('');
-
+    var protocol = this.current_protocol();
+    var host = this.url_get_host(this.url_rtmp_original);
+    var url = protocol + "://" + host + "/api/info/jsonp";
     var dfr = jQuery.ajax({
       url: url,
       dataType: 'jsonp'
@@ -489,31 +501,40 @@ var LoadBalancingMixin = {
     return dfr;
   },
 
+  current_protocol: function () {
+    var usingHTTPS = window.location.href.indexOf('https') === 0;
+    if (usingHTTPS) { return 'https'; }
+    return 'http';
+  },
+  
   connect: function () {
     var self = this;
-    // need to re-set the producer url because 
-    // get_http_api_base_url uses getUrl()
-    self.flash_method_call('setUrl', [self.load_balancing_original_rtmp_url]);
-
-    var url = self.getUrl();
-
-    var tmp = url.split('://')[1];
-    tmp = tmp.split('/')[0];
-
-    var host_original = tmp.split(':')[0];
-
-    self._get_info(function (info) {
-      if (info && info.ip && (info.ip.length > 0)) {
-        console.log('got some infos', info);
-        var ip = info.ip;
-        var url_new = url.replace(host_original, ip);
-        console.log('swapping urls', host_original, ip);
-        self.setUrl(url_new);
-      }
-      url = self.getUrl();
-      self.flash_method_call('connect', []);
+    this.hub_info_get(function () {
+      self.connect_on_hub_info.apply(self, arguments);
     });
   },
+
+  connect_on_hub_info: function (info) {
+    var ip_private = info.ipPrivate;
+    this.url_http_api = this.current_protocol() +
+      '://' + this.url_get_host(this.url_rtmp_original) +
+      '/bounce/' + ip_private + '/';
+    this.fire('url-changed');
+    this.remoteLoggerLog('hubInfo', 'currentHubChanged', {}, info);
+
+    var ip_public = info.ip;
+    var host_original = this.url_get_host(this.url_rtmp_original);
+    var url_new = this.url_rtmp_original.replace(host_original, ip_public);
+
+    this.flash_method_call('setUrl', [url_new]);
+    this.flash_method_call('connect', []);
+  },
+
+  get_http_base_url: function () {
+    // overrides original impl
+    return this.url_http_api;
+  }
+  
 };
 
 WebProducer.extend(LoadBalancingMixin);
@@ -531,31 +552,31 @@ var LoggingMixin = {
     var remoteLogger = new RemoteLogger(options);
     var producer = this;
 
-    this.on('publish', function () {
+    this.on('publish', function () { 
       producer.remoteLoggerStatsTaskRun();
     });
-    this.on('unpublish', function () {
+    this.on('unpublish', function () { 
       producer.remoteLoggerStatsTaskStop();
     });
-    this.on('disconnect', function () {
+    this.on('disconnect', function () { 
       producer.remoteLoggerStatsTaskStop();
     });
-
+    
     this.on('url-changed', function () {
       var url = producer.get_http_api_base_url();
       remoteLogger.setBaseUrl(url);
     });
     this.on('error', function () { remoteLogger.flush(); });
-    this.on('unpublish', function () {
+    this.on('unpublish', function () { 
       remoteLogger.flush();
     });
-    this.on('disconnect', function () {
+    this.on('disconnect', function () { 
       remoteLogger.flush();
       setTimeout(function () {
         remoteLogger.flush();
       }, 1000);
     });
-
+    
     this.remoteLogger = remoteLogger;
   },
 
@@ -569,7 +590,7 @@ var LoggingMixin = {
     if (ignoredMethods.indexOf(name) !== -1) {
       return;
     }
-
+      
     input = JSON.stringify(input);
     output = JSON.stringify(output);
     var args = Array.prototype.slice.call(arguments);
@@ -599,7 +620,7 @@ var LoggingMixin = {
     clearInterval(this.remoteLoggerStatsTask);
     this.remoteLoggerStatsTask = null;
   }
-
+  
 };
 
 WebProducer.extend(LoggingMixin);
@@ -632,7 +653,7 @@ var EventEmitterMixin = {
     var self = this;
     var wrapper = function () {
       self.off(event, wrapper);
-      fct.apply(this, arguments);
+      fct.apply(this, arguments); 
     };
     this.on(event, wrapper);
   }
