@@ -120,6 +120,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.playerCentered != undefined) ? this.options.player.centered = options.playerCentered : this.options.player.centered = true;
         (options && options.playerWidth != undefined) ? this.options.player.width = options.playerWidth : this.options.player.Width = 640;
         (options && options.playerHeight != undefined) ? this.options.player.height = options.playerHeight : this.options.player.height = 400;
+        (options && options.apiSandbox != undefined) ? this.options.apiSandbox = options.apiSandbox : this.options.apiSandbox = false;
 
         this.mediaCount = list.length;
         this.videoType = type;
@@ -1363,7 +1364,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         this.log('Api login in progress');
         this.log('>>STEP api init')
-        this.ceclient.init(true, this.apiHttps, this.apiDomain);
+        this.ceclient.init(true, this.apiHttps, this.apiDomain, vrt.options.apiSandbox);
         this.ceclient.logout(
                 this.ceclient.login(this.apiUsername,this.apiPassword,
                     function(ret){

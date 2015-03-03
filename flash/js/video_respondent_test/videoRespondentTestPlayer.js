@@ -77,7 +77,7 @@ function PlayerInterface() {
             if(status=='ended'){ r = 12; }
             if(status=='paused'){ r = 13; }
         }
-        console.log('statusMap: ' + status + ' to ' + r);
+        //console.log('statusMap: ' + status + ' to ' + r);
         return r;
     }
 }
@@ -604,7 +604,11 @@ window.onytplayerStateChange = function (newState) {
     if (newState == 1) {
         $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange1'})
     }
-
+    if (newState == 0){
+        if(!vrt.timedOverPlayToEnd){
+            vrt.skip_video();
+        }
+    }
 
 
 

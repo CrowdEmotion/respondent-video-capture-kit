@@ -19,8 +19,9 @@ function CEClient() {
         if(cb){ cb();}
     };
 
-    this.init  = function(debug, http, domain){
-        javaRest(debug, http, domain);
+    this.init  = function(debug, http, domain, sandbox){
+        if(sandbox==undefined) sandbox = false;
+        javaRest(debug, http, domain, sandbox);
     };
     /**
      * user login
@@ -253,11 +254,12 @@ javaRest.version = "v1";
 javaRest.debug = false;
 javaRest.token = null;
 javaRest.userId = null;
+javaRest.sandbox = null;
 
 /**
  * Singleton used for Namespace
  */
-function javaRest(debug, http_fallback, domain) {
+function javaRest(debug, http_fallback, domain, sandbox) {
     if(debug==undefined) debug = false;
     if(http_fallback===undefined) http_fallback = false;
     if(!domain) domain = "api.crowdemotion.co.uk";
@@ -265,6 +267,7 @@ function javaRest(debug, http_fallback, domain) {
     javaRest.debug = debug;
     javaRest.domain = domain;
     javaRest.protocol = 'https';
+    javaRest.sandbox = sandbox;
 
     if(http_fallback === null) {
         javaRest.protocol = 'http';
@@ -884,7 +887,12 @@ javaRest.response.writeCustomData = function(id, data, callback) {
 
 javaRest.facevideo = {};
 
-
+javaRest.sandboxUrl = function(){
+    if(javaRest.sandbox===true){
+        return '?sandbox=true';
+    }
+    else return '';
+};
 /**
  * Upload a facevideo via link
  *
@@ -896,8 +904,9 @@ javaRest.facevideo = {};
  */
 javaRest.facevideo.uploadLink = function(videoLink, callback) {
 
+
     javaRest.postAuth(
-        'facevideo',
+        'facevideo'+javaRest.sandboxUrl(),
         {'link': videoLink},
         function(response) {
             if (callback) {
@@ -916,7 +925,7 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
 javaRest.facevideo.info = function(response_id, callback) {
 
     javaRest.get(
-        'facevideo/'+response_id,
+        'facevideo/'+response_id+javaRest.sandboxUrl(),
         function(response) {
             if (callback) {
                 callback(response);
@@ -940,7 +949,7 @@ javaRest.facevideo.upload = function(file, callback) {
 
 
     javaRest.postAuth(
-        'facevideo/upload',
+        'facevideo/upload'+javaRest.sandboxUrl(),
         {'file': file},
         function(response) {
             if (callback) {
@@ -956,7 +965,7 @@ javaRest.facevideo.upload = function(file, callback) {
 
 javaRest.facevideo.uploadForm = function(form_id) {
 
-    javaRest.postAuthForm('facevideo/upload', form_id);
+    javaRest.postAuthForm('facevideo/upload'+javaRest.sandboxUrl(), form_id);
 
 };
 
