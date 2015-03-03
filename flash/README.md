@@ -117,6 +117,8 @@ For a fast implementation, please look at HTML files:
         - `customDataInsertMediaName`  (*true* | *false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
         - `customDataInsertMediaId` (*true* | *false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
         - `customDataInsertMediaPath`  (*true* | *false* - default: *false*) if `true`, insert media path value inside custom data with `media_path` key
+        - `timedOverPlayToEnd` (*true* | *false* - default: *false*) recording will finish at `length` value inside `VIDEODATA` array  (in seconds)
+        - `apiSandbox` (*true* | *false* - default: *false*) generate random emotions values instead analyzing video
                              
                     
 1. Implement in you code the listeners for the following events:
