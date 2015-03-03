@@ -444,9 +444,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.createTS = function(data){
         return {
-            'time': Date.now(),
+            'time': Date.now(), //browser time absolute
             'player_ts': vrt.getTimeStampPlayerDiff(),
             'rec_ts': vrt.getTimeStampRecDiff(),
+            'time_recorder': vrt.producer.getStreamTime(), //flash time from the publish
             'status': data.status,
             'content_id': this.media_id,
             'player_position' : vrt.player.getCurrentTime()
