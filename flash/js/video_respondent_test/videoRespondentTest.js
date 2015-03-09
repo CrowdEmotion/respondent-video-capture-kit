@@ -82,6 +82,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.responseId =null;
     this.results = {apilogin:null,flash:{present:null,version:null}};
 
+    this.initMediaList = function(type, list) {
+        if(!list) return;
+
+        this.mediaCount = list.length;
+        this.videoType = type;
+        this.videoList = list;
+        this.calculateListData();
+        this.randomizeOrderList();
+        this.log(type, 'type');
+        this.log(list, 'list');
+    };
 
     this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
 
@@ -122,18 +133,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.playerHeight != undefined) ? this.options.player.height = options.playerHeight : this.options.player.height = 400;
         (options && options.apiSandbox != undefined) ? this.options.apiSandbox = options.apiSandbox : this.options.apiSandbox = false;
 
-        this.mediaCount = list.length;
-        this.videoType = type;
-        this.videoList = list;
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
-        this.calculateListData();
-        this.randomizeOrderList();
-        this.log(type, 'type');
-        this.log(list, 'list');
+        this.initMediaList(type, list);
         this.apiDomain = apiDomain;
         this.apiUsername = apiUser;
         this.apiPassword = apiPassword;
+        this.researchId = options.researchId;
+        this.researchToken = options.researchToken;
+        this.appToken = options.appToken;
     };
 
 
@@ -1358,28 +1366,91 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.apiClientUploadLink = function(streamFileName, cb){
         this.log('>>STEP api file upload ' + streamFileName);
         this.log('EVT upload api file upload ' + streamFileName);
-        this.ceclient.uploadLink(streamFileName,cb);
+        this.ceclient.uploadLink(
+            this.researchId ?
+            { link: streamFileName, researchId: this.researchId, mediaId: this.media_id } :
+            streamFileName,
+            cb);
     };
 
     this.apiClientSetup = function(cbSuccess, cbFail){
 
+        var apiClientSetupNext = function(ret){
+            vrt.apiClientRes(ret);
+            if(ret){
+
+                if(console.log)console.log('Api login OK + success');
+                vrt.results.apilogin = true;
+
+                if(!vrt.options.researchId && !vrt.options.researchToken) {
+                    if(cbSuccess) cbSuccess();
+                    return;
+                }
+
+                var apiClientSetupLoadMedia = function(researchId) {
+                    vrt.ceclient.loadMediaList(researchId, function(list){
+                        if(console.log)console.log('Api loadMediaList OK + success');
+
+                        if(Array.isArray(list)) {
+
+                            // HACK first decides type, mixed not permitted
+                            var ytCount=0;
+                            list.forEach(function(item){
+                                if(item.isYouTube) {
+                                    ytCount++;
+                                } else
+                                if(item.isStored) {
+                                    vrt.ceclient.loadMedia(item.id, true, function(media){
+                                        item.path = media.presignedUrl;
+                                    });
+                                }
+                            });
+
+                            if(ytCount > 0 && ytCount < list.length)
+                                console.log('Api loadMediaList VIDEO TYPE MISMATCH: ' + ytCount +'!='+ list.length);
+
+                            vrt.initMediaList(
+                                ytCount == list.length ? 'youtube' : 'customserver',
+                                list);
+
+                            if(cbSuccess) cbSuccess();
+
+                        } else {
+
+                            if(console.log)console.log('Api loadMediaList FAIL + danger');
+                            if(cbFail) cbFail();
+                        }
+                    });
+                };
+
+                if(vrt.options.researchToken) {
+                    vrt.ceclient.loadResearch(vrt.options.researchToken, function(research){
+                        vrt.researchId = research.id;
+                        apiClientSetupLoadMedia(research.id);
+                    }, function(res){ console.log(res); });
+                } else {
+                    apiClientSetupLoadMedia(vrt.options.researchId);
+                }
+
+            }else{
+                if(console.log)console.log('Api login FAIL + danger');
+                vrt.results.apilogin = false;
+                if(cbFail) cbFail();
+            }
+        }
+
+
         this.log('Api login in progress');
         this.log('>>STEP api init')
         this.ceclient.init(true, this.apiHttps, this.apiDomain, vrt.options.apiSandbox);
-        this.ceclient.logout(
-                this.ceclient.login(this.apiUsername,this.apiPassword,
-                    function(ret){
-                        vrt.apiClientRes(ret);
-                        if(ret){
-                            if(console.log)console.log('Api login OK + success');
-                            vrt.results.apilogin = true;
-                            if(cbSuccess) cbSuccess();
-                        }else{
-                            if(console.log)console.log('Api login FAIL + danger');
-                            vrt.results.apilogin = false;
-                            if(cbFail) cbFail();
-                        }
-                    })
+        this.ceclient.logout(function(){
+                if(this.appToken) {
+                    this.ceclient.setToken(this.appToken);
+                    apiClientSetupNext(true);
+                } else {
+                    this.ceclient.login(this.apiUsername, this.apiPassword, apiClientSetupNext);
+                }
+            }.bind(this)
         );
     };
 

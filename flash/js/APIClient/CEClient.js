@@ -44,13 +44,18 @@ function CEClient() {
 
     };
 
+    this.setToken = function(appToken) {
+        this.userId = appToken;
+        this.token = appToken;
+        javaRest.user.setupLogin({userId: appToken, token: appToken});
+    };
+
     /**
      * Upload a video using a full http url
-     * @param mediaURL
+     * @param mediaURL || { link, research_id, media_id }
      */
     this.uploadLink = function (mediaURL, cb) {
         var ceclient = this;
-
 
         javaRest.facevideo.uploadLink(mediaURL, function (res){
             ceclient.responseId = res.responseId;
@@ -199,6 +204,40 @@ function CEClient() {
 
     };
 
+    this.loadResearch = function(researchIdOrKey, cb){
+        var ceclient = this, url;
+        if(isFinite(researchIdOrKey)) {
+            url = 'research/'+ researchIdOrKey;
+        } else {
+            url = 'research?key='+ researchIdOrKey;
+        }
+
+        javaRest.get(url, null,
+            function (res){
+                if(Array.isArray(res) && res.length > 0) res = res[0];
+                if(cb) cb(res);
+            },
+            function (res){ if(cb) { cb(res); } }
+        );
+    };
+
+    this.loadMediaList = function(researchId, cb){
+        var ceclient = this;
+        var url = 'media?where={"research_id":"'+ researchId +'"}';
+        javaRest.get(url, null,
+            function (res){ if(cb) { cb(res); } },
+            function (res){ if(cb) { cb(res); } }
+        );
+    };
+
+    this.loadMedia = function(mediaId, presignedUrl, cb){
+        var ceclient = this;
+        var url = 'media/'+ mediaId + (presignedUrl ? '?presignedUrl=true' : '');
+        javaRest.get(url, null,
+            function (res){ if(cb) { cb(res); } },
+            function (res){ if(cb) { cb(res); } }
+        );
+    };
 
 
 
@@ -269,16 +308,25 @@ function javaRest(debug, http_fallback, domain, sandbox) {
     javaRest.protocol = 'https';
     javaRest.sandbox = sandbox;
 
-    if(http_fallback === null) {
-        javaRest.protocol = 'http';
-    }
-    if(http_fallback === true) {
-        var connection = javaRest.httpGet('https://'+javaRest.domain+'/');
+    if(domain.indexOf('http') >= 0) {
 
-        if (connection) {
-            javaRest.protocol = 'https';
-        } else {
+        var parts = domain.split('://');
+        javaRest.domain = parts[1];
+        javaRest.protocol = parts[0];
+
+    } else {
+
+        if(http_fallback === null) {
             javaRest.protocol = 'http';
+        }
+        if(http_fallback === true) {
+            var connection = javaRest.httpGet('https://'+javaRest.domain+'/');
+
+            if (connection) {
+                javaRest.protocol = 'https';
+            } else {
+                javaRest.protocol = 'http';
+            }
         }
     }
 }
@@ -638,6 +686,18 @@ javaRest.user.is_logged_in = function () {
     return (!!javaRest.cookie.get('token') || !!this.token)
 };
 
+javaRest.user.setupLogin = function (response, email) {
+    javaRest.cookie.set('token', response.token);
+    javaRest.token = response.token;
+    javaRest.cookie.set('userId', response.userId);
+    javaRest.userId = response.userId;
+    javaRest.cookie.set('email', email);
+    response.success = true;
+    if(response.userId==undefined){
+        response.success = false;
+    }    
+};
+
 /**
  * Log the user in
  * @param {string}
@@ -653,17 +713,8 @@ javaRest.user.login = function (email, password, callback) {
             "password" : password
         },
         function (response) { //success
-            javaRest.cookie.set('token', response.token);
-            javaRest.token = response.token;
-            javaRest.cookie.set('userId', response.userId);
-            javaRest.userId = response.userId;
-            javaRest.cookie.set('email', email);
-            response.success = true;
-            if(response.userId==undefined){
-                response.success = false;
-            }
+            javaRest.user.setupLogin(response, email);
             callback(response)
-
         },
         function(jqXHR, textStatus) { //login
             jqXHR.success = false;
@@ -904,10 +955,13 @@ javaRest.sandboxUrl = function(){
  */
 javaRest.facevideo.uploadLink = function(videoLink, callback) {
 
+    if(typeof videoLink == 'string') {
+        videoLink = { link: videoLink };
+    }
 
     javaRest.postAuth(
         'facevideo'+javaRest.sandboxUrl(),
-        {'link': videoLink},
+        videoLink,
         function(response) {
             if (callback) {
                 callback(response);
