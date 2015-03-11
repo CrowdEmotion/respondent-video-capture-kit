@@ -54,6 +54,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.bufferTS = [];
     this.stepCompleted = false;
     this.timedOverPlayToEnd;
+    this.continuosPlay = false;
 
     //steps && user actions
     this.click_start = false;
@@ -119,9 +120,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.producerStreamWidth) ? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
         (options && options.producerStreamHeight) ? this.producerStreamHeight = options.producerStreamHeight : this.producerStreamHeight = 480;
         (options && options.avgPreLoadTime) ? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
-        (options && options.recorderCenter != undefined) ? this.recorderCenter = options.recAutoHide : this.recorderCenter = true;
+        (options && options.recorderCenter != undefined) ? this.recorderCenter = options.recorderCenter : this.recorderCenter = true;
         (options && options.randomOrder != undefined) ? this.randomOrder = options.randomOrder : this.randomOrder = false;
         (options && options.apiHttps !== undefined) ? this.apiHttps = options.apiHttps : this.apiHttps = true;
+        (options && options.continuosPlay !== undefined) ? this.continuosPlay = options.continuosPlay : this.continuosPlay = false;
         (options && options.swfPath != undefined) ? this.swfPath = options.swfPath : this.swfPath = '../swf/';
         (options && options.timedOverPlayToEnd != undefined) ? this.timedOverPlayToEnd = options.timedOverPlayToEnd : this.timedOverPlayToEnd = false;
 
@@ -432,6 +434,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         $('#vrtWrapper').on('click', '#vrtFrameClose', function () {
             vrt.closeFrame();
+        });
+
+        $(window.vrt).on('vrt_event_video_step_completed', function () {
+            if(vrt.continuosPlay===true){
+                $(window.vrt).trigger('vrt_event_user_next_video');
+            }
+
         });
 
     };
