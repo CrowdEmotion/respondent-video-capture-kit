@@ -198,6 +198,7 @@ function VjsInterface() {
     };
 
     this.on_player_end = function (cb) {
+        $(vrt).trigger('vrt_event_stimuli_end');
         if(!vrt.timedOverPlayToEnd){
             vrt.skip_video();
         }
@@ -605,6 +606,7 @@ window.onytplayerStateChange = function (newState) {
         $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange1'})
     }
     if (newState == 0){
+        $(vrt).trigger('vrt_event_stimuli_end');
         if(!vrt.timedOverPlayToEnd){
             vrt.skip_video();
         }

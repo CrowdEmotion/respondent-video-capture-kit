@@ -222,12 +222,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " +
             "<div id='vrtLoader'></div>" +
             "<div id='vrtFrameWr'></div>" +
-            ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
-            "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
-            "           <div id='producer'></div>                                                                   " +
-            "           <div class='clearfix'></div>                                                                " +
-            "       </div>                                                                                          " +
-            ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
             ((this.options.htmlVideoPre) ? this.options.htmlVideoPre : '') +
             "<div id='vrtVideoWrapper' class='vrtWrap' style='" + this.options.videoStyle + "'>                                                      " +
             "      <div id='vrtvideo' class='" + this.options.htmlVideoClass + "'></div>                                " +
@@ -236,6 +230,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             "      <div class='clearfix'></div>                                                                     " +
             "</div>                                                                                               " +
             ((this.options.htmlVideoPost) ? this.options.htmlVideoPost : '') +
+            ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
+            "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
+            "           <div id='producer'></div>                                                                   " +
+            "           <div class='clearfix'></div>                                                                " +
+            "       </div>                                                                                          " +
+            ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
             "<div id='vrtLogWrapper' class='vrtWrap'>                                                      " +
             "      <div id='vrtalert'></div>                                                                        " +
             "      <div id='vrt_timer_player'></div>                                                                       " +
