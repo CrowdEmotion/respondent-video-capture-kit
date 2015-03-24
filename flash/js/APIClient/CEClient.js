@@ -19,9 +19,18 @@ function CEClient() {
         if(cb){ cb();}
     };
 
-    this.init  = function(debug, http, domain, sandbox){
-        if(sandbox==undefined) sandbox = false;
-        javaRest(debug, http, domain, sandbox);
+    this.init  = function(debug, http, domain, sandbox, options){
+        if(arguments.length>1) {
+            var defOptions = {engineType:'kanako',processVideo:true};
+            options = clientMergeObj(defOptions, options);
+            if (sandbox == undefined) sandbox = false;
+            javaRest(debug, http, domain, sandbox, options);
+        }else{
+            //"debug" contain all options
+            var defVal = {debug: false, http: false, domain: null, sandbox: false, engineType:'kanako',processVideo:true};
+            debug = clientMergeObj(defVal, debug);
+            javaRest(debug);
+        }
     };
     /**
      * user login
@@ -166,6 +175,28 @@ function CEClient() {
         );
     };
 
+    this.writeResponse = function(data,callback){
+
+        dataApi = {'data':data}
+
+        javaRest.postAuth(
+            'response'+javaRest.queryUrl(),
+            null,
+            function(response) {
+                console.log(response);
+                if (callback) {
+                    callback(response);
+                }
+            },
+            function(jqXHR, textStatus) {
+                console.log(jqXHR);
+                if (callback) {
+                    callback(jqXHR);
+                }
+            }
+        );
+    }
+
     this.getFvStatus = function(url,cb){
         var ceclient = this;
         javaRest.get(url, null,
@@ -275,6 +306,22 @@ function CEClient() {
 
 
 }
+
+var clientMergeObj = function() {
+    var obj = {},
+        i = 0,
+        il = arguments.length,
+        key;
+    for (; i < il; i++) {
+        for (key in arguments[i]) {
+            if (arguments[i].hasOwnProperty(key)) {
+                if(arguments[i][key]!==undefined)
+                    obj[key] = arguments[i][key];
+            }
+        }
+    }
+    return obj;
+};
 //==========================JAVAREST==========================================
 /*
  * Client crowdemotion js
@@ -295,20 +342,39 @@ javaRest.token = null;
 javaRest.userId = null;
 javaRest.sandbox = null;
 
+javaRest.engineType = 'kanako';
+javaRest.processVideo = true;
+
 /**
  * Singleton used for Namespace
  */
-function javaRest(debug, http_fallback, domain, sandbox) {
-    if(debug==undefined) debug = false;
-    if(http_fallback===undefined) http_fallback = false;
-    if(!domain) domain = "api.crowdemotion.co.uk";
+function javaRest(debug, http_fallback, domain, sandbox, options) {
+    console.log(arguments);
+    if(arguments.length>1) {
+        if (debug == undefined) debug = false;
+        if (http_fallback === undefined) http_fallback = false;
+        if (!domain) domain = "api.crowdemotion.co.uk";
 
-    javaRest.debug = debug;
-    javaRest.domain = domain;
-    javaRest.protocol = 'https';
-    javaRest.sandbox = sandbox;
+        javaRest.debug = debug;
+        javaRest.domain = domain;
+        javaRest.protocol = 'https';
+        javaRest.sandbox = sandbox;
+        if(options.engineType!==undefined && options.engineType!==null ){javaRest.engineType = options.engineType;}
+        if(options.processVideo!==undefined && options.processVideo!==null ){javaRest.processVideo = options.processVideo;}
 
-    if(domain.indexOf('http') >= 0) {
+    }else{
+        var defVals = {debug:false, http_fallback:false, protocol: 'https',domain:"api.crowdemotion.co.uk"}
+        debug = clientMergeObj(defVals, debug);
+        javaRest.debug = debug.debug;
+        http_fallback = defVals.http_fallback;
+        javaRest.domain = domain = debug.domain;
+        javaRest.protocol = debug.protocol;
+        javaRest.sandbox = sandbox = debug.sandbox;
+        javaRest.engineType = debug.engineType;
+        javaRest.processVideo = debug.processVideo;
+    }
+
+    if (javaRest.domain.indexOf('http') >= 0) {
 
         var parts = domain.split('://');
         javaRest.domain = parts[1];
@@ -316,11 +382,11 @@ function javaRest(debug, http_fallback, domain, sandbox) {
 
     } else {
 
-        if(http_fallback === null) {
+        if (http_fallback === null) {
             javaRest.protocol = 'http';
         }
-        if(http_fallback === true) {
-            var connection = javaRest.httpGet('https://'+javaRest.domain+'/');
+        if (http_fallback === true) {
+            var connection = javaRest.httpGet('https://' + javaRest.domain + '/');
 
             if (connection) {
                 javaRest.protocol = 'https';
@@ -490,7 +556,7 @@ javaRest.postAuth = function (url, data, success, error) {
         url: this.baseurl()+url,
         type: "POST",
         contentType: "application/json", // send as JSON
-        data: JSON.stringify(data),
+        data: data?JSON.stringify(data):null,
         crossDomain: true,
         headers: {
             'Authorization' : auth.authorization,
@@ -912,7 +978,8 @@ javaRest.HashTable = function(obj)
         this.items = {}
         this.length = 0;
     }
-}
+};
+
 
 javaRest.response.writeCustomData = function(id, data, callback) {
 
@@ -940,10 +1007,31 @@ javaRest.facevideo = {};
 
 javaRest.sandboxUrl = function(){
     if(javaRest.sandbox===true){
-        return '?sandbox=true';
+        return 'sandbox=true';
     }
     else return '';
 };
+javaRest.engineTypeUrl = function(){
+    if(javaRest.engineType){
+        return 'engineType='+javaRest.engineType;
+    }
+    else return '';
+};
+javaRest.processVideoUrl = function(){
+    if(javaRest.processVideo!==undefined && javaRest.processVideo!==null ){
+        return 'processVideo='+javaRest.processVideo;
+    }
+    else return '';
+};
+
+javaRest.queryUrl = function(){
+    var els = [javaRest.sandboxUrl(), javaRest.engineTypeUrl(), javaRest.processVideoUrl()];
+    console.log(els);
+    for(var i in els){        if(els[i]==''){els.splice(i,1);}    }
+    els = els.join('&');
+    console.log(els);
+    return (els=='') ? '':'?'+els;
+}
 /**
  * Upload a facevideo via link
  *
@@ -960,7 +1048,7 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
     }
 
     javaRest.postAuth(
-        'facevideo'+javaRest.sandboxUrl(),
+        'facevideo'+javaRest.queryUrl(),
         videoLink,
         function(response) {
             if (callback) {
@@ -979,7 +1067,7 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
 javaRest.facevideo.info = function(response_id, callback) {
 
     javaRest.get(
-        'facevideo/'+response_id+javaRest.sandboxUrl(),
+        'facevideo/'+response_id+javaRest.queryUrl(),
         function(response) {
             if (callback) {
                 callback(response);
@@ -1003,7 +1091,7 @@ javaRest.facevideo.upload = function(file, callback) {
 
 
     javaRest.postAuth(
-        'facevideo/upload'+javaRest.sandboxUrl(),
+        'facevideo/upload'+javaRest.queryUrl(),
         {'file': file},
         function(response) {
             if (callback) {
@@ -1019,7 +1107,7 @@ javaRest.facevideo.upload = function(file, callback) {
 
 javaRest.facevideo.uploadForm = function(form_id) {
 
-    javaRest.postAuthForm('facevideo/upload'+javaRest.sandboxUrl(), form_id);
+    javaRest.postAuthForm('facevideo/upload'+javaRest.queryUrl(), form_id);
 
 };
 

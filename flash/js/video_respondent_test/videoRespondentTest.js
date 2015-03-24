@@ -82,6 +82,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.eventList = {};
     this.responseId =null;
     this.results = {apilogin:null,flash:{present:null,version:null}};
+    this.responseAtStart = false;
+    this.engineType = 'kanako';
+    this.processVideo = true;
+    this.responseList = [];
 
     this.initMediaList = function(type, list) {
         if(!list) return;
@@ -96,6 +100,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
+        if(arguments.length==1){ //type include all
+            var data = type;
+            list        = (data.list)?data.list:{};
+            streamUrl   = (data.streamUrl)?data.streamUrl: null;
+            streamName   = (data.streamName)?data.streamName: null;
+            apiDomain   = (data.apiDomain)?data.apiDomain: null;
+            apiUser     = (data.apiUser)?data.apiUser:null;
+            apiPassword = (data.apiPassword)?data.apiPassword:null;
+            options     = type;
+            type        = (data.type)?data.type:null;
+        }
 
         if (options == undefined || options == null) options = {player: {}};
 
@@ -134,6 +149,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.playerWidth != undefined) ? this.options.player.width = options.playerWidth : this.options.player.Width = 640;
         (options && options.playerHeight != undefined) ? this.options.player.height = options.playerHeight : this.options.player.height = 400;
         (options && options.apiSandbox != undefined) ? this.options.apiSandbox = options.apiSandbox : this.options.apiSandbox = false;
+        (options && options.responseAtStart != undefined) ? this.responseAtStart = options.responseAtStart : this.options.responseAtStart = false;
+        (options && options.engineType != undefined) ? this.options.engineType = options.engineType : this.options.engineType = 'kanako';
+
 
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
@@ -336,13 +354,16 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         //internal event: start
         $(window.vrt).on('vrt_init_ok', function () {
+            vrt.llog('!!--vrt_init_ok');
             window.vrt.vrtTrigLoadend('vrt_init_ok');
         });
         $(window.vrt).on('producer_init_ok', function () {
+            vrt.llog('!!--producer_init_ok');
             vrt.producerSetupConnection(vrt.producerConnection);
             window.vrt.vrtTrigLoadend('producer_init_ok');
         });
         $(window.vrt).on('api_init_ok', function () {
+            vrt.llog('!!--api_init_ok');
             window.vrt.vrtTrigLoadend('api_init_ok');
         });
 
@@ -350,9 +371,27 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(window.vrt).on('vrtstep_loaded', function () {
             vrt.log('EVT vrtstep_loaded');
             vrt.log('>>EVT vrtstep_loaded');
-            vrt.player.video_play(vrt.showVisibility('#videoDiv'));
+            if(vrt.responseAtStart===true){
+                if(vrt.responseList[vrt.currentMedia]===undefined){
+                    vrt.apiClientWriteResponse(
+                        null, function(res){
+                            vrt.responseList[vrt.currentMedia] = res.id;
+                            $(window.vrt).trigger('vrt_event_create_response',[{data:res.id}]);
+                            $(window.vrt).trigger('vrtstep_loaded_by_response');
+                        }
+                    );
+                }
+            }else {
+                vrt.player.video_play(vrt.showVisibility('#videoDiv'));
+            }
             //TODO open_video_window();  // HACK else the Flash player is not instantiated
         });
+
+        $(window.vrt).on('vrtstep_loaded_by_response', function () {
+                vrt.player.video_play(vrt.showVisibility('#videoDiv'));
+        }) ;
+
+
         $(window.vrt).on('vrt_event_user_skip_video', function () {
             vrt.skip_video();
         });
@@ -378,6 +417,22 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 try {
                     vrt.producer.remoteLogger.name = vrt.streamName;
                     vrt.producer.publish(vrt.streamName);
+                    // TODO insert option to save respondant first
+                    /*
+                    if(vrt.responseAtStart){
+                        vrt.ceclient.writeResponse(null,
+                            function(result){
+                                if(result){
+                                    vrt.responseList.push(result);
+                                    $(vrt).trigger('vrt_event_response_saved', [{data:result}])
+                                }else{
+                                    $(vrt).trigger('vrt_event_response_not_saved', [{data:result}])
+                                }
+
+                            }
+                        );
+                    }
+                    */
                 }catch(err){
                     vrt.llog('exception in producer.publish');
                     vrt.llog(err);
@@ -621,11 +676,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
 
-    this.facevideoUpload = function(url,cb){
+    this.facevideoUpload = function(url,cb, opts){
         this.log(url,'fileUpload','a');
         this.log('!! '+url);
 
-        this.apiClientUploadLink(url, cb);
+        this.apiClientUploadLink(url, cb, opts);
     };
 
     this.externalDataSave = function(id, data,cb){
@@ -838,7 +893,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.producerSetupConnection = function(cb) {
 
-        this.log(streamUrl);
+        //this.log(streamUrl);
         this.log('!! filename ' + this.producerStreamName);
         var url = 'rtmp://' + this.producerStreamUrl + ':1935/live'; // "live/" is the RTMP application name, always the same.
         this.log('!! url ' + url);
@@ -1375,11 +1430,26 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.apiClientUploadLink = function(streamFileName, cb){
         this.log('>>STEP api file upload ' + streamFileName);
         this.log('EVT upload api file upload ' + streamFileName);
-        this.ceclient.uploadLink(
-            this.researchId ?
-            { link: streamFileName, researchId: this.researchId, mediaId: this.media_id } :
-            streamFileName,
-            cb);
+        // todo insert response on upload link
+
+        var dataToUpload = {}
+        if(this.researchId){
+            dataToUpload = { link: streamFileName, researchId: this.researchId, mediaId: this.media_id } ;
+            if(vrt.responseAtStart){
+                dataToUpload.responseId = vrt.responseList[vrt.currentMedia];
+            }
+        } else{
+            dataToUpload= streamFileName;
+            if(vrt.responseAtStart){
+                dataToUpload = { link: videoLink, responseId: vrt.responseList[vrt.currentMedia]  };
+            }
+        }
+
+        this.ceclient.uploadLink(dataToUpload, cb);
+    };
+
+    this.apiClientWriteResponse = function(data,cb){
+        vrt.ceclient.writeResponse(data,cb);
     };
 
     this.apiClientSetup = function(cbSuccess, cbFail){
@@ -1446,12 +1516,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.results.apilogin = false;
                 if(cbFail) cbFail();
             }
-        }
+        };
 
 
         this.log('Api login in progress');
         this.log('>>STEP api init')
-        this.ceclient.init(true, this.apiHttps, this.apiDomain, vrt.options.apiSandbox);
+        //this.ceclient.init(true, this.apiHttps, this.apiDomain, vrt.options.apiSandbox);
+        this.ceclient.init({debug: true, http: this.apiHttps, domain: this.apiDomain, sandbox: vrt.options.apiSandbox, engineType:vrt.options.engineType,processVideo:vrt.options.processVideo});
         this.ceclient.logout(function(){
                 if(this.appToken) {
                     this.ceclient.setToken(this.appToken);
