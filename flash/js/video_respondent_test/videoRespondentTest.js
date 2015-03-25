@@ -943,7 +943,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.log = function (msg , display ,mode) {
 
-        if(!this.debug) return'';
+        if(!this.debug) return'';if(!msg) return'';
         var str = msg.toString().substring(0,2);
 
         if(!this.debugEvt && str=='EV') return'';
