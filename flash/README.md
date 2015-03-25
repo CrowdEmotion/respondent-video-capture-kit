@@ -68,13 +68,16 @@ For a fast implementation, please look at HTML files:
 
 1. Include this html code in the *body* of your page
      ```<div id="vrt"></div>```
+
+After this you can include options in two ways (using multiple parameters or one javascript objeect)
      
-1. Include the following code in the *head* of your page
+1. Multiple parameters (will be deprecated)
+Include the following code in the *head* of your page
      ```
      <SCRIPT>
       $(document).ready(function(){
                  var vrt = new Vrt(<<VIDEOTYPE>>,<<VIDEODATA>>,<<STREAM DOMAIN>>,<<STREAM NAME>>,
-                         <<API DOMAIN>>,<<API USERNAME>>, <<API PASSWORD>>,<<OPTION>>
+                         <<API DOMAIN>>,<<API USERNAME>>, <<API PASSWORD>>,<<OPTIONS>>
                      );
              });
      </SCRIPT>
@@ -108,7 +111,7 @@ For a fast implementation, please look at HTML files:
     
     - `API DOMAIN`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
                          
-    - `OPTION` object: contains a list of properties
+    - `OPTIONS` object: contains a list of properties
         - `randomOrder` (*true* | *false* - default: *false*): display videos in a random order  
         - `playerCentered` (*true* | *false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
         - `playerWidth` (*integer* - default 640): set the width of the videos
@@ -119,7 +122,25 @@ For a fast implementation, please look at HTML files:
         - `customDataInsertMediaPath`  (*true* | *false* - default: *false*) if `true`, insert media path value inside custom data with `media_path` key
         - `timedOverPlayToEnd` (*true* | *false* - default: *false*) recording will finish at `length` value inside `VIDEODATA` array  (in seconds)
         - `apiSandbox` (*true* | *false* - default: *false*) generate random emotions values instead analyzing video
-                             
+		-	```researchToken``` string: a random string bind to your research on CrowdEmotion system
+		-	```appToken``` string: a random string bind to your user on CrowdEmotion system
+		- ```responseAtStart``` boolean: you response id is generated before the start of video stimuli
+
+1. One javascript object as single parameter (suggested way)
+       Include the following code in the *head* of your page
+     ```
+     <SCRIPT>
+      $(document).ready(function(){
+                 var vrt = new Vrt(<<OPTIONS>>);
+     </SCRIPT>
+     ```        
+the ```<<OPTIONS>>``` values are the same of previous paragraph, just add these values:
+		-	```type``` string: ```youtube``` or ```custom server``` - choose if your video stimuli are hosted by YouTube or custom server
+		-	```list``` array: list of video stimuli, please follow  instruction on previous paragraph under the ```<<VIDEODATA>> ``` option
+		- ```streamName``` string: a simple string used as recording name
+		- ```apiDomain``` string : contain CrowdEmotion API domain to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
+
+                     
                     
 1. Implement in you code the listeners for the following events:
 
@@ -138,6 +159,7 @@ For a fast implementation, please look at HTML files:
     - `vrt_event_producer_no_camera_found`:    no camera found
     - `vrt_event_frame_open`:                  use this event to open a frame OR user the `openFrame()` method 
     - `vrt_event_frame_close`:                 triggere by the `closeFrame()` method
+	- `vrt_event_create_response` : if the option `responseAtStart` is `true`, this event will send you the response id before the video play
 
     Example ```  $(window.vrt).on('vrt_event_producer_camera_blocked', function () {
                             alert('The webcam is blocked');
