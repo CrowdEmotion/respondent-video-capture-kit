@@ -100,7 +100,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
-        if(arguments.length==1){ //type include all
+
+        if(typeof type == 'object'){ //type include all
             var data = type;
             list        = (data.list)?data.list:{};
             streamUrl   = (data.streamUrl)?data.streamUrl: null;
@@ -1031,7 +1032,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(vrt).trigger('vrt_event_logchrono_'+this.chronoType[pos]+'_'+startm, [{time:timeCheck[7]}]);
 
 
-        console.log('vrt_event_logchrono_'+this.chronoType[pos]+'_'+startm+'    '+timeCheck[7]);
+        //console.log('vrt_event_logchrono_'+this.chronoType[pos]+'_'+startm+'    '+timeCheck[7]);
         if(this.debugChrono==undefined){}else{echo = this.debugChrono  ;}
         if(pos==0 && start == true){
             this.timeRecStart = timeCheck[7];

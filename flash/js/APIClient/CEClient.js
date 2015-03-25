@@ -20,7 +20,7 @@ function CEClient() {
     };
 
     this.init  = function(debug, http, domain, sandbox, options){
-        if(arguments.length>1) {
+        if(typeof debug != 'object'){
             var defOptions = {engineType:'kanako',processVideo:true};
             options = clientMergeObj(defOptions, options);
             if (sandbox == undefined) sandbox = false;
@@ -349,8 +349,8 @@ javaRest.processVideo = true;
  * Singleton used for Namespace
  */
 function javaRest(debug, http_fallback, domain, sandbox, options) {
-    console.log(arguments);
-    if(arguments.length>1) {
+
+    if(typeof debug != 'object') {
         if (debug == undefined) debug = false;
         if (http_fallback === undefined) http_fallback = false;
         if (!domain) domain = "api.crowdemotion.co.uk";
