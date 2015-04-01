@@ -1026,11 +1026,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         //(this.debugChronoHtml==undefined)? '': echoHtml = this.debugChronoHtml  ;
 
         var startm='end';
-        (start==true)? startm = 'start':'';
+        if(start===true) startm = 'start';
+        var posm='recorder';
+        if(pos==1) posm = 'player';
         var timeCheck = vrt.logTime();
 
-        $(vrt).trigger('vrt_event_logchrono_'+this.chronoType[pos]+'_'+startm, [{time:timeCheck[7]}]);
-
+        //$(vrt).trigger('vrt_event_logchrono_'+this.chronoType[pos]+'_'+startm, [{time:timeCheck[7]}]);
+        $(vrt).trigger('vrt_event_'+posm+'_'+startm);
 
         //console.log('vrt_event_logchrono_'+this.chronoType[pos]+'_'+startm+'    '+timeCheck[7]);
         if(this.debugChrono==undefined){}else{echo = this.debugChrono  ;}
@@ -1065,7 +1067,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         //if(echoHtml && pos==0) $('#vrt_timer_recorder').append('<br/>'+str +'<br/>'+ strend);
         str = ''; strend = '';
 
-        $(vrt).trigger('vrt_eventList', [{event: this.chronoType[pos], position:startm, time: timeCheck[7], timeFull: timeCheck}]);
+        //$(vrt).trigger('vrt_eventList', [{event: this.chronoType[pos], position:startm, time: timeCheck[7], timeFull: timeCheck}]);
+
 
 
         if(vrt.chronoStart[0] && vrt.chronoStart[1] && vrt.chronoALertStart==false){
@@ -1082,7 +1085,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             this.eventList.startFirst = start_first;
             this.eventList.startFirstDiff = difft;
-            $(vrt).trigger('vrt_eventList_startFirst', [{startFirst: start_first, timeDiff: difft}]);
+            //$(vrt).trigger('vrt_eventList_startFirst', [{startFirst: start_first, timeDiff: difft}]);
         }
 
         if(vrt.chronoEnd[0] && vrt.chronoEnd[1] && vrt.chronoALertEnd==false && vrt.chronoEnd[0][7] && vrt.chronoEnd[1][7]){
@@ -1098,7 +1101,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if (echo && console && console.log) console.log('CHRONO DIFF END '+ end_first +' end first by '+ (difft));
             this.eventList.endFirst = end_first;
             this.eventList.endFirstDiff = difft;
-            $(vrt).trigger('vrt_eventList_endFirst', [{endFirst: end_first, timeDiff: difft}]);
+            //$(vrt).trigger('vrt_eventList_endFirst', [{endFirst: end_first, timeDiff: difft}]);
         }
 
     };
