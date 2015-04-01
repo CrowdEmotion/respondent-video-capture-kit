@@ -127,7 +127,9 @@ function CEClient() {
 
     this.readThumbnail = function (mediaId, cb){
         javaRest.get('media/'+mediaId+'?presignedUrl=true', {'data': null},
-            function(res){},
+            function(res){
+                if(cb) cb(res);
+            },
             function (res){
                 if(cb) cb(res);
             }
