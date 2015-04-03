@@ -86,6 +86,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.engineType = 'kanako';
     this.processVideo = true;
     this.responseList = [];
+    this.respondentId = null;
 
     this.initMediaList = function(type, list) {
         if(!list) return;
@@ -152,6 +153,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.apiSandbox != undefined) ? this.options.apiSandbox = options.apiSandbox : this.options.apiSandbox = false;
         (options && options.responseAtStart != undefined) ? this.responseAtStart = options.responseAtStart : this.options.responseAtStart = false;
         (options && options.engineType != undefined) ? this.options.engineType = options.engineType : this.options.engineType = 'kanako';
+        (options && options.respondentCustomDataString!= undefined)?
+            this.options.respondentCustomDataString = options.respondentCustomDataString : this.options.respondentCustomDataString = {};
+        (options && options.respondentCustomData!= undefined)?
+            this.options.respondentCustomData = options.respondentCustomData : this.options.respondentCustomData = {};
+        (options && options.respondentName!= undefined)? this.options.respondentName = options.respondentName : this.options.respondentName = '';
 
 
         this.producerStreamUrl = streamUrl;
@@ -1431,6 +1437,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.ceclient.writeCustomData(id, data,cb);
     };
 
+    this.apiClientSaveRespondentCustomData= function(id, data, cb){
+        this.log('>>STEP insert custom data');
+        this.log(data);
+        this.ceclient.writeRespondentCustomData(id, data,cb);
+    };
+
     this.apiClientUploadLink = function(streamFileName, cb){
         this.log('>>STEP api file upload ' + streamFileName);
         this.log('EVT upload api file upload ' + streamFileName);
@@ -1441,14 +1453,21 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             dataToUpload = { link: streamFileName, researchId: this.researchId, mediaId: this.media_id } ;
             if(vrt.responseAtStart){
                 dataToUpload.responseId = vrt.responseList[vrt.currentMedia];
+                if(this.respondentId){
+                    dataToUpload.respondentId = this.respondentId;
+                }
             }
         } else{
             dataToUpload  = streamFileName;
             if(vrt.responseAtStart){
                 dataToUpload = { link: streamFileName, responseId: vrt.responseList[vrt.currentMedia]  };
+                if(this.respondentId){
+                    dataToUpload.respondentId = this.respondentId;
+                }
             }
         }
-
+        //console.log('>>>>>>>>dataToUpload');
+        //console.log(dataToUpload);
         this.ceclient.uploadLink(dataToUpload, cb);
     };
 
@@ -1509,14 +1528,39 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     });
                 };
 
+                var apiClientCreateRespondent = function(cb){
+                    var respoData = {};
+                    if(vrt.researchId) {
+                        respoData.researchId = vrt.researchId;
+                    }
+                    if(vrt.options.respondentCustomDataString) {
+                        respoData.customData = vrt.options.respondentCustomDataString;
+                    }
+                    if(vrt.options.respondentName) {
+                        respoData.name = vrt.options.respondentName;
+                    }
+
+                    vrt.ceclient.writeRespondent(respoData,
+                        function(res){
+                            vrt.respondentId = res.id;
+                            if(vrt.options.respondentCustomData){
+                                vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
+                            }
+                        });
+                }
+
                 if(vrt.options.researchToken) {
                     vrt.ceclient.loadResearch(vrt.options.researchToken, function(research){
                         vrt.researchId = research.id;
-                        apiClientSetupLoadMedia(research.id);
+                        apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
                     }, function(res){ console.log(res); });
                 } else {
-                    apiClientSetupLoadMedia(vrt.options.researchId);
+                    apiClientSetupLoadMedia(vrt.options.researchId, apiClientCreateRespondent());
                 }
+
+
+
+
 
             }else{
                 if(console.log)console.log('Api login FAIL + danger');

@@ -87,6 +87,12 @@ function CEClient() {
 
     };
 
+    this.writeRespondentCustomData = function(responsendentId, data, cb){
+        javaRest.respondent.writeRespondentCustomData(responsendentId, data, function (res){
+            if(cb) cb(res);
+        });
+    };
+
     this.uploadForm = function (form_id) {
 
         javaRest.facevideo.uploadForm(form_id);
@@ -200,6 +206,24 @@ function CEClient() {
         })
     };
 
+    this.writeRespondent = function (data, callback) {
+        if(data.customData && typeof data.customData  == 'object'){
+            data.customData = JSON.stringify(data.customData)
+        }
+        javaRest.postAuth("respondent" + javaRest.queryUrl(), data, function (response) {
+            console.log(response);
+            if (callback) {
+                callback(response)
+            }
+        }, function (jqXHR, textStatus) {
+            console.log(jqXHR);
+            if (callback) {
+                callback(jqXHR)
+            }
+        })
+    };
+
+
     this.getFvStatus = function(url,cb){
         var ceclient = this;
         javaRest.get(url, null,
@@ -214,8 +238,8 @@ function CEClient() {
 
     this.apiClientWriteResponse = function (data, cb) {
         data = {};
-        data.research_id = this.researchId;
-        data.media_id = this.media_id;
+        if(this.researchId) data.research_id = this.researchId;
+        if(this.media_id) data.media_id = this.media_id;
         vrt.ceclient.writeResponse(data, cb)
     };
 
@@ -1013,6 +1037,28 @@ javaRest.response.writeCustomData = function(id, data, callback) {
     );
 };
 
+javaRest.respondent = {};
+javaRest.respondent.writeRespondentCustomData = function(id, data, callback) {
+
+    var dataApi = new javaRest.HashTable(data);
+    dataApi = {'data':dataApi.items}
+
+    javaRest.postAuth(
+        'respondent/'+id+'/metadata',
+        dataApi,
+        function(response) {
+            if (callback) {
+                callback(response);
+            }
+        },
+        function(jqXHR, textStatus) {
+            console.log(jqXHR);
+            if (callback) {
+                callback(jqXHR);
+            }
+        }
+    );
+};
 javaRest.facevideo = {};
 
 javaRest.sandboxUrl = function(){
@@ -1022,6 +1068,7 @@ javaRest.sandboxUrl = function(){
     else return '';
 };
 javaRest.engineTypeUrl = function(){
+    return '';
     if(javaRest.engineType){
         return 'engineType='+javaRest.engineType;
     }
