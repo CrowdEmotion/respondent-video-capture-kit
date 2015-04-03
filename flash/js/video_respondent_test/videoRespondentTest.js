@@ -1443,17 +1443,20 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 dataToUpload.responseId = vrt.responseList[vrt.currentMedia];
             }
         } else{
-            dataToUpload= streamFileName;
+            dataToUpload  = streamFileName;
             if(vrt.responseAtStart){
-                dataToUpload = { link: videoLink, responseId: vrt.responseList[vrt.currentMedia]  };
+                dataToUpload = { link: streamFileName, responseId: vrt.responseList[vrt.currentMedia]  };
             }
         }
 
         this.ceclient.uploadLink(dataToUpload, cb);
     };
 
-    this.apiClientWriteResponse = function(data,cb){
-        vrt.ceclient.writeResponse(data,cb);
+    this.apiClientWriteResponse = function (data, cb) {
+        data = {};
+        data.research_id = this.researchId;
+        data.media_id = this.media_id;
+        vrt.ceclient.writeResponse(data, cb)
     };
 
     this.apiClientSetup = function(cbSuccess, cbFail){

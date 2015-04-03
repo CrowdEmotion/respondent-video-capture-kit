@@ -186,27 +186,19 @@ function CEClient() {
         );
     };
 
-    this.writeResponse = function(data,callback){
-
-        dataApi = {'data':data}
-
-        javaRest.postAuth(
-            'response'+javaRest.queryUrl(),
-            null,
-            function(response) {
-                console.log(response);
-                if (callback) {
-                    callback(response);
-                }
-            },
-            function(jqXHR, textStatus) {
-                console.log(jqXHR);
-                if (callback) {
-                    callback(jqXHR);
-                }
+    this.writeResponse = function (data, callback) {
+        javaRest.postAuth("response" + javaRest.queryUrl(), data, function (response) {
+            console.log(response);
+            if (callback) {
+                callback(response)
             }
-        );
-    }
+        }, function (jqXHR, textStatus) {
+            console.log(jqXHR);
+            if (callback) {
+                callback(jqXHR)
+            }
+        })
+    };
 
     this.getFvStatus = function(url,cb){
         var ceclient = this;
@@ -218,6 +210,13 @@ function CEClient() {
                 if(cb) {cb(res.status);}
             }
         );
+    };
+
+    this.apiClientWriteResponse = function (data, cb) {
+        data = {};
+        data.research_id = this.researchId;
+        data.media_id = this.media_id;
+        vrt.ceclient.writeResponse(data, cb)
     };
 
     /**
