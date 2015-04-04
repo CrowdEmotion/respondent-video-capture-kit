@@ -1454,6 +1454,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if(vrt.responseAtStart){
                 dataToUpload.responseId = vrt.responseList[vrt.currentMedia];
                 if(this.respondentId){
+                    dataToUpload.respondent_id = this.respondentId;
                     dataToUpload.respondentId = this.respondentId;
                 }
             }
@@ -1462,6 +1463,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if(vrt.responseAtStart){
                 dataToUpload = { link: streamFileName, responseId: vrt.responseList[vrt.currentMedia]  };
                 if(this.respondentId){
+                    dataToUpload.respondent_id = this.respondentId;
                     dataToUpload.respondentId = this.respondentId;
                 }
             }
@@ -1475,6 +1477,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         data = {};
         data.research_id = this.researchId;
         data.media_id = this.media_id;
+        data.respondent_id = data.respondentd = this.respondentId;
+        //this.llog('>>>>>>>>writeResponse');
+        //this.llog(data);
         vrt.ceclient.writeResponse(data, cb)
     };
 
@@ -1532,6 +1537,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     var respoData = {};
                     if(vrt.researchId) {
                         respoData.researchId = vrt.researchId;
+                        respoData.research_id = vrt.researchId;
                     }
                     if(vrt.options.respondentCustomDataString) {
                         respoData.customData = vrt.options.respondentCustomDataString;

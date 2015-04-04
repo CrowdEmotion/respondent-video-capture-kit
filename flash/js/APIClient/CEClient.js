@@ -1105,7 +1105,7 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
     }
 
     javaRest.postAuth(
-        'facevideo'+javaRest.queryUrl(),
+        'facevideo/upload'+javaRest.queryUrl(),
         videoLink,
         function(response) {
             if (callback) {
