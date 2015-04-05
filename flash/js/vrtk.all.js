@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-4-4 16:15 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-4-5 19:3 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -1772,6 +1772,18 @@ function CEClient() {
             console.log(jqXHR);
             if (callback) {
                 callback(jqXHR);
+            }
+        });
+    };
+    this.readRespondent = function(data, cb) {
+        var url = "respondent?id=" + data;
+        javaRest.get(url, null, function(res) {
+            if (cb) {
+                cb(res);
+            }
+        }, function(res) {
+            if (cb) {
+                cb(res);
             }
         });
     };
@@ -7624,6 +7636,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         options && options.respondentCustomDataString != undefined ? this.options.respondentCustomDataString = options.respondentCustomDataString : this.options.respondentCustomDataString = {};
         options && options.respondentCustomData != undefined ? this.options.respondentCustomData = options.respondentCustomData : this.options.respondentCustomData = {};
         options && options.respondentName != undefined ? this.options.respondentName = options.respondentName : this.options.respondentName = "";
+        options && options.apiClientOnly != undefined ? this.options.apiClientOnly = options.apiClientOnly : this.options.apiClientOnly = false;
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
         this.initMediaList(type, list);
@@ -7657,14 +7670,16 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.results.flash.present = true;
             $(window.vrt).trigger("vrt_event_flash_is_present");
         }
-        if (swfobject.getFlashPlayerVersion("11.1.0")) {
-            this.results.flash.version = true;
-            $(window.vrt).trigger("vrt_event_flash_version_ok");
-            this.loadProducer(vrt.swfPath);
-        } else {
-            this.results.flash.version = false;
-            this.log("Flash is old=" + this.playerVersion.major + "." + this.playerVersion.minor);
-            $(window.vrt).trigger("vrt_event_flash_old");
+        if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
+            if (swfobject.getFlashPlayerVersion("11.1.0")) {
+                this.results.flash.version = true;
+                $(window.vrt).trigger("vrt_event_flash_version_ok");
+                this.loadProducer(vrt.swfPath);
+            } else {
+                this.results.flash.version = false;
+                this.log("Flash is old=" + this.playerVersion.major + "." + this.playerVersion.minor);
+                $(window.vrt).trigger("vrt_event_flash_old");
+            }
         }
         this.ceclient = new CEClient();
         this.apiClientSetup(function() {
@@ -7683,6 +7698,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options && this.options.mainStyle ? "" : this.options.mainStyle = certerstyle;
         this.options && this.options.recStyle ? "" : this.options.recStyle = certerstyle;
         this.options && this.options.videoStyle ? "" : this.options.videoStyle = certerstyle;
+        if (this.options.apiClientOnly && this.options.apiClientOnly === true) {
+            this.options.recStyle = "height: 1px; width: 1px; position: absolute: left: -1000000px";
+        }
         var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " + "<div id='vrtLoader'></div>" + "<div id='vrtFrameWr'></div>" + (this.options.htmlVideoPre ? this.options.htmlVideoPre : "") + "<div id='vrtVideoWrapper' class='vrtWrap' style='" + this.options.videoStyle + "'>                                                      " + "      <div id='vrtvideo' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='videoDiv' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='ytPlayer' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div class='clearfix'></div>                                                                     " + "</div>                                                                                               " + (this.options.htmlVideoPost ? this.options.htmlVideoPost : "") + (this.options.htmlRecorderPre ? this.options.htmlRecorderPre : "") + "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " + "           <div id='producer'></div>                                                                   " + "           <div class='clearfix'></div>                                                                " + "       </div>                                                                                          " + (this.options.htmlRecorderPost ? this.options.htmlRecorderPost : "") + "<div id='vrtLogWrapper' class='vrtWrap'>                                                      " + "      <div id='vrtalert'></div>                                                                        " + "      <div id='vrt_timer_player'></div>                                                                       " + "      <div id='vrt_timer_recorder'></div>                                                                       " + "      <div class='clearfix'></div>                                                                     " + "</div>                                                                                               " + "</div>";
         var debugHtml = "<div id='vrtValues' class='vrtWrap'>                                                             " + "          <h4>Info</h4>                                                                                " + "          <div id='vrtVal_type'>Type: <span></span></div>                                              " + "          <div id='vrtVal_mediaCount'>media count: <span></span></div>                                 " + "          <div id='vrtVal_currentMedia'>current media: <span></span></div>                             " + "          <div id='vrtVal_list'>List: <span></span></div>                                              " + "          <div id='vrtVal_producerStreamUrl'>Producer stream URL: <span></span></div>                  " + "          <div id='vrtVal_producerStreamName'>Producer stream name: <span></span></div>                " + "          <div id='vrtVal_producerConnStatus'>Producer conn status: <span>Not connected</span></div>   " + "          <div id='vrtVal_apiStatus'>API status: <span>Not connected</span></div>                      " + "          <div id='vrtVal_fileUpload'>Files: <span>Not connected</span></div>                          " + "      </div>                                                                                           " + "      <div id='vrtLog'></div>                                                                          ";
         $("#" + pre).html(html);
@@ -8508,6 +8526,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log(">>STEP producer disconnected");
                 vrt.trigger("vrtstep_disconnect");
             });
+            if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {
+                $(window.vrt).trigger("vrt_event_producer_camera_ok");
+            }
         });
     };
     this.createFrame = function(data) {

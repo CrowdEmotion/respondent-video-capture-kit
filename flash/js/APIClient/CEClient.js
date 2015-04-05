@@ -223,6 +223,24 @@ function CEClient() {
         })
     };
 
+    this.readRespondent = function (data, cb) {
+
+        var url = "respondent?id="+data;
+
+        javaRest.get(url, null,
+            function (res){
+                if(cb) {
+                    cb(res);
+                }
+            },
+            function (res){
+                if(cb) {
+                    cb(res);
+                }
+            }
+        );
+    };
+
 
     this.getFvStatus = function(url,cb){
         var ceclient = this;

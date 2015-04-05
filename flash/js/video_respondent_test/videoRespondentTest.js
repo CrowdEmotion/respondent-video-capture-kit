@@ -158,6 +158,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.respondentCustomData!= undefined)?
             this.options.respondentCustomData = options.respondentCustomData : this.options.respondentCustomData = {};
         (options && options.respondentName!= undefined)? this.options.respondentName = options.respondentName : this.options.respondentName = '';
+        (options && options.apiClientOnly!= undefined)? this.options.apiClientOnly = options.apiClientOnly : this.options.apiClientOnly = false;
 
 
         this.producerStreamUrl = streamUrl;
@@ -207,14 +208,18 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $(window.vrt).trigger('vrt_event_flash_is_present');
         }
 
-        if (swfobject.getFlashPlayerVersion("11.1.0")) {
-            this.results.flash.version = true;
-            $(window.vrt).trigger('vrt_event_flash_version_ok');
-            this.loadProducer(vrt.swfPath);
-        } else {
-            this.results.flash.version = false;
-            this.log('Flash is old=' + this.playerVersion.major + '.' + this.playerVersion.minor);
-            $(window.vrt).trigger('vrt_event_flash_old');
+        if(vrt.options.apiClientOnly && vrt.options.apiClientOnly===true) {
+
+        }else{
+            if (swfobject.getFlashPlayerVersion("11.1.0")) {
+                this.results.flash.version = true;
+                $(window.vrt).trigger('vrt_event_flash_version_ok');
+                this.loadProducer(vrt.swfPath);
+            } else {
+                this.results.flash.version = false;
+                this.log('Flash is old=' + this.playerVersion.major + '.' + this.playerVersion.minor);
+                $(window.vrt).trigger('vrt_event_flash_old');
+            }
         }
 
         this.ceclient = new CEClient();
@@ -243,7 +248,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (this.options && this.options.recStyle) ? '' : this.options.recStyle = certerstyle;
         (this.options && this.options.videoStyle) ? '' : this.options.videoStyle = certerstyle;
 
-
+        if(this.options.apiClientOnly && this.options.apiClientOnly===true){
+            //this.options.mainStyle = '';
+            this.options.recStyle  = 'height: 1px; width: 1px; position: absolute: left: -1000000px'
+        }
         var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " +
             "<div id='vrtLoader'></div>" +
             "<div id='vrtFrameWr'></div>" +
@@ -1371,6 +1379,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             });
 
+            if(vrt.options.apiClientOnly && vrt.options.apiClientOnly===true){
+                $(window.vrt).trigger('vrt_event_producer_camera_ok');
+            }
         });
     }
 
