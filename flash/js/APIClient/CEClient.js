@@ -192,6 +192,20 @@ function CEClient() {
         );
     };
 
+
+    this.searchResponse = function(key,value,cb){
+        var url = 'response';
+        var data =  '?where={"'+key+'":{"like":"'+ value +'"}}'  ; // this.props.url
+
+        javaRest.get(url+data, null,
+            function (res){
+                if(cb) {cb(res);}
+            },function (res){
+                if(cb) {cb(res);}
+            }
+        );
+    };
+
     this.writeResponse = function (data, callback) {
         javaRest.postAuth("response" + javaRest.queryUrl(), data, function (response) {
             console.log(response);
