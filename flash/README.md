@@ -20,13 +20,13 @@ Components:
 ### How It Works (UI)
 
 1. Set connection values in the recorderConfiguration.js file
-1. Using a web server, set the document root to the project root, and connect to the domain
+2. Using a web server, set the document root to the project root, and connect to the domain
 ```
 http://localhost/flash/examples/index.html
 ```
-1. Click on "save connection data"
-1. Click on "start recording" and "stop recording" when you finish
-1. After clicking on "stop recording", wait until your video is uploaded
+3. Click on "save connection data"
+4. Click on "start recording" and "stop recording" when you finish
+5. After clicking on "stop recording", wait until your video is uploaded
 
 
 ## PlayCorder Page Description
@@ -51,10 +51,10 @@ For a quick implementation, please look at HTML files:
 
 ### Implement PlayCorder
 
-1. Requirements: PlayCorder use the _JQuery_ library, tested on 1.9.1 version.
+1. Requirements: PlayCorder use the _JQuery_ library, tested on 1.9.1 version:
   1. Download JQuery [here](http://jquery.com/download/)
   2. Include *JQuery* in the *head* of you html page
-1. Include the Webproducer, a Flash object for recording video.
+1. Include the Webproducer, a Flash object for recording video:
   - Copy the file  `swf/producer.swf` in your file system
 1. In the *head* of your html page, include all these files:
   1. `js/vrtk.min.js`
