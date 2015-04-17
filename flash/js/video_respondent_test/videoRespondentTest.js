@@ -428,7 +428,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if (vrt.isPlaying == false) {
                 vrt.streamName = this.videoList[this.currentMedia].streamCode;
                 $(window.vrt).trigger('vrt_event_streamname', [{streamname:vrt.streamName}]);
-                vrt.llog('REC event before');
+                vrt.llog("REC event before "+vrt.streamName);
                 try {
                     vrt.producer.remoteLogger.name = vrt.streamName;
                     vrt.producer.publish(vrt.streamName);
@@ -1066,15 +1066,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(start){
             vrt.chronoMessagge[pos] = msg;
             vrt.chronoStart[pos] = timeCheck;
-            str = 'CHRONO '+pos+': ' +startm+ ' ' + msg +': '+vrt.chronoStart[pos][4]+' '+vrt.chronoStart[pos][5]+' '+vrt.chronoStart[pos][6];
-            if (echo && console && console.log) console.log(str);
-
-        }else{
+            //str = "CHRONO " + pos + ": " + startm + " " + msg + ": " + vrt.chronoStart[pos][4] + " " + vrt.chronoStart[pos][5] + " " + vrt.chronoStart[pos][6];
+            //if (echo && console && console.log)console.log(str)
+        } else {
             vrt.chronoEnd[pos] = timeCheck;
-            str = 'CHRONO '+pos+': '+startm+ ' ' + msg +': '+vrt.chronoEnd[pos][4]+' '+vrt.chronoEnd[pos][5]+' '+vrt.chronoEnd[pos][6];
-            strend = 'CHRONO '+pos+': '+ msg +' RESULTS: ' + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7])
-            if (echo && console && console.log) console.log(str);
-            if (echo && console && console.log) console.log(strend);
+            //str = "CHRONO " + pos + ": " + startm + " " + msg + ": " + vrt.chronoEnd[pos][4] + " " + vrt.chronoEnd[pos][5] + " " + vrt.chronoEnd[pos][6];
+            //strend = "CHRONO " + pos + ": " + msg + " RESULTS: " + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7]);
+            //if (echo && console && console.log)console.log(str);
+            //if (echo && console && console.log)console.log(strend)
         };
 
         //if(echoHtml && pos==1) $('#vrt_timer_player').append('<br/>'+str +'<br/>'+ strend);
@@ -1273,7 +1272,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             // checking user permissions on camera
             this.once('camera-unmuted', function () {
-                vrt.log('!!PRODUCER camera unmuted');
+                vrt.log('!!PRODUCER camera unmuted 1');
                 vrt.log('camera unmuted','producerConnStatus');
                 vrt.log("===WEBP Camera is now available");
 
@@ -1304,9 +1303,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger('producer_init_ok');
                 $(window.vrt).trigger('vrt_event_producer_camera_ok');
             }
-
+/*
             this.once('camera-unmuted', function () {
-                vrt.log('!!PRODUCER camera unmuted');
+                vrt.log('!!PRODUCER camera unmuted 2');
                 vrt.log("Camera is now available");
                 vrt.log('camera aviable','producerConnStatus');
                 this.setMirroredPreview(true);
@@ -1314,7 +1313,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 this.setAudioStreamActive(false);
                 vrt.log('Is audio streaming active ? ', producer.getAudioStreamActive());
             });
-
+*/
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('publish',function(){
                 vrt.isRecording = true;
@@ -1337,11 +1336,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
                 vrt.log('!!PRODUCER connect');
 
-                this.setMirroredPreview(true);
+                //this.setMirroredPreview(true);
                 vrt.log('Is preview mirrored ? ', this.getMirroredPreview());
-                this.setAudioStreamActive(false);
+                //this.setAudioStreamActive(false);
                 vrt.log('Is audio streaming active ? ', this.getAudioStreamActive());
-                this.setStreamFPS(15);
+                //this.setStreamFPS(15);
                 vrt.log('FPS ', this.getStreamFPS());
                 $(vrt).trigger('vrtstep_connect');
 
@@ -1356,7 +1355,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             });
 
             this.on('save-metadata', function (url) {
-                console.log("The metadata file has been saved to "+ url);
+               //  console.log("The metadata file has been saved to "+ url);
             });
 
             this.on('error', function (reason) {
@@ -1570,7 +1569,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     vrt.ceclient.loadResearch(vrt.options.researchToken, function(research){
                         vrt.researchId = research.id;
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
-                    }, function(res){ console.log(res); });
+                    }, function(res){
+                        //console.log(res);
+                    });
                 } else {
                     apiClientSetupLoadMedia(vrt.options.researchId, apiClientCreateRespondent());
                 }

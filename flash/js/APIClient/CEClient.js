@@ -78,13 +78,14 @@ function CEClient() {
      * @param data          object|json
      */
     this.writeCustomData = function(responseId, data, cb){
-
-
         javaRest.response.writeCustomData(responseId, data, function (res){
             if(cb) cb(res);
         });
-
-
+    };
+    this.readResponseCustomData = function (responseId, cb) {
+        javaRest.response.readCustomData(responseId, null, function (res) {
+            if (cb)cb(res)
+        })
     };
 
     this.writeRespondentCustomData = function(responsendentId, data, cb){
@@ -208,12 +209,12 @@ function CEClient() {
 
     this.writeResponse = function (data, callback) {
         javaRest.postAuth("response" + javaRest.queryUrl(), data, function (response) {
-            console.log(response);
+            //console.log(jqXHR);response);
             if (callback) {
                 callback(response)
             }
         }, function (jqXHR, textStatus) {
-            console.log(jqXHR);
+            //console.log(jqXHR);jqXHR);
             if (callback) {
                 callback(jqXHR)
             }
@@ -225,34 +226,30 @@ function CEClient() {
             data.customData = JSON.stringify(data.customData)
         }
         javaRest.postAuth("respondent" + javaRest.queryUrl(), data, function (response) {
-            console.log(response);
+            //console.log(jqXHR);response);
             if (callback) {
                 callback(response)
             }
         }, function (jqXHR, textStatus) {
-            console.log(jqXHR);
+            //console.log(jqXHR);jqXHR);
             if (callback) {
                 callback(jqXHR)
             }
         })
     };
 
-    this.readRespondent = function (data, cb) {
-
-        var url = "respondent?id="+data;
-
-        javaRest.get(url, null,
-            function (res){
-                if(cb) {
-                    cb(res);
-                }
-            },
-            function (res){
-                if(cb) {
-                    cb(res);
-                }
+    this.readRespondent = function (data, cb, key) {
+        if(key===undefined) key = 'id';
+        var url = "respondent?"+key+"=" + data;
+        javaRest.get(url, null, function (res) {
+            if (cb) {
+                cb(res)
             }
-        );
+        }, function (res) {
+            if (cb) {
+                cb(res)
+            }
+        })
     };
 
 
@@ -485,7 +482,7 @@ javaRest.actionurl = function(actionurl){
     var s = actionurl;
     var n = s.indexOf('?');
     actionurl = s.substring(0, n != -1 ? n : s.length);
-    console.log('action url: '+ javaRest.version + '/'+ actionurl);
+    //console.log(jqXHR);'action url: '+ javaRest.version + '/'+ actionurl);
     return javaRest.version + '/'+ actionurl;
 };
 
@@ -745,7 +742,7 @@ javaRest.user.create = function (firstName, emailAddress, password, lastName, ca
             callback()
         },
         function(jqXHR, textStatus) {
-            console.log(jqXHR);
+            //console.log(jqXHR);jqXHR);
             callback(jqXHR)
         })
 
@@ -762,7 +759,7 @@ javaRest.user.download = function (callback) {
         'user/' + javaRest.cookie.get('userId'),
         {},
         function (response) {
-            console.log(response);
+            //console.log(jqXHR);response);
 
             javaRest.user.user = response;
 
@@ -770,7 +767,7 @@ javaRest.user.download = function (callback) {
             // version, just return. Else, we will run the callback.
             var sResponse = JSON.stringify(response);
             if (store.get('userResponse') === sResponse) {
-                console.log('cached');
+                //console.log(jqXHR);'cached');
                 return false
             }
 
@@ -945,7 +942,7 @@ javaRest.user.updateName = function (value, callback) {
             "firstName" : value
         },
         function (response) {
-            console.log(response);
+            //console.log(jqXHR);response);
             if (callback)
                 callback();
             // Clear user cache
@@ -957,10 +954,6 @@ javaRest.user.updateName = function (value, callback) {
             // Clear user cache
             javaRest.user.download()
         })
-};
-
-javaRest.response.readCustomData = function(id, callback) {
-
 };
 
 javaRest.HashTable = function(obj)
@@ -1061,12 +1054,25 @@ javaRest.response.writeCustomData = function(id, data, callback) {
             }
         },
         function(jqXHR, textStatus) {
-            console.log(jqXHR);
+            //console.log(jqXHR);jqXHR);
             if (callback) {
                 callback(jqXHR);
             }
         }
     );
+};
+
+javaRest.response.readCustomData = function (id, data, callback) {
+    javaRest.get("response/" + id + "/metadata", null, function (response) {
+        if (callback) {
+            callback(response)
+        }
+    }, function (jqXHR, textStatus) {
+
+        if (callback) {
+            callback(jqXHR)
+        }
+    })
 };
 
 javaRest.respondent = {};
@@ -1084,7 +1090,7 @@ javaRest.respondent.writeRespondentCustomData = function(id, data, callback) {
             }
         },
         function(jqXHR, textStatus) {
-            console.log(jqXHR);
+            //console.log(jqXHR);jqXHR);
             if (callback) {
                 callback(jqXHR);
             }
@@ -1115,10 +1121,10 @@ javaRest.processVideoUrl = function(){
 
 javaRest.queryUrl = function(){
     var els = [javaRest.sandboxUrl(), javaRest.engineTypeUrl(), javaRest.processVideoUrl()];
-    console.log(els);
+    //console.log(jqXHR);els);
     for(var i in els){        if(els[i]==''){els.splice(i,1);}    }
     els = els.join('&');
-    console.log(els);
+    //console.log(jqXHR);els);
     return (els=='') ? '':'?'+els;
 }
 /**
@@ -1145,7 +1151,7 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
             }
         },
         function(jqXHR, textStatus) {
-            console.log(jqXHR);
+            //console.log(jqXHR);jqXHR);
             if (callback) {
                 callback(jqXHR);
             }
@@ -1163,7 +1169,7 @@ javaRest.facevideo.info = function(response_id, callback) {
             }
         },
         function(jqXHR, textStatus) {
-            //console.log(jqXHR);
+            ////console.log(jqXHR);jqXHR);
             if (callback) {
                 callback(jqXHR);
             }
@@ -1213,7 +1219,7 @@ javaRest.verify.request_email = function (email, callback) {
             'emailAddress' : email
         },
         function (response) {
-            console.log(response);
+            //console.log(jqXHR);response);
             callback()
         },
         function(jqXHR, textStatus) {

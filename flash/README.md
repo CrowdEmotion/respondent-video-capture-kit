@@ -23,9 +23,9 @@ Components:
 
 1. Using a web server, set the document root to the project root, and connect to the domain
 
-    ```
+    `
     http://localhost/flash/examples/index.html
-    ```
+    `
 
 1. Click on "save connection data"
 
@@ -49,8 +49,9 @@ Components:
 ### Example
 
 For a fast implementation, please look at HTML files:
- 1. [examples/video_respondent_test.html](./examples/video_respondent_test.html) for streamig normal videos, or
- 2. [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) for streaming YouTube videos
+1. [examples/playcorder.html](./examples/playcorder.html) loading data from API
+1. [examples/video_respondent_test.html](./examples/video_respondent_test.html) for streamig normal videos, or
+1. [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) for streaming YouTube videos
 
 ### Implement Playcorder
 
@@ -59,111 +60,125 @@ For a fast implementation, please look at HTML files:
             2. Include *JQuery* in the *head* of you html page
 
 1. Include the Webproducer, a Flash object for recording video.
-            1. Copy the file  ```swf/producer.swf``` in your file system
+            1. Copy the file  `swf/producer.swf` in your file system
 
 
 1. In the *head* of your html page, include all these files:
-			1. ```js/vrtk.min.js```
-			2. ```js/vrtk.min.css```
+			1. `js/vrtk.min.js`
+			2. `js/vrtk.min.css`
 
 1. Include this html code in the *body* of your page
-     ```<div id="vrt"></div>```
+     `<div id="vrt"></div>`
 
-After this you can include options in two ways (using multiple parameters or one javascript objeect)
-     
-1. Multiple parameters (will be deprecated)
+1. Initialize PlayCorder 
+Paycorder can be initializated in two ways (using multiple parameters or one javascript object)
+
+###### Multiple parameters (deprecated)
+
 Include the following code in the *head* of your page
-     ```
+
+`
      <SCRIPT>
       $(document).ready(function(){
                  var vrt = new Vrt(<<VIDEOTYPE>>,<<VIDEODATA>>,<<STREAM DOMAIN>>,<<STREAM NAME>>,
                          <<API DOMAIN>>,<<API USERNAME>>, <<API PASSWORD>>,<<OPTIONS>>
                      );
              });
-     </SCRIPT>
-     ```       
-    - `VIDEOTYPE` string: ```youtube``` or ```customserver``` - choose if your video stimuli are hosted by YouTube or custom server
+     </SCRIPT>      
+`
 
-    - `VIDEODATA` array: list of video stimuli. 
+`<<VIDEOTYPE>>` string: youtube or customserver - choose if your video stimuli are hosted by YouTube or custom server
+
+`<<VIDEODATA>>` array: list of video stimuli. 
         
-        Each object must include 3 properties:
-            
-        - `path` a string with full url of video stimuli, like http://www.youtube.com/watch?v=o9BqrSAHbTc
-            
-        - `length` integer number of seconds, describe how long the video will be seen by users
-            
-        - `name` a simple string with name
-
-        - `id`  a numeric or string value, if missing, `id` = `name` ( _not mandatory_ )
-            
-        Example:
-        
-        ```
-        [
-           {'path': 'http://www.youtube.com/watch?v=o9BqrSAHbTc', 'length': 10, 'name' : 'How the sun sees you'},
-           {'path': 'http://www.youtube.com/watch?v=IJNR2EpS0jw', 'length': 11, 'name' : 'Dumb Ways to Die'},
-           {'path': 'http://www.youtube.com/watch?v=Yfr5ISTSIAM', 'length': 12, 'name' : 'best of Sheldon Cooper'}
-        ]
-        ```                 
-    - `STREAM DOMAIN` string: the URL where to stream the recorder output as a RTMP/Adobe Flash Media Server compatible (ask to [support@crowdemotion.co.uk](mailto:support@crowdemotion.co.uk) for more information if you like to use our servers)
+Each object must include 3 properties:            
+    - `path` a string with full url of video stimuli, like http://www.youtube.com/watch?v=o9BqrSAHbTc        
+    - `length` integer number of seconds, describe how long the video will be seen by users        
+    - `name` a simple string with name
+    - `id`  a numeric or string value, if missing, `id` = `name` ( _not mandatory_ )        
+    Example:
     
-    - `STREAM NAME` string: a simple string used as recording name
-    
-    - `API DOMAIN`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
-                         
-    - `OPTIONS` object: contains a list of properties
-        - `randomOrder` (*true* | *false* - default: *false*): display videos in a random order  
-        - `playerCentered` (*true* | *false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
-        - `playerWidth` (*integer* - default 640): set the width of the videos
-        - `playerHeight` (*integer* - default 400): set the height of the videos
-        - `customData` (*true* | *false* | *javascript object* ) (eg: {user_id:user_id}), insert any custom data by users in  js object format
-        - `customDataInsertMediaName`  (*true* | *false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
-        - `customDataInsertMediaId` (*true* | *false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
-        - `customDataInsertMediaPath`  (*true* | *false* - default: *false*) if `true`, insert media path value inside custom data with `media_path` key
-        - `timedOverPlayToEnd` (*true* | *false* - default: *false*) recording will finish at `length` value inside `VIDEODATA` array  (in seconds)
-        - `apiSandbox` (*true* | *false* - default: *false*) generate random emotions values instead analyzing video
-		-	```researchToken``` string: a random string bind to your research on CrowdEmotion system
-		-	```appToken``` string: a random string bind to your user on CrowdEmotion system
-		- ```responseAtStart``` boolean: you response id is generated before the start of video stimuli
+    `
+    [
+       {'path': 'http://www.youtube.com/watch?v=o9BqrSAHbTc', 'length': 10, 'name' : 'How the sun sees you'},
+       {'path': 'http://www.youtube.com/watch?v=IJNR2EpS0jw', 'length': 11, 'name' : 'Dumb Ways to Die'},
+       {'path': 'http://www.youtube.com/watch?v=Yfr5ISTSIAM', 'length': 12, 'name' : 'best of Sheldon Cooper'}
+    ]
+    `   
+                  
+- `<<STREAM DOMAIN>>` string: the URL where to stream the recorder output as a RTMP/Adobe Flash Media Server compatible (ask to [support@crowdemotion.co.uk](mailto:support@crowdemotion.co.uk) for more information if you like to use our servers)
 
-1. One javascript object as single parameter (suggested way)
-       Include the following code in the *head* of your page
-     ```
+- `<<STREAM NAME>>` string: a simple string used as recording name
+
+- `<<API DOMAIN>>`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
+                     
+- `<<OPTIONS>>` object: contains a list of properties
+    - `randomOrder` (*true* | *false* - default: *false*): display videos in a random order  
+    - `playerCentered` (*true* | *false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
+    - `playerWidth` (*integer* - default 640): set the width of the videos
+    - `playerHeight` (*integer* - default 400): set the height of the videos
+    - `customData` (*true* | *false* | *javascript object* ) (eg: {user_id:user_id}), insert any custom data by users in  js object format
+    - `customDataInsertMediaName`  (*true* | *false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
+    - `customDataInsertMediaId` (*true* | *false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
+    - `customDataInsertMediaPath`  (*true* | *false* - default: *false*) if `true`, insert media path value inside custom data with `media_path` key
+    - `timedOverPlayToEnd` (*true* | *false* - default: *false*) recording will finish at `length` value inside `VIDEODATA` array  (in seconds)
+    - `apiSandbox` (*true* | *false* - default: *false*) generate random emotions values instead analyzing video
+    - `researchToken` string: a random string bind to your research on CrowdEmotion system
+    - `appToken` string: a random string bind to your user on CrowdEmotion system
+    - `responseAtStart` boolean: you response id is generated before the start of video stimuli
+    - `respondentName` string: save a string data before the start of video session
+    - `respondentCustomDataString` javascript object: save a js object as string before the start of video session
+    - `respondentCustomData` : javascript object: save a js object before the start of video session
+
+###### One javascript object as single parameter (suggested way)
+Include the following code in the tag *head* of your page
+       
+     `
      <SCRIPT>
       $(document).ready(function(){
                  var vrt = new Vrt(<<OPTIONS>>);
      </SCRIPT>
-     ```        
-the ```<<OPTIONS>>``` values are the same of previous paragraph, just add these values:
-		-	```type``` string: ```youtube``` or ```custom server``` - choose if your video stimuli are hosted by YouTube or custom server
-		-	```list``` array: list of video stimuli, please follow  instruction on previous paragraph under the ```<<VIDEODATA>> ``` option
-		- ```streamName``` string: a simple string used as recording name
-		- ```apiDomain``` string : contain CrowdEmotion API domain to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
+     `        
+     
+the  `<<OPTIONS>>` values are the same of previous paragraph, just add these values:
+    - `type` string: `youtube` or `custom server` - choose if your video stimuli are hosted by YouTube or custom server
+    - `list` array: list of video stimuli, please follow  instruction on previous paragraph under the `<<VIDEODATA>> ` option
+    - `streamName` string: a simple string used as recording name
+    - `apiDomain` string : contain CrowdEmotion API domain to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
 
-                     
+### Load Playcorder media from API
+If the `appToken` and `researchToken` options are implemented, media are loaded through the CrowdEmotion API backend [http://api.crowdemotion.co.uk/] 
+To upload media, just follow these  steps
+
+1. Signup at [http://api.crowdemotion.co.uk/#/signup] and confirm
+2. Login at [http://api-beta.crowdemotion.co.uk/#/login] 
+3. Create a project [http://api-beta.crowdemotion.co.uk/#/project]
+4. Upload media [http://api-beta.crowdemotion.co.uk/#/project] 
+5. Assign media created to your project and check project as `ready`
+                  
                     
-1. Implement in you code the listeners for the following events:
+### Implement in you code the listeners for the following events:
 
-    - `vrt_event_preview_loaded`:              all objects are loaded
-    - `vrt_event_producer_camera_ok`:          the user camera is ok
-    - `vrt_event_api_login_fail`:              login to api is failed
-    - `vrt_event_producer_camera_muted`:       webcam is waiting for user permission
-    - `vrt_event_producer_camera_blocked`:     user block webcam
-    - `vrt_event_start_video_session`:         the first video stimuli is played and producer is recording        
-    - `vrt_event_video_step_completed`:       one video stimuli is ended and facevideos is uplodead, a `responseId` is received 
-    - `vrt_event_user_next_video`:             user is ready for next video              
-    - `vrt_event_video_session_complete`:      all video stimuli are played
-    - `vrt_event_user_session_complete`:       user finish his session
-    - `vrt_event_flash_old`:                   the Flash version included is too old (Flash 11.1.0 is required)
-    - `vrt_event_flash_no`:                    there is no Flash included
-    - `vrt_event_producer_no_camera_found`:    no camera found
-    - `vrt_event_frame_open`:                  use this event to open a frame OR user the `openFrame()` method 
-    - `vrt_event_frame_close`:                 triggere by the `closeFrame()` method
-	- `vrt_event_create_response` : if the option `responseAtStart` is `true`, this event will send you the response id before the video play
+- `vrt_event_preview_loaded`:              all objects are loaded
+- `vrt_event_producer_camera_ok`:          the user camera is ok
+- `vrt_event_api_login_fail`:              login to api is failed
+- `vrt_event_producer_camera_muted`:       webcam is waiting for user permission
+- `vrt_event_producer_camera_blocked`:     user block webcam
+- `vrt_event_start_video_session`:         the first video stimuli is played and producer is recording        
+- `vrt_event_video_step_completed`:       one video stimuli is ended and facevideos is uplodead, a `responseId` is received 
+- `vrt_event_user_next_video`:             user is ready for next video              
+- `vrt_event_video_session_complete`:      all video stimuli are played
+- `vrt_event_user_session_complete`:       user finish his session
+- `vrt_event_flash_old`:                   the Flash version included is too old (Flash 11.1.0 is required)
+- `vrt_event_flash_no`:                    there is no Flash included
+- `vrt_event_producer_no_camera_found`:    no camera found
+- `vrt_event_frame_open`:                  use this event to open a frame OR user the `openFrame()` method 
+- `vrt_event_frame_close`:                 triggere by the `closeFrame()` method
+- `vrt_event_create_response` : if the option `responseAtStart` is `true`, this event will send you the response id before the video play
 
-    Example ```  $(window.vrt).on('vrt_event_producer_camera_blocked', function () {
-                            alert('The webcam is blocked');
-                        }); ```
+Example `  $(window.vrt).on('vrt_event_producer_camera_blocked', function () {
+                        alert('The webcam is blocked');
+                    }); `
          
 1. List of usable methods
     -  `recorderHide()`:                          hide the recorder
@@ -174,51 +189,61 @@ the ```<<OPTIONS>>``` values are the same of previous paragraph, just add these 
     -  `closeFrame()` :                           close a frame opened with the `openFrame` method
 
 ## Code examples
+
+#### Initialization example
+```
+(document).ready(function(){
+	//create PlayCorder object
+	var vrt = new Vrt(optionstype:’youtube’, list:{} ,streamName:’test’, streamUrl:’xxxx.com’, researchToken:’XXXXXXXXYYYYYYYYY’,appToken:’AAAAAAAABBBBBBBBBB’,
+                apiDomain:’http://api.com',
+                debug:true, debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true,
+                randomOrder : true, timedOverPlayToEnd:false, continuosPlay:true,
+                customData:{user_id:user_id}, customDataInsertMediaName: true, customDataInsertMediaId: true,
+                customDataInsertMediaPath : true, responseAtStart: true,
+                respondentName: ’nnnnnn’,
+                respondentCustomDataString:  {name:’nnnn’, lastname:’mmmm’},
+                respondentCustomData : {name1:’myname’, lastname1:’mylastname’});
+
+	//Implement event and method related to PlayCorder
+ 		$(vrt).on(‘vrt_event_producer_camera_ok’,function()	{ alert(‘Your webcam is ok’) });
+	//...insert code here 
+	//PlayCorder start
+	vrt.init();
+});
+```
+
 #### Adding custom data
+
+Playcorder has 2 type of custom data: 
+1. custom data for every `response`, saved before or after every video
+2. custom data for every `respondent`, saved once before the start of session (`respondent` is a group of responses)
+
+##### Response custom data
 Custom data could be added in two ways
 1. using the method _apiClientSaveCustomData()_ 
 2. setting the option _customData_ inside vrt object
-##### 1. method _apiClientSaveCustomData()_ 
+
+##### method _apiClientSaveCustomData()_ 
 _apiClientSaveCustomData()_ can be used every time a face video is uploaded through the API
-```
-window.vrt.apiClientSaveCustomData( api_response_id , data_object, callback_function)
-```
-```api_response_id``` is an integer value provided by CrowdEmotion API after a video upload
 
-```data_object``` is a js script object with custom values, like  ```{user_id:333;user_name:’john’}```
+`window.vrt.apiClientSaveCustomData( api_response_id , data_object, callback_function)`
 
-```callback_function``` is the function called at end of _apiClientSaveCustomData()_
+`api_response_id` is an integer value provided by CrowdEmotion API after a video upload
 
-##### 2. Options
-When the vrt object is created, some options are available
-```
+`data_object` is a js script object with custom values, like  `{user_id:333;user_name:’john’}`
 
-var videoData = [{'path': 'http://yt.be/v/7126', 
-	'length': 5, 
-	'name' : '30 sec 1', 
-	id:1}];
-var userData = {user_id:12}
-var options = {customData: userData,
-customDataInsertMediaName: true, 
-customDataInsertMediaId: true, 
-customDataInsertMediaPath : true };
+`callback_function` is the function called at end of _apiClientSaveCustomData()_
 
-var vrt = new Vrt(‘youtube’,videoData,streamDomain,streamName,
-				apiDomain,apiUsername, apiPassword,options );
-```
+##### Respondent custom data
 
-At end of each video session, _vrt_ object will save the values inside the variable _videoData_ and _userData_ according to the variable _options_
-
-Check the file for an example```/flash/example/video_respondent_test_dev.html```
-
+To implement `respondent` custom data just add the options  `respondentName` , `respondentCustomDataString`, `respondentCustomData` to PlayCorder initialization
 
 ##NOTES
 
-```vrtk.min.js``` and ```vtk.min.css`` are compressed files that contains all js/css files in these folders:
+`vrtk.min.js` and `vtk.min.css`` are compressed files that contains all js/css files in these folders:
     - js/APIClient/
     - js/external/
     - js/recorder/
     - js/video/ [^]
     - js/video_respondent_test/
  
-
