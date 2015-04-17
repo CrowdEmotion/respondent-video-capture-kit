@@ -7,7 +7,7 @@ CrowdEmotion PlayCorder includes two different functionalities:
  - playcorder (example: examples/video_respondent_test.html) include the Flash recorder and a video player (video.js)
 
 
-## Recorder Page Description
+## Recorder Example Page
 
 This page explains how embed PlayCorder to record and upload a video.
  
@@ -19,17 +19,21 @@ Components:
 
 ### How It Works (UI)
 
-1. Set connection values in the recorderConfiguration.js file
-2. Using a web server, set the document root to the project root, and connect to the domain
+1. Set connection values in file `flash/js/examples/recorderConfiguration.js`
+1. Using a web server, set the document root to the PlayCorder project root, and connect to the URL http://localhost:8080/flash/examples/recorder.html with your browser
+1. Click on "save connection data"
+1. Click on "start recording" and "stop recording" when you finish
+1. After clicking on "stop recording", wait until your video is uploaded
+
+A quick way to start a simple web server from the command line is:
+
 ```
-http://localhost/flash/examples/index.html
+~$ cd respondent-video-capture-kit/
+~/respondent-video-capture-kit$ python -m SimpleHTTPServer 8080
 ```
-3. Click on "save connection data"
-4. Click on "start recording" and "stop recording" when you finish
-5. After clicking on "stop recording", wait until your video is uploaded
 
 
-## PlayCorder Page Description
+## PlayCorder Example Pages
 
 PlayCorder include all the components required to play a video stimuli, record the user and upload a video for analysis.
 
@@ -47,6 +51,8 @@ For a quick implementation, please look at HTML files:
 1. [examples/playcorder.html](./examples/playcorder.html) loading data from API
 1. [examples/video_respondent_test.html](./examples/video_respondent_test.html) for streamig normal videos, or
 1. [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) for streaming YouTube videos
+
+These files can be opened through the page http://localhost:8080/flash/index.html following the same directions in the previous paragraphs.
 
 
 ### Implement PlayCorder
