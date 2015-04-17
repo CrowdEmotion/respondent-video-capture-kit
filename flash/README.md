@@ -20,7 +20,7 @@ Components:
 ### How It Works (UI)
 
 1. Set connection values in file `flash/js/examples/recorderConfiguration.js`
-1. Using a web server, set the document root to the PlayCorder project root, and connect to the URL (http://localhost:8080/flash/examples/recorder.html) with your browser
+1. Using a web server, set the document root to the PlayCorder project root, and connect to the URL [](http://localhost:8080/flash/examples/recorder.html) with your browser
 1. Click on "save connection data"
 1. Click on "start recording" and "stop recording" when you finish
 1. After clicking on "stop recording", wait until your video is uploaded
@@ -52,7 +52,7 @@ For a quick implementation, please look at HTML files:
 1. [examples/video_respondent_test.html](./examples/video_respondent_test.html) for streamig normal videos, or
 1. [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) for streaming YouTube videos
 
-These files can be opened through the page (http://localhost:8080/flash/index.html) following the same directions in the previous paragraphs.
+These files can be opened through the page [](http://localhost:8080/flash/index.html) following the same directions in the previous paragraphs.
 
 
 ### Implement PlayCorder
