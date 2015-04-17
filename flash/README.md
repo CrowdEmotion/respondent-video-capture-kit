@@ -53,6 +53,7 @@ For a quick implementation, please look at HTML files:
 1. [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) for streaming YouTube videos
 
 These files can be opened through the page [http://localhost:8080/flash/index.html](http://localhost:8080/flash/index.html) following the same directions in the previous paragraphs.
+Set connection values in the files `flash/js/examples/videoRespondentTestConf.js` and/or `flash/js/examples/videoRespondentTestConfYT.js` before opening it.
 
 
 ### Implement PlayCorder
