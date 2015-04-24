@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-4-7 12:54 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-4-24 12:5 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -1662,6 +1662,11 @@ function CEClient() {
             if (cb) cb(res);
         });
     };
+    this.readResponseCustomData = function(responseId, cb) {
+        javaRest.response.readCustomData(responseId, null, function(res) {
+            if (cb) cb(res);
+        });
+    };
     this.writeRespondentCustomData = function(responsendentId, data, cb) {
         javaRest.respondent.writeRespondentCustomData(responsendentId, data, function(res) {
             if (cb) cb(res);
@@ -1761,12 +1766,10 @@ function CEClient() {
     };
     this.writeResponse = function(data, callback) {
         javaRest.postAuth("response" + javaRest.queryUrl(), data, function(response) {
-            console.log(response);
             if (callback) {
                 callback(response);
             }
         }, function(jqXHR, textStatus) {
-            console.log(jqXHR);
             if (callback) {
                 callback(jqXHR);
             }
@@ -1777,19 +1780,18 @@ function CEClient() {
             data.customData = JSON.stringify(data.customData);
         }
         javaRest.postAuth("respondent" + javaRest.queryUrl(), data, function(response) {
-            console.log(response);
             if (callback) {
                 callback(response);
             }
         }, function(jqXHR, textStatus) {
-            console.log(jqXHR);
             if (callback) {
                 callback(jqXHR);
             }
         });
     };
-    this.readRespondent = function(data, cb) {
-        var url = "respondent?id=" + data;
+    this.readRespondent = function(data, cb, key) {
+        if (key === undefined) key = "id";
+        var url = "respondent?" + key + "=" + data;
         javaRest.get(url, null, function(res) {
             if (cb) {
                 cb(res);
@@ -1990,7 +1992,6 @@ javaRest.actionurl = function(actionurl) {
     var s = actionurl;
     var n = s.indexOf("?");
     actionurl = s.substring(0, n != -1 ? n : s.length);
-    console.log("action url: " + javaRest.version + "/" + actionurl);
     return javaRest.version + "/" + actionurl;
 };
 
@@ -2157,18 +2158,15 @@ javaRest.user.create = function(firstName, emailAddress, password, lastName, cal
         javaRest.cookie.set("email", emailAddress);
         callback();
     }, function(jqXHR, textStatus) {
-        console.log(jqXHR);
         callback(jqXHR);
     });
 };
 
 javaRest.user.download = function(callback) {
     javaRest.get("user/" + javaRest.cookie.get("userId"), {}, function(response) {
-        console.log(response);
         javaRest.user.user = response;
         var sResponse = JSON.stringify(response);
         if (store.get("userResponse") === sResponse) {
-            console.log("cached");
             return false;
         }
         store.set("userResponse", sResponse);
@@ -2266,7 +2264,6 @@ javaRest.user.updateName = function(value, callback) {
         emailAddress: javaRest.cookie.get("email"),
         firstName: value
     }, function(response) {
-        console.log(response);
         if (callback) callback();
         javaRest.user.download();
     }, function(jqXHR, textStatus) {
@@ -2274,8 +2271,6 @@ javaRest.user.updateName = function(value, callback) {
         javaRest.user.download();
     });
 };
-
-javaRest.response.readCustomData = function(id, callback) {};
 
 javaRest.HashTable = function(obj) {
     this.length = 0;
@@ -2353,7 +2348,18 @@ javaRest.response.writeCustomData = function(id, data, callback) {
             callback(response);
         }
     }, function(jqXHR, textStatus) {
-        console.log(jqXHR);
+        if (callback) {
+            callback(jqXHR);
+        }
+    });
+};
+
+javaRest.response.readCustomData = function(id, data, callback) {
+    javaRest.get("response/" + id + "/metadata", null, function(response) {
+        if (callback) {
+            callback(response);
+        }
+    }, function(jqXHR, textStatus) {
         if (callback) {
             callback(jqXHR);
         }
@@ -2372,7 +2378,6 @@ javaRest.respondent.writeRespondentCustomData = function(id, data, callback) {
             callback(response);
         }
     }, function(jqXHR, textStatus) {
-        console.log(jqXHR);
         if (callback) {
             callback(jqXHR);
         }
@@ -2402,14 +2407,12 @@ javaRest.processVideoUrl = function() {
 
 javaRest.queryUrl = function() {
     var els = [ javaRest.sandboxUrl(), javaRest.engineTypeUrl(), javaRest.processVideoUrl() ];
-    console.log(els);
     for (var i in els) {
         if (els[i] == "") {
             els.splice(i, 1);
         }
     }
     els = els.join("&");
-    console.log(els);
     return els == "" ? "" : "?" + els;
 };
 
@@ -2424,7 +2427,6 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
             callback(response);
         }
     }, function(jqXHR, textStatus) {
-        console.log(jqXHR);
         if (callback) {
             callback(jqXHR);
         }
@@ -2465,7 +2467,6 @@ javaRest.verify.request_email = function(email, callback) {
     javaRest.post("verify/tokens", {
         emailAddress: email
     }, function(response) {
-        console.log(response);
         callback();
     }, function(jqXHR, textStatus) {
         callback(jqXHR);
@@ -7830,7 +7831,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger("vrt_event_streamname", [ {
                     streamname: vrt.streamName
                 } ]);
-                vrt.llog("REC event before");
+                vrt.llog("REC event before " + vrt.streamName);
                 try {
                     vrt.producer.remoteLogger.name = vrt.streamName;
                     vrt.producer.publish(vrt.streamName);
@@ -8181,8 +8182,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (cb) cb();
     };
     this.producerConnection = function() {
-        vrt.log(">>STEP producer connection");
-        vrt.producer.connect();
+        vrt.log("!!STEP producer connection " + Date.now());
+        setTimeout(function() {
+            vrt.log("!!STEP producer connection " + Date.now());
+            vrt.producer.connect();
+        }, 1e3);
         $(vrt).trigger("vrt_event_connect_start");
     };
     this.hideVideobox = function(cb) {
@@ -8284,14 +8288,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (start) {
             vrt.chronoMessagge[pos] = msg;
             vrt.chronoStart[pos] = timeCheck;
-            str = "CHRONO " + pos + ": " + startm + " " + msg + ": " + vrt.chronoStart[pos][4] + " " + vrt.chronoStart[pos][5] + " " + vrt.chronoStart[pos][6];
-            if (echo && console && console.log) console.log(str);
         } else {
             vrt.chronoEnd[pos] = timeCheck;
-            str = "CHRONO " + pos + ": " + startm + " " + msg + ": " + vrt.chronoEnd[pos][4] + " " + vrt.chronoEnd[pos][5] + " " + vrt.chronoEnd[pos][6];
-            strend = "CHRONO " + pos + ": " + msg + " RESULTS: " + vrt.get_time_diff(vrt.chronoStart[pos][7], vrt.chronoEnd[pos][7]);
-            if (echo && console && console.log) console.log(str);
-            if (echo && console && console.log) console.log(strend);
         }
         str = "";
         strend = "";
@@ -8371,6 +8369,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
     };
     this.skip_video = function() {
+        $(vrt).trigger("vrt_event_skip_or_end_video");
         if (!window.vrt.stepCompleted) {
             vrt.stop_playing();
             vrt.stop_rec();
@@ -8448,7 +8447,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger("vrt_event_producer_camera_found");
             }
             this.once("camera-unmuted", function() {
-                vrt.log("!!PRODUCER camera unmuted");
+                vrt.log("!!PRODUCER camera unmuted 1");
                 vrt.log("camera unmuted", "producerConnStatus");
                 vrt.log("===WEBP Camera is now available");
                 vrt.popOverCe("pop_click_allow", "destroy");
@@ -8475,15 +8474,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger("producer_init_ok");
                 $(window.vrt).trigger("vrt_event_producer_camera_ok");
             }
-            this.once("camera-unmuted", function() {
-                vrt.log("!!PRODUCER camera unmuted");
-                vrt.log("Camera is now available");
-                vrt.log("camera aviable", "producerConnStatus");
-                this.setMirroredPreview(true);
-                vrt.log("Is preview mirrored ? ", this.getMirroredPreview());
-                this.setAudioStreamActive(false);
-                vrt.log("Is audio streaming active ? ", producer.getAudioStreamActive());
-            });
             this.on("publish", function() {
                 vrt.isRecording = true;
                 $(vrt).trigger("vrtevent_player_ts", {
@@ -8504,11 +8494,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             });
             this.on("connect", function() {
                 vrt.log("!!PRODUCER connect");
-                this.setMirroredPreview(true);
                 vrt.log("Is preview mirrored ? ", this.getMirroredPreview());
-                this.setAudioStreamActive(false);
                 vrt.log("Is audio streaming active ? ", this.getAudioStreamActive());
-                this.setStreamFPS(15);
                 vrt.log("FPS ", this.getStreamFPS());
                 $(vrt).trigger("vrtstep_connect");
             });
@@ -8518,9 +8505,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.postPartecipate();
                 vrt.facevideoUpload(url, vrt.stepComplete);
             });
-            this.on("save-metadata", function(url) {
-                console.log("The metadata file has been saved to " + url);
-            });
+            this.on("save-metadata", function(url) {});
             this.on("error", function(reason) {
                 vrt.isRecording = false;
                 vrt.log("!!PRODUCER error " + reason);
@@ -8697,9 +8682,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     vrt.ceclient.loadResearch(vrt.options.researchToken, function(research) {
                         vrt.researchId = research.id;
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
-                    }, function(res) {
-                        console.log(res);
-                    });
+                    }, function(res) {});
                 } else {
                     apiClientSetupLoadMedia(vrt.options.researchId, apiClientCreateRespondent());
                 }

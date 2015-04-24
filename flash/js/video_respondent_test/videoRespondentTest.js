@@ -923,8 +923,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.producerConnection = function() {
-        vrt.log('>>STEP producer connection')
-        vrt.producer.connect();
+        vrt.log('!!STEP producer connection '+ Date.now());
+        setTimeout(function(){
+            vrt.log('!!STEP producer connection '+ Date.now());
+            vrt.producer.connect();},1000);
         $(vrt).trigger('vrt_event_connect_start');
     };
 
@@ -1192,6 +1194,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.skip_video = function () {
+        $(vrt).trigger('vrt_event_skip_or_end_video');
         if (!window.vrt.stepCompleted) {
             vrt.stop_playing();
             vrt.stop_rec();
@@ -1335,7 +1338,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.on('connect', function () {
 
                 vrt.log('!!PRODUCER connect');
-
                 //this.setMirroredPreview(true);
                 vrt.log('Is preview mirrored ? ', this.getMirroredPreview());
                 //this.setAudioStreamActive(false);
@@ -1343,7 +1345,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 //this.setStreamFPS(15);
                 vrt.log('FPS ', this.getStreamFPS());
                 $(vrt).trigger('vrtstep_connect');
-
 
             });
 

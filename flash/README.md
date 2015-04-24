@@ -172,7 +172,8 @@ To upload media, just follow these steps:
 - `vrt_event_producer_camera_blocked`:     user block webcam
 - `vrt_event_start_video_session`:         the first video stimuli is played and producer is recording        
 - `vrt_event_video_step_completed`:        one video stimuli is ended and facevideos is uplodead, a `responseId` is received 
-- `vrt_event_user_next_video`:             user is ready for next video              
+- `vrt_event_user_next_video`:             user is ready for next video
+- `vrt_event_skip_or_end_video`:           video stimuli reach the end or skipped by user              
 - `vrt_event_video_session_complete`:      all video stimuli are played
 - `vrt_event_user_session_complete`:       user finish his session
 - `vrt_event_flash_old`:                   the Flash version included is too old (Flash 11.1.0 is required)
