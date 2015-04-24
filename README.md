@@ -11,7 +11,7 @@ This components can be integrated on any web platform in a few hours, adding the
 
 Contents:
 
- - flash: includes a Flash recorder and HTML/Javascript components
+ - [flash](./flash): includes a Flash recorder and HTML/Javascript components
 
 
 Advantages
