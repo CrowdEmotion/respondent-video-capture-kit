@@ -379,8 +379,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on('producer_init_camera_ok', function () {
             vrt.llog('!!--producer_init_camera_ok');
-            vrt.producerSetupConnection(vrt.producerConnection);
-
+            //delay between camera allow and connection
+            setTimeout(function(){
+                    vrt.producerSetupConnection(vrt.producerConnection);
+            },3000);
         });
         $(window.vrt).on('api_init_ok', function () {
             vrt.llog('!!--api_init_ok');
@@ -919,9 +921,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.producerConnection = function() {
         vrt.log('!!STEP producer connection '+ Date.now());
-        vrt.log('!!STEP producer connection '+ Date.now());
-        vrt.producer.connect();
-        $(vrt).trigger('vrt_event_connect_start');
+        setTimeout(function(){
+            vrt.producer.connect();
+            $(vrt).trigger('vrt_event_connect_start');
+        },1000);
     };
 
     this.hideVideobox = function(cb){
@@ -1324,10 +1327,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log('Is audio streaming active ? ', this.getAudioStreamActive());
                 //this.setStreamFPS(15);
                 vrt.log('FPS ', this.getStreamFPS());
-                $(window.vrt).trigger('vrt_event_producer_camera_ok');
-                window.vrt.vrtTrigLoadend('producer_init_ok');
-                $(vrt).trigger('vrtstep_connect');
-
+                setTimeout(function(){
+                    $(window.vrt).trigger('vrt_event_producer_camera_ok');
+                    window.vrt.vrtTrigLoadend('producer_init_ok');
+                    $(vrt).trigger('vrtstep_connect');
+                },1000);
             });
 
             this.on('save', function (url) {
