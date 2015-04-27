@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-4-24 12:5 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-4-27 15:34 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -7588,6 +7588,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.processVideo = true;
     this.responseList = [];
     this.respondentId = null;
+    this.newInit = false;
     this.initMediaList = function(type, list) {
         if (!list) return;
         this.mediaCount = list.length;
@@ -7609,6 +7610,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             apiPassword = data.apiPassword ? data.apiPassword : null;
             options = type;
             type = data.type ? data.type : null;
+            this.newInit = true;
         }
         if (options == undefined || options == null) options = {
             player: {}
@@ -7646,6 +7648,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         options && options.playerHeight != undefined ? this.options.player.height = options.playerHeight : this.options.player.height = 400;
         options && options.apiSandbox != undefined ? this.options.apiSandbox = options.apiSandbox : this.options.apiSandbox = false;
         options && options.responseAtStart != undefined ? this.responseAtStart = options.responseAtStart : this.options.responseAtStart = false;
+        if (this.newInit) {
+            this.responseAtStart = options.responseAtStart = true;
+        }
         options && options.engineType != undefined ? this.options.engineType = options.engineType : this.options.engineType = "kanako";
         options && options.respondentCustomDataString != undefined ? this.options.respondentCustomDataString = options.respondentCustomDataString : this.options.respondentCustomDataString = {};
         options && options.respondentCustomData != undefined ? this.options.respondentCustomData = options.respondentCustomData : this.options.respondentCustomData = {};
@@ -7778,14 +7783,16 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger("vrt_event_fatal_error");
             }
         });
+        $(window.vrt).on("vrt_event_producer_camera_ok", function() {
+            vrt.llog("!! PlayCorder initialized correctly (vrt_event_producer_camera_ok)");
+        });
         $(window.vrt).on("vrt_init_ok", function() {
             vrt.llog("!!--vrt_init_ok");
             window.vrt.vrtTrigLoadend("vrt_init_ok");
         });
-        $(window.vrt).on("producer_init_ok", function() {
-            vrt.llog("!!--producer_init_ok");
+        $(window.vrt).on("producer_init_camera_ok", function() {
+            vrt.llog("!!--producer_init_camera_ok");
             vrt.producerSetupConnection(vrt.producerConnection);
-            window.vrt.vrtTrigLoadend("producer_init_ok");
         });
         $(window.vrt).on("api_init_ok", function() {
             vrt.llog("!!--api_init_ok");
@@ -7937,6 +7944,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         window.vrt.vrtOnStartSequence++;
         vrt.log("EVT vrtOnStartSequence " + evtname + " " + window.vrt.vrtOnStartSequence);
         if (window.vrt.vrtOnStartSequence >= 3) {
+            vrt.log("!!--> vrt_event_preview_loaded ");
             $(window.vrt).trigger("vrt_event_preview_loaded");
         }
     };
@@ -8166,11 +8174,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log("player_is_ready_after");
         this.player.video_play();
     };
-    this.startRecording = function() {
-        this.log("startRecording");
-        this.log("Producer recording starting");
-        this.producerConnection();
-    };
     this.producerSetupConnection = function(cb) {
         this.log("!! filename " + this.producerStreamName);
         var url = "rtmp://" + this.producerStreamUrl + ":1935/live";
@@ -8183,10 +8186,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
     this.producerConnection = function() {
         vrt.log("!!STEP producer connection " + Date.now());
-        setTimeout(function() {
-            vrt.log("!!STEP producer connection " + Date.now());
-            vrt.producer.connect();
-        }, 1e3);
+        vrt.log("!!STEP producer connection " + Date.now());
+        vrt.producer.connect();
         $(vrt).trigger("vrt_event_connect_start");
     };
     this.hideVideobox = function(cb) {
@@ -8447,13 +8448,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger("vrt_event_producer_camera_found");
             }
             this.once("camera-unmuted", function() {
-                vrt.log("!!PRODUCER camera unmuted 1");
+                vrt.log("!!PRODUCER camera unmuted 1" + Date.now());
                 vrt.log("camera unmuted", "producerConnStatus");
                 vrt.log("===WEBP Camera is now available");
                 vrt.popOverCe("pop_click_allow", "destroy");
                 vrt.popOverCe("pop_center");
-                $(window.vrt).trigger("producer_init_ok");
-                $(window.vrt).trigger("vrt_event_producer_camera_ok");
+                $(window.vrt).trigger("producer_init_camera_ok");
             });
             this.on("camera-muted", function() {
                 vrt.log("!!PRODUCER camera muted");
@@ -8471,8 +8471,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log("!!PRODUCER camera already unmuted");
                 vrt.log("camera aviable", "producerConnStatus");
                 vrt.log("===WEBP The camera is available, user already approved");
-                $(window.vrt).trigger("producer_init_ok");
-                $(window.vrt).trigger("vrt_event_producer_camera_ok");
+                $(window.vrt).trigger("producer_init_camera_ok");
             }
             this.on("publish", function() {
                 vrt.isRecording = true;
@@ -8497,6 +8496,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log("Is preview mirrored ? ", this.getMirroredPreview());
                 vrt.log("Is audio streaming active ? ", this.getAudioStreamActive());
                 vrt.log("FPS ", this.getStreamFPS());
+                $(window.vrt).trigger("vrt_event_producer_camera_ok");
+                window.vrt.vrtTrigLoadend("producer_init_ok");
                 $(vrt).trigger("vrtstep_connect");
             });
             this.on("save", function(url) {
