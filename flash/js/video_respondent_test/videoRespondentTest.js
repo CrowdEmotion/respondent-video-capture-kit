@@ -87,6 +87,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.processVideo = true;
     this.responseList = [];
     this.respondentId = null;
+    this.newInit = false;
 
     this.initMediaList = function(type, list) {
         if(!list) return;
@@ -112,6 +113,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             apiPassword = (data.apiPassword)?data.apiPassword:null;
             options     = type;
             type        = (data.type)?data.type:null;
+            this.newInit = true;
         }
 
         if (options == undefined || options == null) options = {player: {}};
@@ -152,6 +154,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.playerHeight != undefined) ? this.options.player.height = options.playerHeight : this.options.player.height = 400;
         (options && options.apiSandbox != undefined) ? this.options.apiSandbox = options.apiSandbox : this.options.apiSandbox = false;
         (options && options.responseAtStart != undefined) ? this.responseAtStart = options.responseAtStart : this.options.responseAtStart = false;
+        if(this.newInit){this.responseAtStart = options.responseAtStart = true;}
         (options && options.engineType != undefined) ? this.options.engineType = options.engineType : this.options.engineType = 'kanako';
         (options && options.respondentCustomDataString!= undefined)?
             this.options.respondentCustomDataString = options.respondentCustomDataString : this.options.respondentCustomDataString = {};
@@ -366,16 +369,18 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 //$(window.vrt).trigger('vrt_event_video_session_complete');
             }
         });
-
+        $(window.vrt).on('vrt_event_producer_camera_ok', function () {
+            vrt.llog('!! PlayCorder initialized correctly (vrt_event_producer_camera_ok)');
+        });
         //internal event: start
         $(window.vrt).on('vrt_init_ok', function () {
             vrt.llog('!!--vrt_init_ok');
             window.vrt.vrtTrigLoadend('vrt_init_ok');
         });
-        $(window.vrt).on('producer_init_ok', function () {
-            vrt.llog('!!--producer_init_ok');
+        $(window.vrt).on('producer_init_camera_ok', function () {
+            vrt.llog('!!--producer_init_camera_ok');
             vrt.producerSetupConnection(vrt.producerConnection);
-            window.vrt.vrtTrigLoadend('producer_init_ok');
+
         });
         $(window.vrt).on('api_init_ok', function () {
             vrt.llog('!!--api_init_ok');
@@ -463,8 +468,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         $(window.vrt).on('vrtstep_connect', function () {
             vrt.log('EVT vrtstep_connect ' + vrt.logTime());
-
-
         });
 
         $(window.vrt).on('vrt_event_publish', function () {
@@ -564,6 +567,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         window.vrt.vrtOnStartSequence++;
         vrt.log('EVT vrtOnStartSequence '+evtname+' '+ window.vrt.vrtOnStartSequence);
         if(window.vrt.vrtOnStartSequence>=3){
+            vrt.log('!!--> vrt_event_preview_loaded ');
             $(window.vrt).trigger('vrt_event_preview_loaded');
         }
     };
@@ -897,15 +901,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     };
 
-    this.startRecording = function() {
-        this.log('startRecording');
-        //if (!this.isRecording) {
-            this.log('Producer recording starting');
-            this.producerConnection();
-
-        //}
-    };
-
     this.producerSetupConnection = function(cb) {
 
         //this.log(streamUrl);
@@ -924,9 +919,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.producerConnection = function() {
         vrt.log('!!STEP producer connection '+ Date.now());
-        setTimeout(function(){
-            vrt.log('!!STEP producer connection '+ Date.now());
-            vrt.producer.connect();},1000);
+        vrt.log('!!STEP producer connection '+ Date.now());
+        vrt.producer.connect();
         $(vrt).trigger('vrt_event_connect_start');
     };
 
@@ -1275,14 +1269,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             // checking user permissions on camera
             this.once('camera-unmuted', function () {
-                vrt.log('!!PRODUCER camera unmuted 1');
+                vrt.log('!!PRODUCER camera unmuted 1'+ Date.now());
                 vrt.log('camera unmuted','producerConnStatus');
                 vrt.log("===WEBP Camera is now available");
-
                 vrt.popOverCe('pop_click_allow','destroy');
                 vrt.popOverCe('pop_center');
-                $(window.vrt).trigger('producer_init_ok');
-                $(window.vrt).trigger('vrt_event_producer_camera_ok');
+                $(window.vrt).trigger('producer_init_camera_ok');
             });
 
             this.on('camera-muted', function () {
@@ -1303,20 +1295,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log('!!PRODUCER camera already unmuted');
                 vrt.log('camera aviable','producerConnStatus');
                 vrt.log("===WEBP The camera is available, user already approved");
-                $(window.vrt).trigger('producer_init_ok');
-                $(window.vrt).trigger('vrt_event_producer_camera_ok');
+                $(window.vrt).trigger('producer_init_camera_ok');
             }
-/*
-            this.once('camera-unmuted', function () {
-                vrt.log('!!PRODUCER camera unmuted 2');
-                vrt.log("Camera is now available");
-                vrt.log('camera aviable','producerConnStatus');
-                this.setMirroredPreview(true);
-                vrt.log('Is preview mirrored ? ', this.getMirroredPreview());
-                this.setAudioStreamActive(false);
-                vrt.log('Is audio streaming active ? ', producer.getAudioStreamActive());
-            });
-*/
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('publish',function(){
                 vrt.isRecording = true;
@@ -1344,6 +1324,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log('Is audio streaming active ? ', this.getAudioStreamActive());
                 //this.setStreamFPS(15);
                 vrt.log('FPS ', this.getStreamFPS());
+                $(window.vrt).trigger('vrt_event_producer_camera_ok');
+                window.vrt.vrtTrigLoadend('producer_init_ok');
                 $(vrt).trigger('vrtstep_connect');
 
             });
