@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-4-27 17:26 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-5-2 13:28 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -7794,7 +7794,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.llog("!!--producer_init_camera_ok");
             setTimeout(function() {
                 vrt.producerSetupConnection(vrt.producerConnection);
-            }, 3e3);
+            }, 1e3);
         });
         $(window.vrt).on("api_init_ok", function() {
             vrt.llog("!!--api_init_ok");
@@ -8191,7 +8191,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         setTimeout(function() {
             vrt.producer.connect();
             $(vrt).trigger("vrt_event_connect_start");
-        }, 1e3);
+        }, 500);
     };
     this.hideVideobox = function(cb) {
         this.log("hideVideoBox");
@@ -8503,7 +8503,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     $(window.vrt).trigger("vrt_event_producer_camera_ok");
                     window.vrt.vrtTrigLoadend("producer_init_ok");
                     $(vrt).trigger("vrtstep_connect");
-                }, 1e3);
+                }, 500);
             });
             this.on("save", function(url) {
                 vrt.log("!!PRODUCER save " + url);

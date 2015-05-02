@@ -382,7 +382,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             //delay between camera allow and connection
             setTimeout(function(){
                     vrt.producerSetupConnection(vrt.producerConnection);
-            },3000);
+            },1000);
         });
         $(window.vrt).on('api_init_ok', function () {
             vrt.llog('!!--api_init_ok');
@@ -924,7 +924,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         setTimeout(function(){
             vrt.producer.connect();
             $(vrt).trigger('vrt_event_connect_start');
-        },1000);
+        },500);
     };
 
     this.hideVideobox = function(cb){
@@ -1331,7 +1331,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     $(window.vrt).trigger('vrt_event_producer_camera_ok');
                     window.vrt.vrtTrigLoadend('producer_init_ok');
                     $(vrt).trigger('vrtstep_connect');
-                },1000);
+                },500);
             });
 
             this.on('save', function (url) {
