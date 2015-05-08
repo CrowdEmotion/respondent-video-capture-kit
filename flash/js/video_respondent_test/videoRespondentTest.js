@@ -89,6 +89,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.respondentId = null;
     this.newInit = false;
 
+    this.researchTitle = '';
+    this.researchDesc = '';
+    this.researchComplete = true;
+    this.researchReady = false;
+    this.researchOutUrl = null;
+
     this.initMediaList = function(type, list) {
         if(!list) return;
 
@@ -362,7 +368,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
             if (window.vrt.fatalError == true) {
                 window.vrt.stepCompleted = true;
-                if (vrt.player.player && vrt.player.player.dispose) {
+                if (vrt.player && vrt.player.player && vrt.player.player.dispose) {
                     vrt.player.player.dispose();
                 }
                 $(window.vrt).trigger('vrt_event_fatal_error');
@@ -1554,7 +1560,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
                 if(vrt.options.researchToken) {
                     vrt.ceclient.loadResearch(vrt.options.researchToken, function(research){
+                        //console.log('research');console.log(research);
                         vrt.researchId = research.id;
+                        vrt.researchTitle = research.title? research.title : '';
+                        vrt.researchDesc = research.description ? research.description : '';
+                        vrt.researchComplete = research.complete ? research.complete : false;
+                        vrt.researchReady = research.ready? research.ready : true;
+                        vrt.researchOutUrl = research.outgoingUrl ? research.outgoingUrl : '';
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
                     }, function(res){
                         //console.log(res);

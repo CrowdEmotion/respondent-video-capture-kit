@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-5-2 13:28 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-5-8 11:5 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -7589,6 +7589,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.responseList = [];
     this.respondentId = null;
     this.newInit = false;
+    this.researchTitle = "";
+    this.researchDesc = "";
+    this.researchComplete = true;
+    this.researchReady = false;
+    this.researchOutUrl = null;
     this.initMediaList = function(type, list) {
         if (!list) return;
         this.mediaCount = list.length;
@@ -7777,7 +7782,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
             if (window.vrt.fatalError == true) {
                 window.vrt.stepCompleted = true;
-                if (vrt.player.player && vrt.player.player.dispose) {
+                if (vrt.player && vrt.player.player && vrt.player.player.dispose) {
                     vrt.player.player.dispose();
                 }
                 $(window.vrt).trigger("vrt_event_fatal_error");
@@ -8687,6 +8692,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 if (vrt.options.researchToken) {
                     vrt.ceclient.loadResearch(vrt.options.researchToken, function(research) {
                         vrt.researchId = research.id;
+                        vrt.researchTitle = research.title ? research.title : "";
+                        vrt.researchDesc = research.description ? research.description : "";
+                        vrt.researchComplete = research.complete ? research.complete : false;
+                        vrt.researchReady = research.ready ? research.ready : true;
+                        vrt.researchOutUrl = research.outgoingUrl ? research.outgoingUrl : "";
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
                     }, function(res) {});
                 } else {
