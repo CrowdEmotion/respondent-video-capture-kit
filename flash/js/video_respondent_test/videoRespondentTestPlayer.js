@@ -140,8 +140,8 @@ function VjsInterface() {
             try{
                 if(this.player.techName == 'Html5'){
                     this.player.pause();
-                    this.player.currentTime(this.player.duration());
-                    this.player.ended();
+                    //this.player.currentTime(this.player.duration());
+                    //this.player.ended();
                 }else if(!this.player.ended() && !this.player.paused()){
                     this.player.pause();
                 }else{
