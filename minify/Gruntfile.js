@@ -23,7 +23,7 @@ module.exports = function(grunt) {
                     '../flash/js/APIClient/enc-base64-min.js'
                 , '../flash/js/APIClient/store.js',
                     '../flash/js/APIClient/CEClient.js',
-                    '../flash/js/video/video-js-4-7/video.dev.js'
+                    '../flash/js/video/video-js-4-12/video.dev.js'
                 , '../flash/js/video_respondent_test/videoRespondentTestPlayer.js',
                     '../flash/js/video_respondent_test/videoRespondentTest.js'],
 
@@ -44,7 +44,7 @@ module.exports = function(grunt) {
                     '../flash/js/APIClient/enc-base64-min.js'
                     , '../flash/js/APIClient/store.js',
                     '../flash/js/APIClient/CEClient.js',
-                    '../flash/js/video/video-js-4-7/video.dev.js'
+                    '../flash/js/video/video-js-4-12/video.dev.js'
                     , '../flash/js/video_respondent_test/videoRespondentTestPlayer.js',
                     '../flash/js/video_respondent_test/videoRespondentTest.js'],
                 dest: '../flash/js/vrtk.all.js'

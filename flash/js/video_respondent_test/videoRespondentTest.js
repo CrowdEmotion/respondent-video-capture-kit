@@ -91,6 +91,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.researchTitle = '';
     this.researchDesc = '';
+    this.customData = '';
     this.researchComplete = true;
     this.researchReady = false;
     this.researchOutUrl = null;
@@ -438,7 +439,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(window.vrt).on('vrtstep_play', function (e, data) {
             vrt.log('EVT vrtstep_play caller ' + data.caller);
             vrt.llog('REC event');
-            if (vrt.isPlaying == false) {
+            if (!vrt.isPlaying) {
                 vrt.streamName = this.videoList[this.currentMedia].streamCode;
                 $(window.vrt).trigger('vrt_event_streamname', [{streamname:vrt.streamName}]);
                 vrt.llog("REC event before "+vrt.streamName);
@@ -738,20 +739,23 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(window.vrt).trigger('vrt_event_facevideo_upload',res.responseId);
     };
 
-    this.setupPlayer = function(){
-        this.log('setupPlayer / guideButtonVideo');
-
-        if(this.videoType=='youtube'){
-            this.player = window.ytInterface;
-        }else{
-            //videojs.options.flash.swf = "videovideo-js.swf";
-            videojs.options.techOrder = ["flash","html5"];
-            this.player = window.vjsInterface;
+    this.setupPlayer = function () {
+        this.log("setupPlayer / guideButtonVideo");
+        if (this.videoType == "youtube") {
+            this.player = window.ytInterface
+        } else {
+            var browserName = null, nAgt = navigator.userAgent;
+            if ((verOffset = nAgt.indexOf("Chrome")) != -1) {
+                browserName = "Chrome";
+            }
+            videojs.options.techOrder = ["flash", "html5"];
+            if (browserName == "Chrome") {
+                videojs.options.techOrder = ["html5", "flash"];
+            }
+            this.player = window.vjsInterface
         }
-
         var preloadfunc = this.player.preloadPlayer();
-
-        this.dopreload(preloadfunc);
+        this.dopreload(preloadfunc)
     };
 
     this.afterpreload = function (success) {
@@ -977,10 +981,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 if (msg instanceof Object) {
                     $('#vrtVal_' + display + ' span').html(JSON.stringify(msg));
                 } else {
-                    if (mode && mode == 'a')
-                        $('#vrtVal_' + display + ' span').append('<br/>' + JSON.stringify(msg));
-                    else
-                        $('#vrtVal_' + display + ' span').html(msg.toString());
+                    if (mode && mode == "a")$("#vrtVal_" + display + " span").append("<br/>" + JSON.stringify(msg)); else $("#vrtVal_" + display + " span").html(msg.toString())
                 }
             }
         }
@@ -1562,11 +1563,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     vrt.ceclient.loadResearch(vrt.options.researchToken, function(research){
                         //console.log('research');console.log(research);
                         vrt.researchId = research.id;
-                        vrt.researchTitle = research.title? research.title : '';
-                        vrt.researchDesc = research.description ? research.description : '';
-                        vrt.researchComplete = research.complete ? research.complete : false;
-                        vrt.researchReady = research.ready? research.ready : true;
-                        vrt.researchOutUrl = research.outgoingUrl ? research.outgoingUrl : '';
+                        vrt.researchTitle = research.title;
+                        vrt.researchDesc = research.description;
+                        vrt.customData = research.customData;
+                        vrt.researchComplete = research.complete;
+                        vrt.researchReady = research.ready;
+                        vrt.researchOutUrl = research.outgoingUrl;
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
                     }, function(res){
                         //console.log(res);

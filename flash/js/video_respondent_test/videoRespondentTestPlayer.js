@@ -13,6 +13,8 @@ function PlayerInterface() {
     this.swf = '',
     this.width = 640;
     this.height = 400;
+    this.hasStarted = false;
+    this.hasStopped = false;
 
     this.log = function (msg) {
         if (console.log) {
@@ -136,7 +138,11 @@ function VjsInterface() {
             this.player.src();
             this.isloadeddata = false;
             try{
-                if(!this.player.ended() && !this.player.paused()){
+                if(this.player.techName == 'Html5'){
+                    this.player.pause();
+                    this.player.currentTime(this.player.duration());
+                    this.player.ended();
+                }else if(!this.player.ended() && !this.player.paused()){
                     this.player.pause();
                 }else{
 
@@ -216,7 +222,7 @@ function VjsInterface() {
 
     this.loadeddata = function (cb) {
         vrt.log("EVT YSP loadeddata");
-        if(vrt.player.isloadeddata==false) {
+        if(!vrt.player.isloadeddata) {
             vrt.player.isloadeddata = true;
             $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
             $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
@@ -225,7 +231,7 @@ function VjsInterface() {
 
     this.loadedalldata = function (cb) {
         vrt.log("EVT YSP loadedalldata");
-        if(vrt.player.isloadeddata==false) {
+        if(!vrt.player.isloadeddatas && this.techName!="Html5") {
             vrt.player.isloadeddata = true;
             $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
             $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
