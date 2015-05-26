@@ -747,9 +747,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             var browserName = null, nAgt = navigator.userAgent;
             if ((verOffset = nAgt.indexOf("Chrome")) != -1) {
                 browserName = "Chrome";
+            }else if ((verOffset=nAgt.indexOf("Firefox"))!=-1) {
+                browserName = "Firefox";
             }
             videojs.options.techOrder = ["flash", "html5"];
-            if (browserName == "Chrome") {
+            if (browserName == "Chrome" || browserName == "Firefox") {
                 videojs.options.techOrder = ["html5", "flash"];
             }
             this.player = window.vjsInterface
