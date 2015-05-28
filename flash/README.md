@@ -141,7 +141,16 @@ Include the following code in the tag *head* of your page:
 ```
 <SCRIPT>
 $(document).ready(function(){
+         //Create Playcorder instance
          var vrt = new Vrt(<<OPTIONS>>);
+         
+         //Implement event listeners
+         $(vrt).on('vrt_event_XXXXXX',function(){ // code here});
+         $(vrt).on('vrt_event_YYYYYY',function(){ // code here});
+         
+         //Complete initilization            
+         vrt.init();
+});
 </SCRIPT>
 ```       
      
