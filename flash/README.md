@@ -161,6 +161,7 @@ the  `<<OPTIONS>>` object attributes are the same of previous paragraph, just ad
 - `streamName` string: a simple string used as recording name
 - `apiDomain` string : contain CrowdEmotion API domain to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
 
+Important note: If you include a valid value for `researchToken`, `type` can be set to `null` and `list`  as empty object `{}` (because both `list` and `type` are loaded from the research )
 
 ### Load PlayCorder media from API
 
