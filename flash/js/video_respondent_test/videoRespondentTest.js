@@ -1273,7 +1273,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger('vrt_event_producer_no_camera_found');
                 $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else if (numCameras == undefined){
-                $(window.vrt).trigger('vrt_event_producer_no_camera_found');
+                $(window.vrt).trigger('vrt_event_producer_no_mediabox.crowdemotion.co.ukcamera_found');
                 $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else{
                 $(window.vrt).trigger('vrt_event_producer_camera_found');
@@ -1281,13 +1281,33 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             // checking user permissions on camera
             this.once('camera-unmuted', function () {
-                vrt.log('!!PRODUCER camera unmuted 1'+ Date.now());
-                vrt.log('camera unmuted','producerConnStatus');
+                vrt.log('!!on_camera_unmuted_and_capturing');
+                var loop = function (capturing) {
+                    if (!capturing) {
+                        $('.try-again').off('click');
+                        $('.try-again').on('click', function (s) {
+                            this.producer.reloadFlashElement(function () {
+                                setTimeout(
+                                    function() {
+                                        this.producer.isCameraCapturing(loop);
+                                    }.bind(this)
+                                ,500)
+                            });
+                        });
+                    } else {
+                        this.on_camera_unmuted_and_capturing();
+                    }
+                };
+                vrt.producer.isCameraCapturing(loop);
+            });
+
+            this.on_camera_unmuted_and_capturing = function () {
+                vrt.log("!!on_camera_unmuted_and_capturing");
                 vrt.log("===WEBP Camera is now available");
                 vrt.popOverCe('pop_click_allow','destroy');
                 vrt.popOverCe('pop_center');
                 $(window.vrt).trigger('producer_init_camera_ok');
-            });
+            };
 
             this.on('camera-muted', function () {
                 vrt.log('!!PRODUCER camera muted');
@@ -1349,6 +1369,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.postPartecipate();
                 vrt.facevideoUpload(url, vrt.stepComplete);
             });
+
+
 
             this.on('save-metadata', function (url) {
                //  console.log("The metadata file has been saved to "+ url);
