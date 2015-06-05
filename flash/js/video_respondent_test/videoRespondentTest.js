@@ -1277,29 +1277,35 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else{
                 $(window.vrt).trigger('vrt_event_producer_camera_found');
-            }
+            };
+/*
+            this.reloadFlash = function(){
+                if(vrt.producer){
+                    vrt.producer.reloadFlashElement(function () {vrt.producer.isCameraCapturing();})
+                }
+            };
 
-            // checking user permissions on camera
-            this.once('camera-unmuted', function () {
+            vrt.reloadFlash = this.reloadFlash;
+
+            $(window.vrt).on('vrt_event_reload_flash',function(){
+                vrt.reloadFlash();
+            });
+*/
+            var on_camera_unmuted = function () {
+
                 vrt.log('!!on_camera_unmuted_and_capturing');
                 var loop = function (capturing) {
                     if (!capturing) {
-                        $('.try-again').off('click');
-                        $('.try-again').on('click', function (s) {
-                            this.producer.reloadFlashElement(function () {
-                                setTimeout(
-                                    function() {
-                                        this.producer.isCameraCapturing(loop);
-                                    }.bind(this)
-                                ,500)
-                            });
-                        });
+                        $(window.vrt).trigger('vrt_event_camera_wait_user_too_long');
                     } else {
                         this.on_camera_unmuted_and_capturing();
                     }
                 };
                 vrt.producer.isCameraCapturing(loop);
-            });
+            };
+
+            // checking user permissions on camera
+            this.once('camera-unmuted',on_camera_unmuted);
 
             this.on_camera_unmuted_and_capturing = function () {
                 vrt.log("!!on_camera_unmuted_and_capturing");
@@ -1345,7 +1351,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 clearTimeout(vrt.stop_polling_player_pos);
                 vrt.log('!!PRODUCER unpublish');
             });
-
 
             this.on('connect', function () {
 
@@ -1399,8 +1404,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if(vrt.options.apiClientOnly && vrt.options.apiClientOnly===true){
                 $(window.vrt).trigger('vrt_event_producer_camera_ok');
             }
+
         });
-    }
+    };
+
 
     this.createFrame = function(data){
 

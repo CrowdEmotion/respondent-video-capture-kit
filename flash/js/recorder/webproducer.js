@@ -65,7 +65,7 @@ var WebProducer =
 	  this.el = null;
 	  this.trace = options.trace;
 	  this.streamName = null;
-	  WebProducer[this.id] = this; 
+	  WebProducer[this.id] = this;
 	  var path = options.path || '';
 	  var style = options.style || "display:block;text-align:left;";
 	  this.createElement(this.id, this.width, this.height, path, style);
@@ -155,7 +155,7 @@ var WebProducer =
 	    }
 	    return value;
 	  },
-	  
+
 	  createElement: function (id, width, height, path, style) {
 	    var self = this;
 	    var swfVersionStr = "11.4.0";
@@ -175,7 +175,7 @@ var WebProducer =
 	    swfobject.embedSWF(
 	        path + "producer.swf", id,
 	        width, height,
-	        swfVersionStr, xiSwfUrlStr, 
+	        swfVersionStr, xiSwfUrlStr,
 	        flashvars, params, attributes, check_already_ready);
 	    // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
 	    swfobject.createCSS("#"+id, style);
@@ -284,7 +284,7 @@ var WebProducer =
 	    tmp = tmp.split('/')[0];
 	    return tmp.split(':')[0];
 	  },
-	  
+
 	  setUrl: function (url) {
 	    this.url_rtmp_original = url;
 	  },
@@ -308,7 +308,7 @@ var WebProducer =
 	    if (usingHTTPS) { return 'https'; }
 	    return 'http';
 	  },
-	  
+
 	  connect: function () {
 	    var self = this;
 	    this.hub_info_get(function () {
@@ -336,7 +336,7 @@ var WebProducer =
 	    // overrides original impl
 	    return this.url_http_api;
 	  }
-	  
+
 	};
 
 	WebProducer.extend(LoadBalancingMixin);
@@ -353,7 +353,7 @@ var WebProducer =
 	WebProducer.extend(EventEmitterMixin);
 
 
-	// Polyfill for Array.prototype.forEach for IE 8 
+	// Polyfill for Array.prototype.forEach for IE 8
 	// as seen at: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
 	if (!Array.prototype.forEach) {
 	  Array.prototype.forEach = function(callback, thisArg) {
@@ -399,7 +399,7 @@ var WebProducer =
 	  };
 	}
 
-	// Polyfill for Array.prototype.indexOf for IE 8 
+	// Polyfill for Array.prototype.indexOf for IE 8
 	// as seen at: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf
 	if (!Array.prototype.indexOf) {
 	  Array.prototype.indexOf = function(searchElement, fromIndex) {
@@ -466,7 +466,7 @@ var WebProducer =
 
 	CameraFixMixin = {
 	  camerafix_works: false,
-	  camerafix_works_attempt: 10,
+	  camerafix_works_attempt: 60,
 	  camerafix_works_timeout: null,
 	  camerafix_cb: null,
 	  camerafix_loop: false,
@@ -476,7 +476,7 @@ var WebProducer =
 	  camerafix_start: function(cb, _loop) {
 	    this.camerafix_cb = cb || function() {};
 	    this.camerafix_loop = _loop;
-	    this.camerafix_works_attempt = 10;
+	    this.camerafix_works_attempt = 60;
 	    this.camerafix_works = false;
 	    return this.camerafix_works_timeout = setTimeout(((function(_this) {
 	      return function() {
@@ -500,8 +500,8 @@ var WebProducer =
 	    }
 	    if (this.camerafix_works_attempt <= 0) {
 	      console.log('CAMERAFIX: camera is not working');
-	      this.camerafix_cb(false);
-	      return;
+          this.camerafix_cb(false);
+
 	    }
 	    console.log('attempt', this.camerafix_works_attempt);
 	    this.camerafix_works_attempt -= 1;
