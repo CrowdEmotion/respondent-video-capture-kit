@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-6-4 18:14 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-6-7 13:33 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -952,7 +952,7 @@ var WebProducer = function(modules) {
     var CameraFixMixin;
     CameraFixMixin = {
         camerafix_works: false,
-        camerafix_works_attempt: 10,
+        camerafix_works_attempt: 60,
         camerafix_works_timeout: null,
         camerafix_cb: null,
         camerafix_loop: false,
@@ -962,7 +962,7 @@ var WebProducer = function(modules) {
         camerafix_start: function(cb, _loop) {
             this.camerafix_cb = cb || function() {};
             this.camerafix_loop = _loop;
-            this.camerafix_works_attempt = 10;
+            this.camerafix_works_attempt = 60;
             this.camerafix_works = false;
             return this.camerafix_works_timeout = setTimeout(function(_this) {
                 return function() {
@@ -987,7 +987,6 @@ var WebProducer = function(modules) {
             if (this.camerafix_works_attempt <= 0) {
                 console.log("CAMERAFIX: camera is not working");
                 this.camerafix_cb(false);
-                return;
             }
             console.log("attempt", this.camerafix_works_attempt);
             this.camerafix_works_attempt -= 1;
@@ -13127,6 +13126,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchComplete = true;
     this.researchReady = false;
     this.researchOutUrl = null;
+    this.reloadFlash = null;
     this.initMediaList = function(type, list) {
         if (!list) return;
         this.mediaCount = list.length;
@@ -13997,24 +13997,18 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             } else {
                 $(window.vrt).trigger("vrt_event_producer_camera_found");
             }
-            this.once("camera-unmuted", function() {
+            var on_camera_unmuted = function() {
                 vrt.log("!!on_camera_unmuted_and_capturing");
                 var loop = function(capturing) {
                     if (!capturing) {
-                        $(".try-again").off("click");
-                        $(".try-again").on("click", function(s) {
-                            this.producer.reloadFlashElement(function() {
-                                setTimeout(function() {
-                                    this.producer.isCameraCapturing(loop);
-                                }.bind(this), 500);
-                            });
-                        });
+                        $(window.vrt).trigger("vrt_event_camera_wait_user_too_long");
                     } else {
                         this.on_camera_unmuted_and_capturing();
                     }
                 };
                 vrt.producer.isCameraCapturing(loop);
-            });
+            };
+            this.once("camera-unmuted", on_camera_unmuted);
             this.on_camera_unmuted_and_capturing = function() {
                 vrt.log("!!on_camera_unmuted_and_capturing");
                 vrt.log("===WEBP Camera is now available");

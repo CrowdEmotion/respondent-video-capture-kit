@@ -96,6 +96,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchReady = false;
     this.researchOutUrl = null;
 
+    this.reloadFlash = null;
+
     this.initMediaList = function(type, list) {
         if(!list) return;
 
@@ -1278,19 +1280,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }else{
                 $(window.vrt).trigger('vrt_event_producer_camera_found');
             };
-/*
-            this.reloadFlash = function(){
-                if(vrt.producer){
-                    vrt.producer.reloadFlashElement(function () {vrt.producer.isCameraCapturing();})
-                }
-            };
 
-            vrt.reloadFlash = this.reloadFlash;
 
-            $(window.vrt).on('vrt_event_reload_flash',function(){
-                vrt.reloadFlash();
-            });
-*/
             var on_camera_unmuted = function () {
 
                 vrt.log('!!on_camera_unmuted_and_capturing');
@@ -1408,6 +1399,20 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
     };
 
+    /*
+    this.reloadFlash = function(){
+        if(vrt.producer.el){
+            vrt.producer.reloadFlashElement(
+                function () {vrt.producer.isCameraCapturing();}
+                ,'producer',vrt.producer.el
+            )
+        }
+    };
+
+    $(window.vrt).on('vrt_event_reload_flash',function(){
+        vrt.reloadFlash();
+    });
+    */
 
     this.createFrame = function(data){
 
