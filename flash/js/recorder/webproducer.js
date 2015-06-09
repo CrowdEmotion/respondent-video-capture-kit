@@ -466,18 +466,15 @@ var WebProducer =
 
 	CameraFixMixin = {
 	  camerafix_works: false,
-	  camerafix_works_attempt: 3,
+	  camerafix_works_attempt: 0,
 	  camerafix_works_timeout: null,
-	  camerafix_cb: null,
-	  camerafix_loop: false,
-	  isCameraCapturing: function(cb, _loop) {
-	    return this.camerafix_start(cb, _loop);
+	  isCameraWorking: function() {
+	    return this.camerafix_start();
 	  },
-	  camerafix_start: function(cb, _loop) {
+	  camerafix_start: function() {
+	    this.camerafix_stop();
 	    this.remoteLoggerLog('camerafix', 'start', [this.camerafix_works]);
-	    this.camerafix_cb = cb || function() {};
-	    this.camerafix_loop = _loop;
-	    this.camerafix_works_attempt = 3;
+	    this.camerafix_works_attempt = 0;
 	    this.camerafix_works = false;
 	    return this.camerafix_works_timeout = setTimeout(((function(_this) {
 	      return function() {
@@ -485,27 +482,26 @@ var WebProducer =
 	      };
 	    })(this)), 1000);
 	  },
+	  camerafix_stop: function() {
+	    this.remoteLoggerLog('camerafix', 'stop', [this.camerafix_works]);
+	    if (this.camerafix_works_timeout !== null) {
+	      clearTimeout(this.camerafix_works_timeout);
+	    }
+	    return this.camerafix_works_timeout = null;
+	  },
 	  camerafix_poll: function() {
 	    var fps, self;
 	    fps = this.getCameraCurrentFPS();
 	    self = this;
 	    if (fps > 0) {
 	      this.camerafix_works = true;
-	      this.remoteLoggerLog('camerafix', 'working', [this.camerafix_works]);
-	      setTimeout(((function(_this) {
-	        return function() {
-	          return _this.camerafix_cb(true);
-	        };
-	      })(this)), 10);
-	      return;
-	    }
-	    if (this.camerafix_works_attempt <= 0) {
-	      this.remoteLoggerLog('camerafix', 'working', [this.camerafix_works]);
-	      this.camerafix_cb(false);
+	      this.remoteLoggerLog('camerafix', 'camera-works', [this.camerafix_works]);
+	      this.camerafix_works_timeout = null;
+	      this.fire('camera-works');
 	      return;
 	    }
 	    this.remoteLoggerLog('camerafix', 'attempt', [this.camerafix_works_attempt]);
-	    this.camerafix_works_attempt -= 1;
+	    this.camerafix_works_attempt += 1;
 	    return this.camerafix_works_timeout = setTimeout(((function(_this) {
 	      return function() {
 	        return _this.camerafix_poll();
@@ -523,6 +519,7 @@ var WebProducer =
 	    streamQuality = this.getStreamQuality();
 	    streamBandwidth = this.getStreamBandwidth();
 	    mirrored = this.getMirroredPreview();
+	    this.camerafix_stop();
 	    this.el.remove();
 	    self = this;
 	    once_ready = (function(_this) {
@@ -535,6 +532,7 @@ var WebProducer =
 	        _this.setStreamQuality(streamQuality);
 	        _this.setStreamBandwidth(streamBandwidth);
 	        _this.setMirroredPreview(mirrored);
+	        _this.camerafix_start();
 	        return done();
 	      };
 	    })(this);
