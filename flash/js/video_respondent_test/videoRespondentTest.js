@@ -276,6 +276,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
             "           <div id='producer'></div>                                                                   " +
+            "           <div class='hide' id='producerCamerafix' style='color: red;'>Check your browser camera access, mkay? <button>OK</button></div> " +
             "           <div class='clearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
@@ -1282,22 +1283,38 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             var on_camera_unmuted = function () {
                 vrt.log('!!on_camera_unmuted');
-                var loop = function (capturing) {
-                    if (!capturing) {
-                        // TODO: ask the user to do somethng about it and then
-                        // do the following (try again) only after user agreement
-                        vrt.producer.reloadFlashElement(function () {
-                          vrt.producer.isCameraCapturing(loop);
-                        });
-                    } else {
-                        this.on_camera_unmuted_and_capturing();
-                    }
+                // now camera has been unmuted but we want to check that it
+                // actually works. So we ask the producer to perform the check
+                // and we wait for 'camera-works' response event. if it takes 
+                // too long we assume somthing is wrong and we advice the user
+                // to check the browser
+                var self = this;
+                vrt.producer.isCameraWorking();
+
+                var toolong = function () {
+                  $('#producerCamerafix').removeClass('hide').show();
+                  $('#producerCamerafix button').off().on('click', function () {
+                      vrt.producer.reloadFlashElement(function () {
+                          $('#producerCamerafix').addClass('hide').hide();
+                          var timeout = setTimeout(toolong, 2000);
+                          vrt.producer.once('camera-unmuted', on_camera_unmuted.bind(self));
+                      });
+                  });
                 };
-                vrt.producer.isCameraCapturing(loop);
+
+                var timeout = setTimeout(toolong, 2000);
+
+                vrt.producer.once('camera-works', function () {
+                  // yay, at this point we are sure that camera works and we
+                  // can go on
+                  self.on_camera_unmuted_and_capturing();
+                  $('#producerCamerafix').addClass('hide').hide();
+                  clearTimeout(timeout);
+                });
             };
 
             // checking user permissions on camera
-            this.once('camera-unmuted',on_camera_unmuted);
+            this.once('camera-unmuted', on_camera_unmuted);
 
             this.on_camera_unmuted_and_capturing = function () {
                 vrt.log("!!on_camera_unmuted_and_capturing");
