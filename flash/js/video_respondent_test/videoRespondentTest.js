@@ -276,7 +276,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
             "           <div id='producer'></div>                                                                   " +
-            "           <div class='hide' id='producerCamerafix' style='color: red;'>Check your browser camera access, mkay? <button>OK</button></div> " +
+            "           <div class='hide' id='producerCamerafix' style='color: red;'>" 
+            "             Sorry, we are unable to access your camera. Please, double-check camera connection and browser dialogs to allow camera access and then" +
+            "             <button>Try again</button></div> " +
             "           <div class='clearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
