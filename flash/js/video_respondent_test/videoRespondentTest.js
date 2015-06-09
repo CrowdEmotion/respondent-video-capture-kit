@@ -1278,25 +1278,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }else{
                 $(window.vrt).trigger('vrt_event_producer_camera_found');
             };
-/*
-            this.reloadFlash = function(){
-                if(vrt.producer){
-                    vrt.producer.reloadFlashElement(function () {vrt.producer.isCameraCapturing();})
-                }
-            };
 
-            vrt.reloadFlash = this.reloadFlash;
 
-            $(window.vrt).on('vrt_event_reload_flash',function(){
-                vrt.reloadFlash();
-            });
-*/
             var on_camera_unmuted = function () {
-
-                vrt.log('!!on_camera_unmuted_and_capturing');
+                vrt.log('!!on_camera_unmuted');
                 var loop = function (capturing) {
                     if (!capturing) {
-                        $(window.vrt).trigger('vrt_event_camera_wait_user_too_long');
+                        // TODO: ask the user to do somethng about it and then
+                        // do the following (try again) only after user agreement
+                        vrt.producer.reloadFlashElement(function () {
+                          vrt.producer.isCameraCapturing(loop);
+                        });
                     } else {
                         this.on_camera_unmuted_and_capturing();
                     }
