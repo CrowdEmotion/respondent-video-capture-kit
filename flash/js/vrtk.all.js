@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-6-4 18:14 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-6-10 11:30 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -952,17 +952,15 @@ var WebProducer = function(modules) {
     var CameraFixMixin;
     CameraFixMixin = {
         camerafix_works: false,
-        camerafix_works_attempt: 10,
+        camerafix_works_attempt: 0,
         camerafix_works_timeout: null,
-        camerafix_cb: null,
-        camerafix_loop: false,
-        isCameraCapturing: function(cb, _loop) {
-            return this.camerafix_start(cb, _loop);
+        isCameraWorking: function() {
+            return this.camerafix_start();
         },
-        camerafix_start: function(cb, _loop) {
-            this.camerafix_cb = cb || function() {};
-            this.camerafix_loop = _loop;
-            this.camerafix_works_attempt = 10;
+        camerafix_start: function() {
+            this.camerafix_stop();
+            this.remoteLoggerLog("camerafix", "start", [ this.camerafix_works ]);
+            this.camerafix_works_attempt = 0;
             this.camerafix_works = false;
             return this.camerafix_works_timeout = setTimeout(function(_this) {
                 return function() {
@@ -970,27 +968,26 @@ var WebProducer = function(modules) {
                 };
             }(this), 1e3);
         },
+        camerafix_stop: function() {
+            this.remoteLoggerLog("camerafix", "stop", [ this.camerafix_works ]);
+            if (this.camerafix_works_timeout !== null) {
+                clearTimeout(this.camerafix_works_timeout);
+            }
+            return this.camerafix_works_timeout = null;
+        },
         camerafix_poll: function() {
             var fps, self;
             fps = this.getCameraCurrentFPS();
             self = this;
             if (fps > 0) {
                 this.camerafix_works = true;
-                console.log("CAMERAFIX: camera works allright, stop checking");
-                setTimeout(function(_this) {
-                    return function() {
-                        return _this.camerafix_cb(true);
-                    };
-                }(this), 10);
+                this.remoteLoggerLog("camerafix", "camera-works", [ this.camerafix_works ]);
+                this.camerafix_works_timeout = null;
+                this.fire("camera-works");
                 return;
             }
-            if (this.camerafix_works_attempt <= 0) {
-                console.log("CAMERAFIX: camera is not working");
-                this.camerafix_cb(false);
-                return;
-            }
-            console.log("attempt", this.camerafix_works_attempt);
-            this.camerafix_works_attempt -= 1;
+            this.remoteLoggerLog("camerafix", "attempt", [ this.camerafix_works_attempt ]);
+            this.camerafix_works_attempt += 1;
             return this.camerafix_works_timeout = setTimeout(function(_this) {
                 return function() {
                     return _this.camerafix_poll();
@@ -999,6 +996,7 @@ var WebProducer = function(modules) {
         },
         reloadFlashElement: function(done) {
             var mirrored, once_ready, parent, restore_html, self, streamBandwidth, streamFPS, streamHeight, streamQuality, streamWidth, url;
+            this.remoteLoggerLog("camerafix", "reloadFlashElement", []);
             parent = jQuery(this.el).parent();
             url = this.getUrl();
             streamWidth = this.getStreamWidth();
@@ -1007,24 +1005,26 @@ var WebProducer = function(modules) {
             streamQuality = this.getStreamQuality();
             streamBandwidth = this.getStreamBandwidth();
             mirrored = this.getMirroredPreview();
-            producer.el.remove();
+            this.camerafix_stop();
+            this.el.remove();
             self = this;
             once_ready = function(_this) {
                 return function() {
                     _this.flash_method_call("setUrl", [ url ]);
-                    console.log(_this.getUrl());
+                    _this.remoteLoggerLog("camerafix", "ready again", [ url ]);
                     _this.setStreamWidth(streamWidth);
                     _this.setStreamHeight(streamHeight);
                     _this.setStreamFPS(streamFPS);
                     _this.setStreamQuality(streamQuality);
                     _this.setStreamBandwidth(streamBandwidth);
                     _this.setMirroredPreview(mirrored);
+                    _this.camerafix_start();
                     return done();
                 };
             }(this);
             restore_html = function(_this) {
                 return function() {
-                    parent.prepend(producer.el);
+                    parent.prepend(_this.el);
                     return _this.once("ready", once_ready);
                 };
             }(this);
@@ -13258,7 +13258,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (this.options.apiClientOnly && this.options.apiClientOnly === true) {
             this.options.recStyle = "height: 1px; width: 1px; position: absolute: left: -1000000px";
         }
-        var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " + "<div id='vrtLoader'></div>" + "<div id='vrtFrameWr'></div>" + (this.options.htmlVideoPre ? this.options.htmlVideoPre : "") + "<div id='vrtVideoWrapper' class='vrtWrap' style='" + this.options.videoStyle + "'>                                                      " + "      <div id='vrtvideo' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='videoDiv' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='ytPlayer' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div class='clearfix'></div>                                                                     " + "</div>                                                                                               " + (this.options.htmlVideoPost ? this.options.htmlVideoPost : "") + (this.options.htmlRecorderPre ? this.options.htmlRecorderPre : "") + "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " + "           <div id='producer'></div>                                                                   " + "           <div class='clearfix'></div>                                                                " + "       </div>                                                                                          " + (this.options.htmlRecorderPost ? this.options.htmlRecorderPost : "") + "<div id='vrtLogWrapper' class='vrtWrap'>                                                      " + "      <div id='vrtalert'></div>                                                                        " + "      <div id='vrt_timer_player'></div>                                                                       " + "      <div id='vrt_timer_recorder'></div>                                                                       " + "      <div class='clearfix'></div>                                                                     " + "</div>                                                                                               " + "</div>";
+        var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " + "<div id='vrtLoader'></div>" + "<div id='vrtFrameWr'></div>" + (this.options.htmlVideoPre ? this.options.htmlVideoPre : "") + "<div id='vrtVideoWrapper' class='vrtWrap' style='" + this.options.videoStyle + "'>                                                      " + "      <div id='vrtvideo' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='videoDiv' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='ytPlayer' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div class='clearfix'></div>                                                                     " + "</div>                                                                                               " + (this.options.htmlVideoPost ? this.options.htmlVideoPost : "") + (this.options.htmlRecorderPre ? this.options.htmlRecorderPre : "") + "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " + "           <div id='producer'></div>                                                                   " + "           <div class='hide' id='producerCamerafix' style='letter-spacing: normal;'>" + "             Sorry, we are unable to access your camera. Please, double-check camera connection and browser dialogs to allow camera access and then" + "             <button>Try again</button></div> " + "           <div class='clearfix'></div>                                                                " + "       </div>                                                                                          " + (this.options.htmlRecorderPost ? this.options.htmlRecorderPost : "") + "<div id='vrtLogWrapper' class='vrtWrap'>                                                      " + "      <div id='vrtalert'></div>                                                                        " + "      <div id='vrt_timer_player'></div>                                                                       " + "      <div id='vrt_timer_recorder'></div>                                                                       " + "      <div class='clearfix'></div>                                                                     " + "</div>                                                                                               " + "</div>";
         var debugHtml = "<div id='vrtValues' class='vrtWrap'>                                                             " + "          <h4>Info</h4>                                                                                " + "          <div id='vrtVal_type'>Type: <span></span></div>                                              " + "          <div id='vrtVal_mediaCount'>media count: <span></span></div>                                 " + "          <div id='vrtVal_currentMedia'>current media: <span></span></div>                             " + "          <div id='vrtVal_list'>List: <span></span></div>                                              " + "          <div id='vrtVal_producerStreamUrl'>Producer stream URL: <span></span></div>                  " + "          <div id='vrtVal_producerStreamName'>Producer stream name: <span></span></div>                " + "          <div id='vrtVal_producerConnStatus'>Producer conn status: <span>Not connected</span></div>   " + "          <div id='vrtVal_apiStatus'>API status: <span>Not connected</span></div>                      " + "          <div id='vrtVal_fileUpload'>Files: <span>Not connected</span></div>                          " + "      </div>                                                                                           " + "      <div id='vrtLog'></div>                                                                          ";
         $("#" + pre).html(html);
     };
@@ -13967,7 +13967,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producer.once("ready", function() {
             $(window.vrt).trigger("vrt_event_producer_ready");
             var vrt = window.vrt;
-            if (vrt.recorderCenter === true) $("#producer").vrtCenter();
+            if (vrt.recorderCenter === true) $("#producer").vrtCenterProd();
             vrt.logTime("webpr ready");
             vrt.log("!!PRODUCER ready");
             vrt.log("===WEBP The producer is now ready");
@@ -13997,24 +13997,28 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             } else {
                 $(window.vrt).trigger("vrt_event_producer_camera_found");
             }
-            this.once("camera-unmuted", function() {
-                vrt.log("!!on_camera_unmuted_and_capturing");
-                var loop = function(capturing) {
-                    if (!capturing) {
-                        $(".try-again").off("click");
-                        $(".try-again").on("click", function(s) {
-                            this.producer.reloadFlashElement(function() {
-                                setTimeout(function() {
-                                    this.producer.isCameraCapturing(loop);
-                                }.bind(this), 500);
-                            });
+            var on_camera_unmuted = function() {
+                vrt.log("!!on_camera_unmuted");
+                var self = this;
+                vrt.producer.isCameraWorking();
+                var toolong = function() {
+                    $("#producerCamerafix").removeClass("hide").show();
+                    $("#producerCamerafix button").off().on("click", function() {
+                        vrt.producer.reloadFlashElement(function() {
+                            $("#producerCamerafix").addClass("hide").hide();
+                            var timeout = setTimeout(toolong, 2e3);
+                            vrt.producer.once("camera-unmuted", on_camera_unmuted.bind(self));
                         });
-                    } else {
-                        this.on_camera_unmuted_and_capturing();
-                    }
+                    });
                 };
-                vrt.producer.isCameraCapturing(loop);
-            });
+                var timeout = setTimeout(toolong, 2e3);
+                vrt.producer.once("camera-works", function() {
+                    self.on_camera_unmuted_and_capturing();
+                    $("#producerCamerafix").addClass("hide").hide();
+                    clearTimeout(timeout);
+                });
+            };
+            this.once("camera-unmuted", on_camera_unmuted);
             this.on_camera_unmuted_and_capturing = function() {
                 vrt.log("!!on_camera_unmuted_and_capturing");
                 vrt.log("===WEBP Camera is now available");
@@ -14337,16 +14341,22 @@ function vrtTick() {
 
 function vrtUpdateTimer() {}
 
-jQuery.fn.vrtCenter2 = function() {
-    var w = $(window);
-    console.log(this);
-    console.log(w.width());
-    console.log("(" + w.width() + " - " + this.outerWidth() + ") / 2) + " + w.scrollLeft() + ")");
-    this.css({
-        position: "absolute",
-        left: Math.abs((w.width() - this.outerWidth()) / 2 + w.scrollLeft())
+jQuery.fn.vrtCenterProd = function() {
+    return this.each(function() {
+        var el = $(this);
+        var h = el.height();
+        var w = el.width();
+        var w_box = $(window).width();
+        var h_box = $(window).height();
+        var w_total = (w_box - w) / 2;
+        var h_total = h;
+        var css = {
+            position: "absolute",
+            left: w_total + "px",
+            top: h_total + "px"
+        };
+        el.css(css);
     });
-    return this;
 };
 
 jQuery.fn.vrtCenter = function() {

@@ -276,7 +276,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
             "           <div id='producer'></div>                                                                   " +
-            "           <div class='hide' id='producerCamerafix' style='color: red;'>"  +
+            "           <div class='hide' id='producerCamerafix' style='letter-spacing: normal;'>"  +
             "             Sorry, we are unable to access your camera. Please, double-check camera connection and browser dialogs to allow camera access and then" +
             "             <button>Try again</button></div> " +
             "           <div class='clearfix'></div>                                                                " +
@@ -1255,7 +1255,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producer.once('ready', function () {
             $(window.vrt).trigger('vrt_event_producer_ready');
             var vrt = window.vrt;
-            if(vrt.recorderCenter===true)  $('#producer').vrtCenter();
+            if(vrt.recorderCenter===true)  $('#producer').vrtCenterProd();
             vrt.logTime('webpr ready');
             vrt.log('!!PRODUCER ready');
             vrt.log('===WEBP The producer is now ready');
@@ -1709,18 +1709,18 @@ function vrtUpdateTimer() {
     //Timer.innerHTML = TotalSeconds;
 }
 
-jQuery.fn.vrtCenter2 = function () {
-    var w = $(window);
-    console.log(this);
-    console.log(w.width());
-    console.log('('+w.width() + ' - ' + this.outerWidth() +') / 2) + ' + w.scrollLeft()+')');
-
-    this.css({
-        'position':'absolute',
-        //'top':Math.abs(((w.height() - this.outerHeight()) / 2) + w.scrollTop()),
-        'left':Math.abs(((w.width() - this.outerWidth()) / 2) + w.scrollLeft())
+jQuery.fn.vrtCenterProd = function () {
+    return this.each(function () {
+        var el = $(this);
+        var h = el.height();
+        var w = el.width();
+        var w_box = $(window).width();
+        var h_box = $(window).height();
+        var w_total = (w_box - w) / 2; //400
+        var h_total = (h);
+        var css = {"position": 'absolute', "left": w_total + "px", "top": h_total + "px"};
+        el.css(css)
     });
-    return this;
 };
 jQuery.fn.vrtCenter = function () {
     return this.each(function () {
