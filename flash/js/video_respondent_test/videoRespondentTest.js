@@ -276,9 +276,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
             "           <div id='producer'></div>                                                                   " +
-            "           <div class='hide' id='producerCamerafix' style='letter-spacing: normal;'>"  +
-            "             Sorry, we are unable to access your camera. Please, double-check camera connection and browser dialogs to allow camera access and then" +
-            "             <button>Try again</button></div> " +
+            "           <div class='hide' id='producerCamerafix' >"  +
+            "              Can you see your face inside the box? " +
+            "             <button id='yesbtn'>Yes</button> <button id='nobtn'>NO</button></div> " +
             "           <div class='clearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
@@ -1255,7 +1255,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producer.once('ready', function () {
             $(window.vrt).trigger('vrt_event_producer_ready');
             var vrt = window.vrt;
-            if(vrt.recorderCenter===true)  $('#producer').vrtCenterProd();
+            if(vrt.recorderCenter===true)  {
+                $('#producer').vrtCenterProd();
+                $('#producerCamerafix').vrtCenter();
+            }
             vrt.logTime('webpr ready');
             vrt.log('!!PRODUCER ready');
             vrt.log('===WEBP The producer is now ready');
@@ -1295,13 +1298,16 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
                 var toolong = function () {
                   $('#producerCamerafix').removeClass('hide').show();
-                  $('#producerCamerafix button').off().on('click', function () {
+                  $('#producerCamerafix button#nobtn').off().on('click', function () {
                       vrt.producer.reloadFlashElement(function () {
                           $('#producerCamerafix').addClass('hide').hide();
                           var timeout = setTimeout(toolong, 2000);
                           vrt.producer.once('camera-unmuted', on_camera_unmuted.bind(self));
                       });
                   });
+                $('#producerCamerafix button#yesbtn').off().on('click', function () {
+                    $('#producerCamerafix').hide();
+                });
                 };
 
                 var timeout = setTimeout(toolong, 2000);
