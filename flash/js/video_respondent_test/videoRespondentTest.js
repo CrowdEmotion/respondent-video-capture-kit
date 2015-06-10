@@ -277,10 +277,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlVideoPost) ? this.options.htmlVideoPost : '') +
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
-            "           <div id='producer'></div>                                                                   " +
             "           <div class='hide' id='producerCamerafix' >"  +
             "              Can you see your face inside the box? " +
             "             <button id='yesbtn'>Yes</button> <button id='nobtn'>NO</button></div> " +
+            "           <div id='producer'></div>                                                                   " +
             "           <div class='clearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
