@@ -1301,7 +1301,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                   $('#producerCamerafix button#nobtn').off().on('click', function () {
                       vrt.producer.reloadFlashElement(function () {
                           $('#producerCamerafix').addClass('hide').hide();
-                          var timeout = setTimeout(toolong, 2000);
+                          var timeout = setTimeout(toolong, 5000);
                           vrt.producer.once('camera-unmuted', on_camera_unmuted.bind(self));
                       });
                   });
@@ -1310,7 +1310,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 });
                 };
 
-                var timeout = setTimeout(toolong, 2000);
+                var timeout = setTimeout(toolong, 5000);
 
                 vrt.producer.once('camera-works', function () {
                   // yay, at this point we are sure that camera works and we
