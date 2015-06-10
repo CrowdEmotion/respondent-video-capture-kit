@@ -250,6 +250,10 @@ p {
 #buttons{
 
 }
-#vrt_timer_player,#vrt_timer_recorder{
+#vrt_timer_player,#vrt_timer_recorder,#producerCamerafix{
     letter-spacing: 0;
+}
+#producerCamerafix{
+    text-align: center;
+    margin: 0 auto;
 }

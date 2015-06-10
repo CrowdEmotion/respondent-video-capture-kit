@@ -278,6 +278,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
             "           <div id='producer'></div>                                                                   " +
+            "           <div class='hide' id='producerCamerafix' >"  +
+            "              Can you see your face inside the box? " +
+            "             <button id='yesbtn'>Yes</button> <button id='nobtn'>NO</button></div> " +
             "           <div class='clearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
@@ -1254,7 +1257,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producer.once('ready', function () {
             $(window.vrt).trigger('vrt_event_producer_ready');
             var vrt = window.vrt;
-            if(vrt.recorderCenter===true)  $('#producer').vrtCenter();
+            if(vrt.recorderCenter===true)  {
+                $('#producer').vrtCenterProd();
+                $('#producerCamerafix').vrtCenter();
+            }
             vrt.logTime('webpr ready');
             vrt.log('!!PRODUCER ready');
             vrt.log('===WEBP The producer is now ready');
@@ -1283,20 +1289,42 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
 
             var on_camera_unmuted = function () {
+                vrt.log('!!on_camera_unmuted');
+                // now camera has been unmuted but we want to check that it
+                // actually works. So we ask the producer to perform the check
+                // and we wait for 'camera-works' response event. if it takes 
+                // too long we assume somthing is wrong and we advice the user
+                // to check the browser
+                var self = this;
+                vrt.producer.isCameraWorking();
 
-                vrt.log('!!on_camera_unmuted_and_capturing');
-                var loop = function (capturing) {
-                    if (!capturing) {
-                        $(window.vrt).trigger('vrt_event_camera_wait_user_too_long');
-                    } else {
-                        this.on_camera_unmuted_and_capturing();
-                    }
+                var toolong = function () {
+                  $('#producerCamerafix').removeClass('hide').show();
+                  $('#producerCamerafix button#nobtn').off().on('click', function () {
+                      vrt.producer.reloadFlashElement(function () {
+                          $('#producerCamerafix').addClass('hide').hide();
+                          var timeout = setTimeout(toolong, 5000);
+                          vrt.producer.once('camera-unmuted', on_camera_unmuted.bind(self));
+                      });
+                  });
+                $('#producerCamerafix button#yesbtn').off().on('click', function () {
+                    $('#producerCamerafix').hide();
+                });
                 };
-                vrt.producer.isCameraCapturing(loop);
+
+                var timeout = setTimeout(toolong, 5000);
+
+                vrt.producer.once('camera-works', function () {
+                  // yay, at this point we are sure that camera works and we
+                  // can go on
+                  self.on_camera_unmuted_and_capturing();
+                  $('#producerCamerafix').addClass('hide').hide();
+                  clearTimeout(timeout);
+                });
             };
 
             // checking user permissions on camera
-            this.once('camera-unmuted',on_camera_unmuted);
+            this.once('camera-unmuted', on_camera_unmuted);
 
             this.on_camera_unmuted_and_capturing = function () {
                 vrt.log("!!on_camera_unmuted_and_capturing");
@@ -1703,18 +1731,18 @@ function vrtUpdateTimer() {
     //Timer.innerHTML = TotalSeconds;
 }
 
-jQuery.fn.vrtCenter2 = function () {
-    var w = $(window);
-    console.log(this);
-    console.log(w.width());
-    console.log('('+w.width() + ' - ' + this.outerWidth() +') / 2) + ' + w.scrollLeft()+')');
-
-    this.css({
-        'position':'absolute',
-        //'top':Math.abs(((w.height() - this.outerHeight()) / 2) + w.scrollTop()),
-        'left':Math.abs(((w.width() - this.outerWidth()) / 2) + w.scrollLeft())
+jQuery.fn.vrtCenterProd = function () {
+    return this.each(function () {
+        var el = $(this);
+        var h = el.height();
+        var w = el.width();
+        var w_box = $(window).width();
+        var h_box = $(window).height();
+        var w_total = (w_box - w) / 2; //400
+        var h_total = (h);
+        var css = {"position": 'absolute', "left": w_total + "px", "top": h_total + "px"};
+        el.css(css)
     });
-    return this;
 };
 jQuery.fn.vrtCenter = function () {
     return this.each(function () {
