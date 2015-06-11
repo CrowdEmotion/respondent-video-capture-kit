@@ -1,6 +1,9 @@
 {
-  "name": "vrtk-minify",
+  "name": "vrtk",
   "version": "0.1.0",
+  "scripts": {
+    "build": "node_modules/.bin/grunt"
+  },
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
