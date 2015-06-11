@@ -20,19 +20,33 @@
 
         $(document).ready(function(){
             var user_id = getParameterByName('user_id');
-            (user_id)? '' : user_id = makeRandomString();
+            user_id = user_id || makeRandomString();
 
             var options = {
-                type:null, list:{} ,streamName:'pds_', streamUrl:'mediabox.crowdemotion.co.uk',
-                researchToken:'73ab3ef4ce45df9dc109e92b562fc2f0d8d8c09c',appToken:'9735c2f5-8129-4610-a4b4-7c132d3aa5ca',
+                // ResearchToken and AppToken are obtained using CrowdEmotion Maker web interface
+                researchToken: '73ab3ef4ce45df9dc109e92b562fc2f0d8d8c09c',
+                appToken:'9735c2f5-8129-4610-a4b4-7c132d3aa5ca',
+                
+                type: null, list:{} ,streamName:'pds_', streamUrl:'mediabox.crowdemotion.co.uk',
                 apiDomain:'http://api.crowdemotion.co.uk',
-                debug:true, debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true,
-                randomOrder : true, apiHttps: null,timedOverPlayToEnd:false,apiSandbox:true, continuosPlay:false,
-                customData:{user_id:user_id}, customDataInsertMediaName: true, customDataInsertMediaId: true,
-                customDataInsertMediaPath : true, responseAtStart: true,
+                debug: true,
+                debugChrono: true,
+                debugChronoHtml: false,
+                debugEvt: true,
+                debugVImportant: true,
+                randomOrder : true,
+                apiHttps: null,
+                timedOverPlayToEnd: false,
+                apiSandbox: true,
+                continuosPlay: false,
+                customData: { user_id: user_id },
+                customDataInsertMediaName: true,
+                customDataInsertMediaId: true,
+                customDataInsertMediaPath : true,
+                responseAtStart: true,
                 respondentName: 'stefanoc',
-                respondentCustomDataString:  {name:'stefano', lastname:'Ciao'},
-                respondentCustomData : {name1:'stefano1', lastname1:'Ciao1'}
+                respondentCustomDataString: { name: 'stefano', lastname: 'Ciao' },
+                respondentCustomData: { name1: 'stefano1', lastname1: 'Ciao1' }
             };
 
             var vrt = new Vrt(options);
