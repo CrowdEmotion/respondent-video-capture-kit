@@ -17,18 +17,18 @@ module.exports = function(grunt) {
                     compress: false
                 },
                 src: [
-                    '../src/libs/swfobject.js',
-                    '../src/recorder/var.js',
-                    '../src/libs/browsercompatibility.js',
-                    '../src/APIClient/sha256.js',
-                    '../src/APIClient/enc-base64-min.js',
-                    '../src/APIClient/store.js',
-                    '../src/APIClient/CEClient.js',
-                    '../src/libs/video-js-4-7/video.dev.js',
-                    '../src/vrtk_player.js',
-                    '../src/vrtk.js'
+                    'src/libs/swfobject.js',
+                    'src/recorder/var.js',
+                    'src/libs/browsercompatibility.js',
+                    'src/APIClient/sha256.js',
+                    'src/APIClient/enc-base64-min.js',
+                    'src/APIClient/store.js',
+                    'src/APIClient/CEClient.js',
+                    'src/libs/video-js-4-7/video.dev.js',
+                    'src/vrtk_player.js',
+                    'src/vrtk.js'
                 ],
-                dest: '../dist/vrtk.min.js'
+                dest: 'dist/vrtk.min.js'
             },
             concat : {
                 options: {
@@ -39,18 +39,18 @@ module.exports = function(grunt) {
                     beautify: true
                 },
                 src: [
-                    '../src/libs/swfobject.js',
-                    '../src/recorder/var.js',
-                    '../src/libs/browsercompatibility.js',
-                    '../src/APIClient/sha256.js',
-                    '../src/APIClient/enc-base64-min.js',
-                    '../src/APIClient/store.js',
-                    '../src/APIClient/CEClient.js',
-                    '../src/libs/video-js-4-7/video.dev.js',
-                    '../src/vrtk_player.js',
-                    '../src/vrtk.js'
+                    'src/libs/swfobject.js',
+                    'src/recorder/var.js',
+                    'src/libs/browsercompatibility.js',
+                    'src/APIClient/sha256.js',
+                    'src/APIClient/enc-base64-min.js',
+                    'src/APIClient/store.js',
+                    'src/APIClient/CEClient.js',
+                    'src/libs/video-js-4-7/video.dev.js',
+                    'src/vrtk_player.js',
+                    'src/vrtk.js'
                 ],
-                dest: '../dist/vrtk.all.js'
+                dest: 'dist/vrtk.all.js'
             }
         }
     });
