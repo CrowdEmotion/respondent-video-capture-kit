@@ -1,11 +1,5 @@
 <!DOCTYPE html>
 <html>
-
-<!--
-    1 - copy and paste file code below, the HEAD part and the BODY part
-    2 - fill all data in the videoRespondentTestConf.js
--->
-
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
@@ -18,37 +12,11 @@
     <link rel="stylesheet" href="css/video_respondent_test.css">
     <link type="text/css" href="../js/vrtk.min.css" rel="stylesheet" >
 
-
-    <!-- VIDEO  RESPONDENT TEST PAGE - HEAD - START  -->
-    <!-- Configuration file -->
-
-
-    <!-- Mandatory files -->
-    <script type="text/javascript" charset="utf-8" src="../js/external/jquery-1.9.1.js"></script>
-
-    <!-- Compressed file-->
-
-
-
-
-    <script type="text/javascript" charset="utf-8" src="../js/external/swfobject.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/external/browsercompatibility.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/recorder/var.js"></script>
-
-
-    <script type="text/javascript" charset="utf-8" src="../js/APIClient/sha256.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/APIClient/enc-base64-min.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/APIClient/store.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/APIClient/CEClient.js"></script>
-
-
-    <script type="text/javascript" charset="utf-8" src="../js/video/video-js-4-7/video.dev.js"></script>
-
-
-    <script type="text/javascript" charset="utf-8" src="../js/video_respondent_test/videoRespondentTestPlayer.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/video_respondent_test/videoRespondentTest.js"></script>
+    <script type="text/javascript" charset="utf-8" src="libs/jquery-1.9.1.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../dist/vrtk.all.js"></script>
 
     <script type="text/javascript" charset="utf-8">
+
         $(document).ready(function(){
             var user_id = getParameterByName('user_id');
             (user_id)? '' : user_id = makeRandomString();
