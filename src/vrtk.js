@@ -1,4 +1,20 @@
 //PlayCorder object
+
+var scriptUrl = (function() {
+    var scripts = document.getElementsByTagName('script'),
+        script = scripts[scripts.length - 1];
+    var url;
+    if (script.getAttribute.length !== undefined) {
+      url = script.getAttribute('src')
+    } else {
+      url = script.getAttribute('src', 2);
+    }
+    url = url.split('/');
+    url.pop();
+    url = url.join('/');
+    return url + '/';
+}());
+
 function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options) {
 
 
@@ -65,7 +81,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.streamName = '';
     this.stop_handle;
     this.stop_handle_rec;
-    this.swfPath = '../swf/';
+    this.swfPath = scriptUrl;
 
     //player values
     this.vjs = false;
@@ -153,7 +169,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         (options && options.randomOrder != undefined) ? this.randomOrder = options.randomOrder : this.randomOrder = false;
         (options && options.apiHttps !== undefined) ? this.apiHttps = options.apiHttps : this.apiHttps = true;
         (options && options.continuosPlay !== undefined) ? this.continuosPlay = options.continuosPlay : this.continuosPlay = false;
-        (options && options.swfPath != undefined) ? this.swfPath = options.swfPath : this.swfPath = '../swf/';
+        (options && options.swfPath != undefined) ? this.swfPath = options.swfPath : this.swfPath = scriptUrl;
         (options && options.timedOverPlayToEnd != undefined) ? this.timedOverPlayToEnd = options.timedOverPlayToEnd : this.timedOverPlayToEnd = false;
 
         this.options = options;
