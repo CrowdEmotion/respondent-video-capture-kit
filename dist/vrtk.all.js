@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-6-11 15:43 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-6-12 21:8 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -7983,60 +7983,60 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.initialized = function(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
         if (typeof type == "object") {
             var data = type;
-            list = data.list ? data.list : {};
-            streamUrl = data.streamUrl ? data.streamUrl : null;
-            streamName = data.streamName ? data.streamName : null;
-            apiDomain = data.apiDomain ? data.apiDomain : null;
-            apiUser = data.apiUser ? data.apiUser : null;
-            apiPassword = data.apiPassword ? data.apiPassword : null;
+            list = data.list || {};
+            streamUrl = data.streamUrl || "mediabox.crowdemotion.co.uk";
+            streamName = data.streamName || null;
+            apiDomain = data.apiDomain || "http://api.crowdemotion.co.uk";
+            apiUser = data.apiUser || null;
+            apiPassword = data.apiPassword || null;
             options = type;
-            type = data.type ? data.type : null;
+            type = data.type || null;
             this.newInit = true;
         }
-        if (options == undefined || options == null) options = {
+        if (!options) options = {
             player: {}
         };
-        if (options && options.fullscreen) {
+        if (!options.player) options.player = {};
+        if (options.fullscreen) {
             this.videoFullscreen = options.fullscreen && this.checkSafariMinVer(false, 6);
         } else {
             this.videoFullscreen = false;
         }
-        options && options.skip != undefined ? this.canSkip = options.skip : this.canSkip = false;
-        options && options.vrtID ? this.vrtID = options.vrtID : this.vrtID = "vrt";
-        options && options.producerID ? this.producerID = options.producerID : this.producerID = "producer";
-        options && options.producerWidth ? this.producerWidth = options.producerWidth : this.producerWidth = 320;
-        options && options.producerHeight ? this.producerHeight = options.producerHeight : this.producerHeight = 240;
-        options && options.debug != undefined ? this.debug = options.debug : this.debug = false;
-        options && options.debugEvt != undefined ? this.debugEvt = options.debugEvt : this.debugEvt = false;
-        options && options.debugTime != undefined ? this.debugTime = options.debugTime : this.debugTime = false;
-        options && options.debugChrono != undefined ? this.debugChrono = options.debugChrono : this.debugChrono = false;
-        options && options.debugChronoHtml != undefined ? this.debugChronoHtml = options.debugChronoHtml : this.debugChronoHtml = false;
-        options && options.debugImportant != undefined ? this.debugImportant = options.debugImportant : this.debugImportant = false;
-        options && options.debugVImportant != undefined ? this.debugVImportant = options.debugVImportant : this.debugVImportant = false;
-        options && options.producerStreamWidth ? this.producerStreamWidth = options.producerStreamWidth : this.producerStreamWidth = 640;
-        options && options.producerStreamHeight ? this.producerStreamHeight = options.producerStreamHeight : this.producerStreamHeight = 480;
-        options && options.avgPreLoadTime ? this.avgPreLoadTime = options.avgPreLoadTime : this.avgPreLoadTime = 0;
-        options && options.recorderCenter != undefined ? this.recorderCenter = options.recorderCenter : this.recorderCenter = true;
-        options && options.randomOrder != undefined ? this.randomOrder = options.randomOrder : this.randomOrder = false;
-        options && options.apiHttps !== undefined ? this.apiHttps = options.apiHttps : this.apiHttps = true;
-        options && options.continuosPlay !== undefined ? this.continuosPlay = options.continuosPlay : this.continuosPlay = false;
-        options && options.swfPath != undefined ? this.swfPath = options.swfPath : this.swfPath = scriptUrl;
-        options && options.timedOverPlayToEnd != undefined ? this.timedOverPlayToEnd = options.timedOverPlayToEnd : this.timedOverPlayToEnd = false;
+        this.skip = options.skip || false;
+        this.vrtID = options.vrtID || "vrt";
+        this.producerID = options.producerID || "producer";
+        this.producerWidth = options.producerWidth || 320;
+        this.producerHeight = options.producerHeight || 240;
+        this.debug = options.debug || false;
+        this.debugEvt = options.debugEvt || this.debug;
+        this.debugChrono = options.debugChrono || this.debug;
+        this.debugVImportant = options.debugVImportant || this.debug;
+        this.debugImportant = options.debugImportant || false;
+        this.debugTime = options.debugTime || false;
+        this.debugChronoHtml = options.debugChronoHtml || false;
+        this.producerStreamWidth = options.producerStreamWidth || 640;
+        this.producerStreamHeight = options.producerStreamHeight || 480;
+        this.avgPreLoadTime = options.avgPreLoadTime || 0;
+        this.recorderCenter = options.recorderCenter || true;
+        this.randomOrder = options.randomOrder || false;
+        this.apiHttps = options.apiHttps || true;
+        this.continuosPlay = options.continuosPlay || false;
+        this.swfPath = options.swfPath || scriptUrl;
+        this.timedOverPlayToEnd = options.timedOverPlayToEnd || false;
         this.options = options;
-        if (options.player == undefined || options.player == null) options.player = {};
-        options && options.playerCentered != undefined ? this.options.player.centered = options.playerCentered : this.options.player.centered = true;
-        options && options.playerWidth != undefined ? this.options.player.width = options.playerWidth : this.options.player.Width = 640;
-        options && options.playerHeight != undefined ? this.options.player.height = options.playerHeight : this.options.player.height = 400;
-        options && options.apiSandbox != undefined ? this.options.apiSandbox = options.apiSandbox : this.options.apiSandbox = false;
-        options && options.responseAtStart != undefined ? this.responseAtStart = options.responseAtStart : this.options.responseAtStart = false;
+        this.options.player.centered = options.playerCentered || true;
+        this.options.player.width = options.playerWidth || 640;
+        this.options.player.height = options.playerHeight || 400;
+        this.options.apiSandbox = options.apiSandbox || false;
+        this.responseAtStart = options.responseAtStart || false;
+        this.options.engineType = options.engineType || "kanako";
+        this.options.respondentCustomDataString = options.respondentCustomDataString || {};
+        this.options.respondentCustomData = options.respondentCustomData || {};
+        this.options.respondentName = options.respondentName || "";
+        this.options.apiClientOnly = options.apiClientOnly || false;
         if (this.newInit) {
             this.responseAtStart = options.responseAtStart = true;
         }
-        options && options.engineType != undefined ? this.options.engineType = options.engineType : this.options.engineType = "kanako";
-        options && options.respondentCustomDataString != undefined ? this.options.respondentCustomDataString = options.respondentCustomDataString : this.options.respondentCustomDataString = {};
-        options && options.respondentCustomData != undefined ? this.options.respondentCustomData = options.respondentCustomData : this.options.respondentCustomData = {};
-        options && options.respondentName != undefined ? this.options.respondentName = options.respondentName : this.options.respondentName = "";
-        options && options.apiClientOnly != undefined ? this.options.apiClientOnly = options.apiClientOnly : this.options.apiClientOnly = false;
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
         this.initMediaList(type, list);
