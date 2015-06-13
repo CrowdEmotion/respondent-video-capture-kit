@@ -153,7 +153,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         this.skip = options.skip || false;
         this.vrtID = options.vrtID || 'vrt';
-        this.producerID options.producerID || 'producer';
+        this.producerID = options.producerID || 'producer';
         this.producerWidth = options.producerWidth || 320;
         this.producerHeight = options.producerHeight || 240;
 
@@ -171,7 +171,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.recorderCenter = options.recorderCenter || true;
         this.randomOrder = options.randomOrder || false;
         this.apiHttps = options.apiHttps || true;
-        this.continuosPlay options.continuosPlay || false;
+        this.continuosPlay = options.continuosPlay || false;
         this.swfPath = options.swfPath || scriptUrl;
         this.timedOverPlayToEnd = options.timedOverPlayToEnd || false;
 
