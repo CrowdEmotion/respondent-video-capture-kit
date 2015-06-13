@@ -22,7 +22,7 @@
 
         $(document).ready(function(){
             var user_id = getParameterByName('user_id');
-            user_id = user_id || makeRandomString();
+            user_id = user_id || (Date.now() + "");
 
             var options = {
 
