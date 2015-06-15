@@ -93,6 +93,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchDesc = '';
     this.customData = '';
     this.researchComplete = true;
+    this.researchArchived = false;
     this.researchReady = false;
     this.researchOutUrl = null;
 
@@ -1631,6 +1632,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.researchDesc = research.description;
                         vrt.customData = research.customData;
                         vrt.researchComplete = research.complete;
+                        vrt.researchArchived = research.archived? research.archived:false;
                         vrt.researchReady = research.ready;
                         vrt.researchOutUrl = research.outgoingUrl;
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
