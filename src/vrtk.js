@@ -169,7 +169,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producerStreamHeight = options.producerStreamHeight || 480;
         this.avgPreLoadTime = options.avgPreLoadTime || 0;
         this.recorderCenter = options.recorderCenter || true;
-        this.randomOrder = options.randomOrder || false;
+        this.randomOrder = options.randomOrder || true;
         this.apiHttps = options.apiHttps || true;
         this.continuosPlay = options.continuosPlay || false;
         this.swfPath = options.swfPath || scriptUrl;
@@ -187,6 +187,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.respondentCustomData = options.respondentCustomData || {};
         this.options.respondentName = options.respondentName || '';
         this.options.apiClientOnly = options.apiClientOnly || false;
+        this.options.customData = options.customData || {};
+        this.options.customDataInsertMediaName = true;
+        this.options.customDataInsertMediaId = true;
+        this.options.customDataInsertMediaPath = true;
 
         if (this.newInit) {
           this.responseAtStart = options.responseAtStart = true;
