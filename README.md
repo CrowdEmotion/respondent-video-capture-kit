@@ -19,6 +19,7 @@ Contents:
  - [src](./src): PlayCorder source code
  - [dist](./dist): built version of the PlayCorder
  - [examples](./examples): example of Playcorder integration(s)
+ - [docs](./docs.md): more in-dept documentation of the vrtk APIs and events (wip)
 
 
 Building

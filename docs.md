@@ -1,62 +1,6 @@
-# PlayCorder - Flash version
+# PlayCorder
 
-
-CrowdEmotion PlayCorder includes two different functionalities:
-
- - recorder (example: examples/recorder.html) include a GUI interface with the Flash recorder
- - playcorder (example: examples/video_respondent_test.html) include the Flash recorder and a video player (video.js)
-
-
-## Recorder Example Page
-
-This page explains how embed PlayCorder to record and upload a video.
- 
-Components:
-
- - HTML UI for setup: recording input and log events (examples/recorder.html)
- - Flash based RTMP encoder: records video from webcam
- - API client: upload your video to analyzer server
-
-### How It Works (UI)
-
-1. Set connection values in file `flash/js/examples/recorderConfiguration.js`
-1. Using a web server, set the document root to the PlayCorder project root, and connect to the URL [http://localhost:8080/flash/examples/recorder.html](http://localhost:8080/flash/examples/recorder.html) with your browser
-1. Click on "save connection data"
-1. Click on "start recording" and "stop recording" when you finish
-1. After clicking on "stop recording", wait until your video is uploaded
-
-A quick way to start a simple web server from the command line is:
-
-```
-~$ cd respondent-video-capture-kit/
-~/respondent-video-capture-kit$ python -m SimpleHTTPServer 8080
-```
-
-
-## PlayCorder Example Pages
-
-PlayCorder include all the components required to play a video stimuli, record the user and upload a video for analysis.
-
-Components:
-
-- Flash based RTMP encoder: records video from webcam
-- API client: upload your video to analyzer server
-- Video client: player for YouTube videos OR video.js for custom video server
-
-
-### Example
-
-For a quick implementation, please look at HTML files:
-
-1. [examples/playcorder.html](./examples/playcorder.html) loading data from API
-1. [examples/video_respondent_test.html](./examples/video_respondent_test.html) for streamig normal videos, or
-1. [examples/video_respondent_test_yt.html](./examples/video_respondent_test.html) for streaming YouTube videos
-
-These files can be opened through the page [http://localhost:8080/flash/index.html](http://localhost:8080/flash/index.html) following the same directions in the previous paragraphs.
-Set connection values in the files `flash/js/examples/videoRespondentTestConf.js` and/or `flash/js/examples/videoRespondentTestConfYT.js` before opening it.
-
-
-### Implement PlayCorder
+### Implement
 
 1. Requirements: PlayCorder use the _JQuery_ library, tested on 1.9.1 version:
   1. Download JQuery [here](http://jquery.com/download/)
@@ -70,72 +14,7 @@ Set connection values in the files `flash/js/examples/videoRespondentTestConf.js
 1. Initialize PlayCorder
 
 
-#### PlayCorder Initialization
-
-PlayCorder can be initializated in two ways: using multiple parameters or one Javascript object.
-
-
-###### Multiple parameters (deprecated)
-
-Include the following code in the *head* of your page:
-
-```
-<SCRIPT>
-$(document).ready(function(){
-         var vrt = new Vrt(<<VIDEOTYPE>>,<<VIDEODATA>>,<<STREAM DOMAIN>>,<<STREAM NAME>>,
-                 <<API DOMAIN>>,<<API USERNAME>>, <<API PASSWORD>>,<<OPTIONS>>
-             );
-     });
-</SCRIPT>      
-```
-
-`<<VIDEOTYPE>>` string: youtube or customserver - choose if your video stimuli are hosted by YouTube or custom server
-
-`<<VIDEODATA>>` array: list of video stimuli. 
-        
-Each object must include 3 properties:
-
-- `path` a string with full url of video stimuli, like `http://www.youtube.com/watch?v=o9BqrSAHbTc`
-- `length` integer number of seconds, describe how long the video will be seen by users        
-- `name` a simple string with name
-- `id`  a numeric or string value, if missing, `id` = `name` ( _not mandatory_ )
-
-Example:
-    
-```
-[
-   {'path': 'http://www.youtube.com/watch?v=o9BqrSAHbTc', 'length': 10, 'name' : 'How the sun sees you'},
-   {'path': 'http://www.youtube.com/watch?v=IJNR2EpS0jw', 'length': 11, 'name' : 'Dumb Ways to Die'},
-   {'path': 'http://www.youtube.com/watch?v=Yfr5ISTSIAM', 'length': 12, 'name' : 'best of Sheldon Cooper'}
-]
-```
-                  
-- `<<STREAM DOMAIN>>` string: the URL where to stream the recorder output as a RTMP/Adobe Flash Media Server compatible (ask to [support@crowdemotion.co.uk](mailto:support@crowdemotion.co.uk) for more information if you wish to use our servers)
-
-- `<<STREAM NAME>>` string: a simple string used as recording name
-
-- `<<API DOMAIN>>`, `USERNAME` and `PASSWORD` strings: contain CrowdEmotion API credentials to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
-                     
-- `<<OPTIONS>>` object: contains a list of properties:
-    - `randomOrder` (*true* | *false* - default: *false*): display videos in a random order  
-    - `playerCentered` (*true* | *false* - default: *true*): display videos in the center of the screen using the css *position:absolute*
-    - `playerWidth` (*integer* - default 640): set the width of the videos
-    - `playerHeight` (*integer* - default 400): set the height of the videos
-    - `customData` (*true* | *false* | *Javascript object* ) (eg: {user_id:user_id}), insert any custom data by users in  js object format
-    - `customDataInsertMediaName`  (*true* | *false* - default: *false*) if `true`, insert media name value inside custom data with `media_name` key
-    - `customDataInsertMediaId` (*true* | *false* - default: *false*) if `true`, insert media id value inside custom data with `media_id` key
-    - `customDataInsertMediaPath`  (*true* | *false* - default: *false*) if `true`, insert media path value inside custom data with `media_path` key
-    - `timedOverPlayToEnd` (*true* | *false* - default: *false*) recording will finish at `length` value inside `VIDEODATA` array  (in seconds)
-    - `apiSandbox` (*true* | *false* - default: *false*) generate random emotions values instead analyzing video
-    - `researchToken` string: a random string bind to your research on CrowdEmotion system
-    - `appToken` string: a random string bind to your user on CrowdEmotion system
-    - `responseAtStart` boolean: you response id is generated before the start of video stimuli
-    - `respondentName` string: save a string data before the start of video session
-    - `respondentCustomDataString` Javascript object: save a js object as string before the start of video session
-    - `respondentCustomData` : Javascript object: save a js object before the start of video session
-
-
-###### One Javascript object as single parameter (suggested way)
+###### Initialization
 Include the following code in the tag *head* of your page:
        
 ```
@@ -165,7 +44,7 @@ Important note: If you include a valid value for `researchToken`, `type` can be 
 
 ### Load PlayCorder media from API
 
-If the `appToken` and `researchToken` options are implemented, media are loaded through the CrowdEmotion API backend [http://api.crowdemotion.co.uk/] 
+If the `appToken` and `researchToken` options are specified, media are loaded through the CrowdEmotion API backend [http://api.crowdemotion.co.uk/] 
 To upload media, just follow these steps:
 
 1. Signup at [https://api.crowdemotion.co.uk/#/signup] and wait for confirmation of your account
@@ -219,18 +98,18 @@ $(window.vrt).on('vrt_event_producer_camera_blocked', function () {
 ```
 (document).ready(function(){
 	//create PlayCorder object
-	var vrt = new Vrt({ optionstype:’youtube’, list:{} ,streamName:’test’, streamUrl:’xxxx.com’, researchToken:’XXXXXXXXYYYYYYYYY’,appToken:’AAAAAAAABBBBBBBBBB’,
-                apiDomain:’http://api.com',
+	var vrt = new Vrt({ optionstype:âyoutubeâ, list:{} ,streamName:âtestâ, streamUrl:âxxxx.comâ, researchToken:âXXXXXXXXYYYYYYYYYâ,appToken:âAAAAAAAABBBBBBBBBBâ,
+                apiDomain:âhttp://api.com',
                 debug:true, debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true,
                 randomOrder : true, timedOverPlayToEnd:false, continuosPlay:true,
                 customData:{user_id:user_id}, customDataInsertMediaName: true, customDataInsertMediaId: true,
                 customDataInsertMediaPath : true, responseAtStart: true,
-                respondentName: ’nnnnnn’,
-                respondentCustomDataString:  {name:’nnnn’, lastname:’mmmm’},
-                respondentCustomData : {name1:’myname’, lastname1:’mylastname’} });
+                respondentName: ânnnnnnâ,
+                respondentCustomDataString:  {name:ânnnnâ, lastname:âmmmmâ},
+                respondentCustomData : {name1:âmynameâ, lastname1:âmylastnameâ} });
 
 	//Implement event and method related to PlayCorder
- 		$(vrt).on(‘vrt_event_producer_camera_ok’,function()	{ alert(‘Your webcam is ok’) });
+ 		$(vrt).on(âvrt_event_producer_camera_okâ,function()	{ alert(âYour webcam is okâ) });
 	//...insert code here 
 	//PlayCorder start
 	vrt.init();
@@ -256,7 +135,7 @@ Custom data could be added in two ways:
 `window.vrt.apiClientSaveCustomData( api_response_id , data_object, callback_function)`
 
 - `api_response_id` is an integer value provided by CrowdEmotion API after a video upload
-- `data_object` is a js script object with custom values, like  `{user_id:333;user_name:’john’}`
+- `data_object` is a js script object with custom values, like  `{user_id:333;user_name:âjohnâ}`
 - `callback_function` is the function called at end of _apiClientSaveCustomData()_
 
 ###### Respondent custom data
