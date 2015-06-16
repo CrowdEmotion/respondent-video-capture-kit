@@ -98,18 +98,18 @@ $(window.vrt).on('vrt_event_producer_camera_blocked', function () {
 ```
 (document).ready(function(){
 	//create PlayCorder object
-	var vrt = new Vrt({ optionstype:âyoutubeâ, list:{} ,streamName:âtestâ, streamUrl:âxxxx.comâ, researchToken:âXXXXXXXXYYYYYYYYYâ,appToken:âAAAAAAAABBBBBBBBBBâ,
-                apiDomain:âhttp://api.com',
+	var vrt = new Vrt({ optionstype:"youtube", list:{} ,streamName:"test", streamUrl:"xxxx.com", researchToken:"XXXXXXXXYYYYYYYYY",appToken:"AAAAAAAABBBBBBBBBB",
+                apiDomain:"http://api.com',
                 debug:true, debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true,
                 randomOrder : true, timedOverPlayToEnd:false, continuosPlay:true,
                 customData:{user_id:user_id}, customDataInsertMediaName: true, customDataInsertMediaId: true,
                 customDataInsertMediaPath : true, responseAtStart: true,
-                respondentName: ânnnnnnâ,
-                respondentCustomDataString:  {name:ânnnnâ, lastname:âmmmmâ},
-                respondentCustomData : {name1:âmynameâ, lastname1:âmylastnameâ} });
+                respondentName: "nnnnnn",
+                respondentCustomDataString:  {name:"nnnn", lastname:"mmmm"},
+                respondentCustomData : {name1:"myname", lastname1:"mylastname"} });
 
 	//Implement event and method related to PlayCorder
- 		$(vrt).on(âvrt_event_producer_camera_okâ,function()	{ alert(âYour webcam is okâ) });
+ 		$(vrt).on("vrt_event_producer_camera_ok",function()	{ alert("Your webcam is ok") });
 	//...insert code here 
 	//PlayCorder start
 	vrt.init();
@@ -135,7 +135,7 @@ Custom data could be added in two ways:
 `window.vrt.apiClientSaveCustomData( api_response_id , data_object, callback_function)`
 
 - `api_response_id` is an integer value provided by CrowdEmotion API after a video upload
-- `data_object` is a js script object with custom values, like  `{user_id:333;user_name:âjohnâ}`
+- `data_object` is a js script object with custom values, like  `{user_id:333;user_name:"john"}`
 - `callback_function` is the function called at end of _apiClientSaveCustomData()_
 
 ###### Respondent custom data
