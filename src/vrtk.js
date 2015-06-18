@@ -134,7 +134,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             list        = data.list || {};
             streamUrl   = data.streamUrl || "mediabox.crowdemotion.co.uk";
             streamName  = data.streamName || null;
-            apiDomain   = data.apiDomain || "http://api.crowdemotion.co.uk";
             apiUser     = data.apiUser || null;
             apiPassword = data.apiPassword || null;
             options     = type;
