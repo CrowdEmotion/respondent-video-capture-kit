@@ -548,7 +548,7 @@ function YtInterface() {
 
             var params = { allowScriptAccess: "always", allowFullScreen: true, wmode: this.decideWmode() }; //, bgcolor: '#FFF4D5'
             var atts = { id: "ytPlayer" };
-            swfobject.embedSWF("http://www.youtube.com/apiplayer?" +
+            swfobject.embedSWF("https://www.youtube.com/apiplayer?" +
                     "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1",
                 "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
             if(options.centered && options.centered===true)  $('#ytPlayer').vrtCenter();
