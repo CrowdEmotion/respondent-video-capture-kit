@@ -28,7 +28,7 @@ module.exports = function(grunt) {
                     'src/vrtk_player.js',
                     'src/vrtk.js'
                 ],
-                dest: 'dist/vrtk.min.js'
+                dest: 'dist/vrtk-v2.min.js'
             },
             concat : {
                 options: {
@@ -50,7 +50,7 @@ module.exports = function(grunt) {
                     'src/vrtk_player.js',
                     'src/vrtk.js'
                 ],
-                dest: 'dist/vrtk.all.js'
+                dest: 'dist/vrtk-v2.all.js'
             }
         }
     });
