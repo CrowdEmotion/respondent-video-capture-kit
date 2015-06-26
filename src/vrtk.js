@@ -112,6 +112,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchArchived = false;
     this.researchReady = false;
     this.researchOutUrl = null;
+    this.recordingAudio = false;
 
     this.reloadFlash = null;
 
@@ -205,6 +206,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.researchId = options.researchId;
         this.researchToken = options.researchToken;
         this.appToken = options.appToken;
+        this.recordingAudio = options.recordingAudio || false;
     };
 
 
@@ -1294,8 +1296,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             this.setMirroredPreview(true);
             vrt.log('Is preview mirrored ? ' + this.getMirroredPreview());
-            this.setAudioStreamActive(false);
-            vrt.log('Is audio streaming active ? ' + this.getAudioStreamActive());
+
+            if(vrt.recordingAudio) {
+                this.setAudioStreamActive(true);
+            }else{
+                this.setAudioStreamActive(false);
+            }
+            vrt.llog('Is audio streaming active ? ' + this.getAudioStreamActive());
 
             var numCameras = this.countCameras();
 

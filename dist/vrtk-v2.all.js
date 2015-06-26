@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-6-18 18:21 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-6-26 12:3 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -8549,6 +8549,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchArchived = false;
     this.researchReady = false;
     this.researchOutUrl = null;
+    this.recordingAudio = false;
     this.reloadFlash = null;
     this.initMediaList = function(type, list) {
         if (!list) return;
@@ -8630,6 +8631,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.researchId = options.researchId;
         this.researchToken = options.researchToken;
         this.appToken = options.appToken;
+        this.recordingAudio = options.recordingAudio || false;
     };
     this.init = function() {
         this.log(">>STEP: vrt init");
@@ -9406,8 +9408,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.flash_allowed = true;
             this.setMirroredPreview(true);
             vrt.log("Is preview mirrored ? " + this.getMirroredPreview());
-            this.setAudioStreamActive(false);
-            vrt.log("Is audio streaming active ? " + this.getAudioStreamActive());
+            if (vrt.recordingAudio) {
+                this.setAudioStreamActive(true);
+            } else {
+                this.setAudioStreamActive(false);
+            }
+            vrt.llog("Is audio streaming active ? " + this.getAudioStreamActive());
             var numCameras = this.countCameras();
             vrt.log("===WEBP We have " + numCameras + " camera(s) available");
             if (numCameras == 0) {
