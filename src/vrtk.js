@@ -290,6 +290,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.options.recStyle  = 'height: 1px; width: 1px; position: absolute: left: -1000000px'
         }
         var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " +
+            "<style>.vrtHide{display:none};.vrtClearfix{clear:both}</style>"+
             "<div id='vrtLoader'></div>" +
             "<div id='vrtFrameWr'></div>" +
             ((this.options.htmlVideoPre) ? this.options.htmlVideoPre : '') +
@@ -297,23 +298,23 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             "      <div id='vrtvideo' class='" + this.options.htmlVideoClass + "'></div>                                " +
             "      <div id='videoDiv' class='" + this.options.htmlVideoClass + "'></div>                                " +
             "      <div id='ytPlayer' class='" + this.options.htmlVideoClass + "'></div>                                " +
-            "      <div class='clearfix'></div>                                                                     " +
+            "      <div class='vrtClearfix'></div>                                                                     " +
             "</div>                                                                                               " +
             ((this.options.htmlVideoPost) ? this.options.htmlVideoPost : '') +
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
-            "           <div class='hide' id='producerCamerafix' >"  +
+            "           <div class='vrtHide' id='producerCamerafix' style='display:none'>"  +
             "              Can you see your face inside the box? " +
             "             <button id='yesbtn'>Yes</button> <button id='nobtn'>NO</button></div> " +
             "           <div id='producer'></div>                                                                   " +
-            "           <div class='clearfix'></div>                                                                " +
+            "           <div class='vrtClearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
             "<div id='vrtLogWrapper' class='vrtWrap'>                                                      " +
             "      <div id='vrtalert'></div>                                                                        " +
             "      <div id='vrt_timer_player'></div>                                                                       " +
             "      <div id='vrt_timer_recorder'></div>                                                                       " +
-            "      <div class='clearfix'></div>                                                                     " +
+            "      <div class='vrtClearfix'></div>                                                                     " +
             "</div>                                                                                               " +
             "</div>";
 
@@ -553,6 +554,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger('vrt_event_user_next_video');
             }
 
+        });
+
+        $(window.vrt).on('vrt_event_user_click_yes_camera', function () {
+            vrt.llog('!! user click yes camera');
+        });
+        $(window.vrt).on('vrt_event_user_click_no_camera', function () {
+            vrt.llog('!! user click no camera');
         });
 
     };
@@ -1329,16 +1337,18 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.producer.isCameraWorking();
 
                 var toolong = function () {
-                  $('#producerCamerafix').removeClass('hide').show();
+                  $('#producerCamerafix').removeClass('vrtHide').show();
                   $('#producerCamerafix button#nobtn').off().on('click', function () {
+                      $(vrt).trigger('vrt_event_user_click_no_camera');
                       vrt.producer.reloadFlashElement(function () {
-                          $('#producerCamerafix').addClass('hide').hide();
+                          $('#producerCamerafix').addClass('vrtHide').hide();
                           var timeout = setTimeout(toolong, 5000);
                           vrt.producer.once('camera-unmuted', on_camera_unmuted.bind(self));
                       });
                   });
                 $('#producerCamerafix button#yesbtn').off().on('click', function () {
-                    $('#producerCamerafix').hide();
+                    $('#producerCamerafix').addClass('vrtHide').hide();
+                    $(vrt).trigger('vrt_event_user_click_yes_camera');
                 });
                 };
 
