@@ -1657,6 +1657,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     vrt.ceclient.writeRespondent(respoData,
                         function(res){
                             vrt.respondentId = res.id;
+                            $(vrt).trigger('vrt_event_respondent_created');
                             if(vrt.options.respondentCustomData){
                                 vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
                             }
