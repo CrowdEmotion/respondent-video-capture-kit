@@ -306,7 +306,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             "           <div class='vrtHide' id='producerCamerafix' style='display:none'>"  +
             "              Can you see your face inside the box? " +
             "             <button id='yesbtn'>Yes</button> <button id='nobtn'>NO</button></div> " +
-            "           <div id='producer'></div>                                                                   " +
+            "           <div id='producer'><video style='display: none;'></video></div>                                                                   " +
             "           <div class='vrtClearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
@@ -1278,7 +1278,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log("===WEBP Webpr_init");
         vrt.logTime('webProducerInit');
         vrt.log('!!PRODUCER webProducerInit');
-        this.producer = new WebProducer({
+        var Producer = WebProducer.webProducerClassGet();
+        this.producer = new Producer({
             id: this.producerID, // the html object id
             width: this.producerWidth, // these are sizes of the player on the page
             height: this.producerHeight, // not related to the stream resolution
@@ -1330,7 +1331,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log('!!on_camera_unmuted');
                 // now camera has been unmuted but we want to check that it
                 // actually works. So we ask the producer to perform the check
-                // and we wait for 'camera-works' response event. if it takes 
+                // and we wait for 'camera-works' response event. if it takes
                 // too long we assume somthing is wrong and we advice the user
                 // to check the browser
                 var self = this;
