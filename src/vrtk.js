@@ -127,7 +127,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log(type, 'type');
         this.log(list, 'list');
     };
-
+    this.checkOpt=function(options,k,def){
+        return (options && options[k]!=null && options[k]!=undefined)? options[k] : def;
+    };
     this.initialized = function (type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
 
         if (typeof type == 'object') { //type include all
@@ -169,25 +171,25 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producerStreamWidth = options.producerStreamWidth || 640;
         this.producerStreamHeight = options.producerStreamHeight || 480;
         this.avgPreLoadTime = options.avgPreLoadTime || 0;
-        this.recorderCenter = options.recorderCenter || true;
-        this.randomOrder = options.randomOrder || true;
+        this.recorderCenter = this.checkOpt(options,'recorderCenter',true);
+        this.randomOrder = this.checkOpt(options,'randomOrder',true);
         this.apiHttps = options.apiHttps || true;
-        this.continuosPlay = options.continuosPlay || false;
+        this.continuosPlay = this.checkOpt(options,'continuosPlay',false);
         this.swfPath = options.swfPath || scriptUrl;
         this.timedOverPlayToEnd = options.timedOverPlayToEnd || false;
 
         this.options = options;
 
-        this.options.player.centered = options.playerCentered || true;
+        this.options.player.centered = this.checkOpt(options,'playerCentered',true);
         this.options.player.width = options.playerWidth || 640;
         this.options.player.height = options.playerHeight || 400;
-        this.options.apiSandbox = options.apiSandbox || false;
-        this.responseAtStart = options.responseAtStart || false;
+        this.options.apiSandbox = this.checkOpt(options,'apiSandbox',false);
+        this.responseAtStart = this.checkOpt(options,'responseAtStart',true);
         this.options.engineType = options.engineType || 'kanako';
         this.options.respondentCustomDataString = options.respondentCustomDataString || {};
         this.options.respondentCustomData = options.respondentCustomData || {};
         this.options.respondentName = options.respondentName || '';
-        this.options.apiClientOnly = options.apiClientOnly || false;
+        this.options.apiClientOnly = this.checkOpt(options,'apiClientOnly',false);
         this.options.customData = options.customData || {};
         this.options.customDataInsertMediaName = true;
         this.options.customDataInsertMediaId = true;
