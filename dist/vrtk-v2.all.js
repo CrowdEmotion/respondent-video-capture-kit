@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-7-3 13:13 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-7-13 15:34 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -8462,6 +8462,7 @@ var scriptUrl = function() {
 
 function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options) {
     this.videoList = null;
+    this.videoListOrdered = null;
     this.videoFullscreen = false;
     this.videoType = null;
     this.canSkip = false;
@@ -8556,6 +8557,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.mediaCount = list.length;
         this.videoType = type;
         this.videoList = list;
+        this.videoListOrdered = list;
         this.calculateListData();
         this.randomizeOrderList();
         this.log(type, "type");
@@ -8602,7 +8604,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producerStreamHeight = options.producerStreamHeight || 480;
         this.avgPreLoadTime = options.avgPreLoadTime || 0;
         this.recorderCenter = this.checkOpt(options, "recorderCenter", true);
-        this.randomOrder = this.checkOpt(options, "randomOrder", true);
+        this.randomOrder = this.checkOpt(options, "randomOrder", false);
         this.apiHttps = options.apiHttps || true;
         this.continuosPlay = this.checkOpt(options, "continuosPlay", false);
         this.swfPath = options.swfPath || scriptUrl;
@@ -9713,6 +9715,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.researchArchived = research.archived ? research.archived : false;
                         vrt.researchReady = research.ready;
                         vrt.researchOutUrl = research.outgoingUrl;
+                        vrt.researchCustomData = research.customData;
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
                     }, function(res) {});
                 } else {

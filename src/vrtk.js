@@ -20,6 +20,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     //User settings
     this.videoList = null;
+    this.videoListOrdered = null;
     this.videoFullscreen = false;
     this.videoType = null; //youtube or customserver
     this.canSkip = false;
@@ -116,12 +117,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.reloadFlash = null;
 
-    this.initMediaList = function(type, list) {
-        if(!list) return;
-
+    this.initMediaList = function (type, list) {
+        if (!list)return;
         this.mediaCount = list.length;
         this.videoType = type;
-        this.videoList = list;
+        this.videoList =  list;
+        this.videoListOrdered = list;
         this.calculateListData();
         this.randomizeOrderList();
         this.log(type, 'type');
@@ -172,7 +173,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producerStreamHeight = options.producerStreamHeight || 480;
         this.avgPreLoadTime = options.avgPreLoadTime || 0;
         this.recorderCenter = this.checkOpt(options,'recorderCenter',true);
-        this.randomOrder = this.checkOpt(options,'randomOrder',true);
+        this.randomOrder = this.checkOpt(options,'randomOrder',false);
         this.apiHttps = options.apiHttps || true;
         this.continuosPlay = this.checkOpt(options,'continuosPlay',false);
         this.swfPath = options.swfPath || scriptUrl;
@@ -1677,6 +1678,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.researchArchived = research.archived? research.archived:false;
                         vrt.researchReady = research.ready;
                         vrt.researchOutUrl = research.outgoingUrl;
+                        vrt.researchCustomData = research.customData;
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
                     }, function(res){
                         //console.log(res);
