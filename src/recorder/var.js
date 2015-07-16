@@ -3501,7 +3501,11 @@ var WebProducer =
 	    this.el = null;
 	    this.trace = options.trace;
 	    this.path = options.path;
+	    this.streamTimeBase = 0;
 	    this.style = options.style || "display:block;text-align:left;";
+	    this.fps = 15.0;
+	    this.streamWidth = 640;
+	    this.streamHeight = 480;
 	    if (options.remote_logger_name) {
 	      this.remoteLoggerActivate(options.remote_logger_name);
 	      this.remoteLoggerLog('jsMethodCalled', 'constructor', [options]);
@@ -3518,8 +3522,11 @@ var WebProducer =
 	    this.cameraMuted = true;
 	    this.streamName = null;
 	    this.slowLinkLast = Date.now();
+	    this.useJanusIceServers = false;
 	    if (options.id) {
 	      el = document.getElementById(options.id);
+	      el = $(el).find('video')[0];
+	      $(el).show();
 	      this.elementMediaLocalSet(el);
 	      el.volume = 0;
 	      el.height = options.height;
@@ -3538,7 +3545,19 @@ var WebProducer =
 
 	  HTML5Producer.prototype.previewStart = function() {
 	    var video;
-	    video = true;
+	    this.remoteLoggerLog('jsMethodCalled', 'previewStart');
+	    video = {
+	      mandatory: {},
+	      optional: [
+	        {
+	          maxFrameRate: this.fps * 1.0
+	        }, {
+	          maxWidth: this.streamWidth
+	        }, {
+	          maxHeight: this.streamHeight
+	        }
+	      ]
+	    };
 	    return Adapter.getUserMedia({
 	      video: video,
 	      audio: true
@@ -3559,6 +3578,7 @@ var WebProducer =
 
 	  HTML5Producer.prototype.setUrl = function(url) {
 	    var host;
+	    this.remoteLoggerLog('jsMethodCalled', 'setUrl', url);
 	    host = url.split('/')[2].split(':')[0];
 	    return this.urls.hostSet(host);
 	  };
@@ -3566,6 +3586,7 @@ var WebProducer =
 	  HTML5Producer.prototype.connect = function() {
 	    var self;
 	    self = this;
+	    this.remoteLoggerLog('jsMethodCalled', 'connect');
 	    this.urls.instanceCycle();
 	    this.urls.once('url-changed', function(urls) {
 	      self.connectUrlChanged(urls);
@@ -3612,20 +3633,28 @@ var WebProducer =
 	    this.hub.urlSet(urls.urlHub);
 	    this.server = urls.urlJanus;
 	    iceServer = {
-	      url: "stun:" + urls.instanceIp + ":3478?transport=tcp",
+	      url: "turn:" + urls.instanceIp + ":3478?transport=tcp",
 	      username: "pino",
 	      credential: "pino"
 	    };
 	    this.iceServers = [iceServer];
+	    if (this.useJanusIceServers) {
+	      this.iceServers = void 0;
+	    }
+	    this.remoteLoggerLog('iceServers', 'iceServers', this.iceServers);
+	    this.log('iceServer', iceServer);
 	    return this.sessionInit();
 	  };
 
 	  HTML5Producer.prototype.disconnect = function() {
+	    this.remoteLoggerLog('janusPluginCall', 'disconnect');
+	    this.unpublishExpected = true;
 	    return this.session.destroy();
 	  };
 
 	  HTML5Producer.prototype.publish = function(streamName) {
 	    var self;
+	    this.remoteLoggerLog('janusPluginCall', 'publish');
 	    self = this;
 	    this.recordingStart(streamName, this.stream);
 	    return this.once('publish', function() {
@@ -3634,13 +3663,18 @@ var WebProducer =
 	  };
 
 	  HTML5Producer.prototype.publishDone = function() {
-	    return this.hub.streams.publish(this.streamName);
+	    this.hub.streams.publish(this.streamName);
+	    this.streamTimeBase = Date.now();
+	    this.once('unpublish', this.unpublishCheckUnexpected.bind(this));
+	    return this.unpublishExpected = false;
 	  };
 
 	  HTML5Producer.prototype.unpublish = function() {
 	    var self;
+	    this.remoteLoggerLog('janusPluginCall', 'unpublish');
 	    self = this;
 	    this.recordingStop();
+	    this.unpublishExpected = true;
 	    return this.once('unpublish', function() {
 	      return self.unpublishDone();
 	    });
@@ -3657,6 +3691,12 @@ var WebProducer =
 	    return this.hub.contents.once('save-metadata', function(url, streamName) {
 	      return self.fire('save-metadata', url, streamName);
 	    });
+	  };
+
+	  HTML5Producer.prototype.unpublishCheckUnexpected = function() {
+	    if (!this.unpublishExpected) {
+	      return console.log('UNEXPECTED UNPUBLISH EVENT, connection closed prematurely');
+	    }
 	  };
 
 	  HTML5Producer.prototype.log = function(message) {
@@ -3682,6 +3722,20 @@ var WebProducer =
 	      return true;
 	    }
 	    return false;
+	  };
+
+	  HTML5Producer.prototype.isCameraWorking = function() {
+	    var fn;
+	    fn = (function(_this) {
+	      return function() {
+	        return _this.fire('camera-works');
+	      };
+	    })(this);
+	    return setTimeout(fn, 1000);
+	  };
+
+	  HTML5Producer.prototype.getStreamTime = function() {
+	    return Date.now() - this.streamTimeBase;
 	  };
 
 	  HTML5Producer.prototype.setMirroredPreview = function(val) {
