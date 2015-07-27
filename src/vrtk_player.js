@@ -536,6 +536,7 @@ function YtInterface() {
 
         // load player only one time
         if (!this.player) {
+            var self = this;
 
             this.player_starts_recorder = false;
 
@@ -544,13 +545,39 @@ function YtInterface() {
             if(options && options.width) p_w =this.width = options.width;
             if(options && options.height) p_h =this.height = options.height;
 
-            $('#videoDiv').append('<div id="videoDivConvict"></div>');
+            $('#videoDiv').append('<div id="ytPlayer"></div>');
+            
+            var tag = document.createElement('script');
 
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            window.onYouTubeIframeAPIReady = function () {
+              vrt.logTime('onYouTubePlayerReady');
+              vrt.log("player [YT]: onYouTubePlayerReady");
+
+              vrt.player.player = new YT.Player('ytPlayer', {
+                 height: p_h,
+                 width: p_w,
+                 //videoId: 'M7lc1UVf-VE',
+                 events: {
+                   'onReady': function (event) { $(vrt).trigger('vrtstep_loaded'); },
+                   'onStateChange': onytplayerStateChange,
+                   'onError': onytplayerError
+                }
+              });
+            };
+
+
+            /* before transitioning to iframe apis we were doing this:
             var params = { allowScriptAccess: "always", allowFullScreen: true, wmode: this.decideWmode() }; //, bgcolor: '#FFF4D5'
             var atts = { id: "ytPlayer" };
             swfobject.embedSWF("https://www.youtube.com/apiplayer?" +
                     "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1",
                 "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
+            */
+            
             if(options.centered && options.centered===true)  $('#ytPlayer').vrtCenter();
 
             if(cbSuccess)cbSuccess();
@@ -562,8 +589,8 @@ function YtInterface() {
     this.player_dispose = function () {
         this.log('>>STEP player dispose');
         vrt.logTime('YtInterface player_dispose');
-        swfobject.removeSWF("ytPlayer");
-        $('#videoDiv').remove();  // also exits from fullscreen in FF
+        //swfobject.removeSWF("ytPlayer");
+        $('#ytPlayer').remove();
     };
 
     this.preloadPlayer = function () {
@@ -578,46 +605,33 @@ window.playerInterface = playerInterface;
 window.vjsInterface = vjsInterface;
 window.ytInterface = ytInterface;
 
-
-window.onYouTubePlayerReady =function() {
-    vrt.logTime('onYouTubePlayerReady');
-    vrt.log("player [YT]: onYouTubePlayerReady");
-
-    vrt.player.player = document.getElementById("ytPlayer");
-    vrt.player.player.addEventListener("onStateChange", "onytplayerStateChange");
-    vrt.player.player.addEventListener("onError", "onytplayerError");
-
-    $(vrt).trigger('vrtstep_loaded');
-};
-
 window.onytplayerError = function (newState) {
+    newState = newState.data;
     $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error'+ newState,type:'blocking'});
 };
 
 window.onytplayerStateChange = function (newState) {
+    newState = newState.data;
     vrt.logTime('onytplayerStateChange '+newState);
 
     // TODO sync recording when buffering
 
     $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(newState,'yt')});
 
-    $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}])
+    $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}]);
 
 
     if (newState == 3) {
-        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange3'})
+        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange3'});
     }
 
     if (newState == 1) {
-        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange1'})
+        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange1'});
     }
-    if (newState == 0){
+    if (newState == 0) {
         $(vrt).trigger('vrt_event_stimuli_end');
         if(!vrt.timedOverPlayToEnd){
             vrt.skip_video();
         }
     }
-
-
-
 };
