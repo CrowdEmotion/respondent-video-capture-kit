@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-7-23 14:31 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-7-27 18:6 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -16813,21 +16813,32 @@ function YtInterface() {
         this.log(">>STEP player load");
         vrt.logTime("YtInterface loadPlayer");
         if (!this.player) {
+            var self = this;
             this.player_starts_recorder = false;
             var p_w = this.width;
             var p_h = this.height;
             if (options && options.width) p_w = this.width = options.width;
             if (options && options.height) p_h = this.height = options.height;
-            $("#videoDiv").append('<div id="videoDivConvict"></div>');
-            var params = {
-                allowScriptAccess: "always",
-                allowFullScreen: true,
-                wmode: this.decideWmode()
+            $("#videoDiv").append('<div id="ytPlayer"></div>');
+            var tag = document.createElement("script");
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName("script")[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            window.onYouTubeIframeAPIReady = function() {
+                vrt.logTime("onYouTubePlayerReady");
+                vrt.log("player [YT]: onYouTubePlayerReady");
+                vrt.player.player = new YT.Player("ytPlayer", {
+                    height: p_h,
+                    width: p_w,
+                    events: {
+                        onReady: function(event) {
+                            $(vrt).trigger("vrtstep_loaded");
+                        },
+                        onStateChange: onytplayerStateChange,
+                        onError: onytplayerError
+                    }
+                });
             };
-            var atts = {
-                id: "ytPlayer"
-            };
-            swfobject.embedSWF("https://www.youtube.com/apiplayer?" + "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1", "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
             if (options.centered && options.centered === true) $("#ytPlayer").vrtCenter();
             if (cbSuccess) cbSuccess();
         } else {
@@ -16837,8 +16848,7 @@ function YtInterface() {
     this.player_dispose = function() {
         this.log(">>STEP player dispose");
         vrt.logTime("YtInterface player_dispose");
-        swfobject.removeSWF("ytPlayer");
-        $("#videoDiv").remove();
+        $("#ytPlayer").remove();
     };
     this.preloadPlayer = function() {
         this.log(">>STEP player pre-load");
@@ -16857,16 +16867,8 @@ window.vjsInterface = vjsInterface;
 
 window.ytInterface = ytInterface;
 
-window.onYouTubePlayerReady = function() {
-    vrt.logTime("onYouTubePlayerReady");
-    vrt.log("player [YT]: onYouTubePlayerReady");
-    vrt.player.player = document.getElementById("ytPlayer");
-    vrt.player.player.addEventListener("onStateChange", "onytplayerStateChange");
-    vrt.player.player.addEventListener("onError", "onytplayerError");
-    $(vrt).trigger("vrtstep_loaded");
-};
-
 window.onytplayerError = function(newState) {
+    newState = newState.data;
     $(window.vrt).trigger("vrt_event_error", {
         component: "player",
         error: "player error" + newState,
@@ -16875,6 +16877,7 @@ window.onytplayerError = function(newState) {
 };
 
 window.onytplayerStateChange = function(newState) {
+    newState = newState.data;
     vrt.logTime("onytplayerStateChange " + newState);
     $(vrt).trigger("vrtevent_player_ts", {
         status: vrt.player.statusMap(newState, "yt")
