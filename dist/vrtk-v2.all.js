@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-7-16 19:39 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-7-23 14:31 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -672,7 +672,7 @@ var WebProducer = function(modules) {
 }, function(module, exports, __webpack_require__) {
     var FlashProducer, HTML5Producer, api, e, message, platform;
     platform = __webpack_require__(2);
-    FlashProducer = __webpack_require__(4);
+    window.FlashProducer = FlashProducer = __webpack_require__(4);
     HTML5Producer = null;
     try {
         HTML5Producer = __webpack_require__(5);
@@ -2822,7 +2822,6 @@ var WebProducer = function(modules) {
             }
             this.slowLinkLast = Date.now();
             this.remoteLoggerLog("event", "slow_link");
-            this.videoBitrate *= .7;
             this.videoBitrate = Math.floor(this.videoBitrate);
             this.log("slow_link: adjusting bandwidth to " + this.videoBitrate);
             return this.pluginReconfigure();
@@ -2927,7 +2926,18 @@ var WebProducer = function(modules) {
             return Date.now() - this.streamTimeBase;
         };
         HTML5Producer.prototype.setMirroredPreview = function(val) {
-            return this.mirroredPreview = val;
+            var rot;
+            this.mirroredPreview = val;
+            if (!this.el) {
+                return;
+            }
+            rot = "rotateY(0deg)";
+            if (this.mirroredPreview) {
+                rot = "rotateY(180deg)";
+            }
+            $(this.el).css("transform", rot);
+            $(this.el).css("-webkit-transform", rot);
+            return $(this.el).css("-moz-transform", rot);
         };
         HTML5Producer.prototype.getMirroredPreview = function() {
             return this.mirroredPreview;
@@ -8801,7 +8811,7 @@ var WebProducer = function(modules) {
             this.elementMediaRemote = null;
             this.iceServers = null;
             this.videoKeyframeInterval = 5e3;
-            this.videoBitrate = 512e3 * 2;
+            this.videoBitrate = 512e3;
         }
         JanusRecorder.prototype.log = function(message) {
             if (console && console.log) {

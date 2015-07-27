@@ -56,7 +56,7 @@ var WebProducer =
 
 	platform = __webpack_require__(2);
 
-	FlashProducer = __webpack_require__(4);
+	window.FlashProducer = FlashProducer = __webpack_require__(4);
 
 	HTML5Producer = null;
 
@@ -3622,7 +3622,6 @@ var WebProducer =
 	    }
 	    this.slowLinkLast = Date.now();
 	    this.remoteLoggerLog('event', 'slow_link');
-	    this.videoBitrate *= 0.7;
 	    this.videoBitrate = Math.floor(this.videoBitrate);
 	    this.log('slow_link: adjusting bandwidth to ' + this.videoBitrate);
 	    return this.pluginReconfigure();
@@ -3739,7 +3738,18 @@ var WebProducer =
 	  };
 
 	  HTML5Producer.prototype.setMirroredPreview = function(val) {
-	    return this.mirroredPreview = val;
+	    var rot;
+	    this.mirroredPreview = val;
+	    if (!this.el) {
+	      return;
+	    }
+	    rot = 'rotateY(0deg)';
+	    if (this.mirroredPreview) {
+	      rot = 'rotateY(180deg)';
+	    }
+	    $(this.el).css('transform', rot);
+	    $(this.el).css('-webkit-transform', rot);
+	    return $(this.el).css('-moz-transform', rot);
 	  };
 
 	  HTML5Producer.prototype.getMirroredPreview = function() {
@@ -13603,7 +13613,7 @@ var WebProducer =
 	    this.elementMediaRemote = null;
 	    this.iceServers = null;
 	    this.videoKeyframeInterval = 5000;
-	    this.videoBitrate = 512000 * 2;
+	    this.videoBitrate = 512000;
 	  }
 
 	  JanusRecorder.prototype.log = function(message) {
