@@ -501,7 +501,7 @@ function YtInterface() {
                     $('#ytPlayer').width(w - 20 + 'px').height(h - 60 + 'px');
                 }
             }
-             */
+           */
 
             this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
             if (cb) cb();
@@ -642,6 +642,9 @@ function YtInterface() {
                 vrt.player.player = new YT.Player('ytPlayer', {
                     height: p_h,
                     width: p_w,
+                    playerVars: {
+                        'controls': 0
+                    },
                     //videoId: 'M7lc1UVf-VE',
                     events: {
                         'onReady': function (event) {
