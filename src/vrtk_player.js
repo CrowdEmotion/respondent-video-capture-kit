@@ -2,15 +2,15 @@
 function PlayerInterface() {
     this.player = null;
     this.player_starts_recorder = false;
-    this.timeout_alert = 0,
-    this.videos_preload = null,
-    this.media_path_pre = 'http://none',
-    this.test_media_path = this.media_path_pre + 'throughput_test.mp4', // TODO: HTTPS support, document.location.protocol
-    this.enough_bandwidth = false,
-    this.videos_preload = null,
-    this.hasFullscreen = false,
-    this.sources = '',
-    this.swf = '',
+    this.timeout_alert = 0;
+    this.videos_preload = null;
+    this.media_path_pre = 'http://none';
+    this.test_media_path = this.media_path_pre + 'throughput_test.mp4'; // TODO: HTTPS support, document.location.protocol
+    this.enough_bandwidth = false;
+    this.videos_preload = null;
+    this.hasFullscreen = false;
+    this.sources = '';
+    this.swf = '';
     this.width = 640;
     this.height = 400;
     this.hasStarted = false;
@@ -21,37 +21,39 @@ function PlayerInterface() {
             console.log('player log: ', msg);
         }
     };
-    
-    this.logTime = function(msg){
-            if (!msg) { msg = ''; }
-            var date = new Date();
-            var datevalues = [
-                date.getFullYear(),
-                date.getMonth() + 1,
-                date.getDate(),
-                date.getHours(),
-                date.getMinutes(),
-                date.getSeconds(),
-                date.getMilliseconds()
-            ];
-            if (console && console.log) {
-              console.log('TIME ' + msg + ': ' + datevalues[4] + 
-                  ' ' + datevalues[5] + ' ' + datevalues[6]);
-            }
+
+    this.logTime = function (msg) {
+        if (!msg) {
+            msg = '';
+        }
+        var date = new Date();
+        var datevalues = [
+            date.getFullYear(),
+            date.getMonth() + 1,
+            date.getDate(),
+            date.getHours(),
+            date.getMinutes(),
+            date.getSeconds(),
+            date.getMilliseconds()
+        ];
+        if (console && console.log) {
+            console.log('TIME ' + msg + ': ' + datevalues[4] +
+                ' ' + datevalues[5] + ' ' + datevalues[6]);
+        }
     };
-    
-    this.decideWmode = function() {
+
+    this.decideWmode = function () {
         return this.checkChromeMinVer("MacIntel", 17) ? "direct" : "opaque";
     };
-    this.checkChromeMinVer = function(plat, ver) {
+    this.checkChromeMinVer = function (plat, ver) {
         var bver;
-        if(window.navigator.appVersion.indexOf('Chrome') >= 0 && window.navigator.platform.indexOf(plat) >= 0) {
-            return (bver=/Chrome\/([0-9A-z]+)/.exec(window.navigator.appVersion)) ? bver[1] >= ver : false;
+        if (window.navigator.appVersion.indexOf('Chrome') >= 0 && window.navigator.platform.indexOf(plat) >= 0) {
+            return (bver = /Chrome\/([0-9A-z]+)/.exec(window.navigator.appVersion)) ? bver[1] >= ver : false;
         } else {
             return true;
         }
     };
-    
+
     /*
     CE  RECORDER        YOUTUBE                         VIDEOJS
     10                   case -1: 'unstarted';
@@ -66,28 +68,52 @@ function PlayerInterface() {
     20   publish         ---                            ---
     21   unpublish       ---                            ---
     */
-    
-    this.statusMap = function(status, type) {
+
+    this.statusMap = function (status, type) {
         var r = -1;
-        if (status >= 20) { r =  status; } //recorder
-        if (type == 'yt'){
-            if(status==-1) { r = 10; }
-            if(status==0) { r = 12; }
-            if(status==1) { r = 11; }
-            if(status==2) { r = 13; }
-            if(status==3) { r = 14; }
-            if(status==5) { r = 15; }
+        if (status >= 20) {
+            r = status;
+        } //recorder
+        if (type == 'yt') {
+            if (status == -1) {
+                r = 10;
+            }
+            if (status == 0) {
+                r = 12;
+            }
+            if (status == 1) {
+                r = 11;
+            }
+            if (status == 2) {
+                r = 13;
+            }
+            if (status == 3) {
+                r = 14;
+            }
+            if (status == 5) {
+                r = 15;
+            }
         }
         if (type == 'videojs') {
-            if (status=='playing') { r = 11; }
-            if (status=='buffering') { r = 14; }
-            if (status=='error') { r = 19; }
-            if (status=='ended') { r = 12; }
-            if (status=='paused') { r = 13; }
+            if (status == 'playing') {
+                r = 11;
+            }
+            if (status == 'buffering') {
+                r = 14;
+            }
+            if (status == 'error') {
+                r = 19;
+            }
+            if (status == 'ended') {
+                r = 12;
+            }
+            if (status == 'paused') {
+                r = 13;
+            }
         }
         return r;
     };
-    
+
 }
 
 // TODO video.js implementation
@@ -114,14 +140,20 @@ function VjsInterface() {
             //this.log( media_path_pre + '  ' + media_path );
             if (typeof (this.player) !== 'undefined' && this.player.src) {
                 var source = vrt.media_path;
-                if(source.slice(-3)=='flv') {
-                    this.player.src([{type: "video/flv", src: vrt.media_path}]);
-                }else {
-                    this.player.src([{type: "video/mp4", src: vrt.media_path}]);
+                if (source.slice(-3) == 'flv') {
+                    this.player.src([{
+                        type: "video/flv",
+                        src: vrt.media_path
+                    }]);
+                } else {
+                    this.player.src([{
+                        type: "video/mp4",
+                        src: vrt.media_path
+                    }]);
                 }
             }
 
-            this.log( 'video_play' );
+            this.log('video_play');
             this.logTime('video_play');
             // this.player.currentTime(0);
             // vrt.logChrono(1,'player', true);
@@ -146,12 +178,12 @@ function VjsInterface() {
                     this.player.pause();
                     //this.player.currentTime(this.player.duration());
                     //this.player.ended();
-                } else if(!this.player.ended() && !this.player.paused()) {
+                } else if (!this.player.ended() && !this.player.paused()) {
                     this.player.pause();
                 } else {
 
                 }
-            } catch(e) {
+            } catch (e) {
                 this.log(">> ERROR player [VJSnew]: stop");
                 this.log(e);
             }
@@ -161,8 +193,7 @@ function VjsInterface() {
     };
 
 
-    this.video_after_close_window = function () {
-    };
+    this.video_after_close_window = function () {};
 
     this.video_go_fullscreen = function () {
         this.player.requestFullScreen();
@@ -176,38 +207,53 @@ function VjsInterface() {
         this.player = el;
         this.isloadeddata = false;
 
-        this.player.on("play",              vrt.player.on_player_play); // play loadeddata
-        this.player.on("firstplay",         vrt.player.on_player_firstplay); // play loadeddata
-        this.player.on("error",             vrt.player.on_player_error);
-        this.player.on("fullscreenchange",  vrt.player.on_player_fullscreenchange);
-        this.player.on('pause', function() {
+        this.player.on("play", vrt.player.on_player_play); // play loadeddata
+        this.player.on("firstplay", vrt.player.on_player_firstplay); // play loadeddata
+        this.player.on("error", vrt.player.on_player_error);
+        this.player.on("fullscreenchange", vrt.player.on_player_fullscreenchange);
+        this.player.on('pause', function () {
             vrt.log('EVT YSP pause');
-            $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('paused','videojs')});
+            $(vrt)
+                .trigger('vrtevent_player_ts', {
+                    status: vrt.player.statusMap('paused', 'videojs')
+                });
         });
-        this.player.on('ended', function() {
+        this.player.on('ended', function () {
             vrt.log('EVT YSP ended');
-            $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('ended','videojs')});
+            $(vrt)
+                .trigger('vrtevent_player_ts', {
+                    status: vrt.player.statusMap('ended', 'videojs')
+                });
             vrt.player.on_player_end();
         });
-        this.player.on('loadedalldata',  vrt.player.loadedalldata );
-        this.player.on('loadeddata',     vrt.player.loadeddata );
-        this.player.on('loadedmetadata', vrt.player.loadedmetadata );
-        this.player.on('loadstart',      function() {   vrt.log("EVT YSP loadstart"); });
-        this.player.on('progress',       function() {   vrt.log("EVT YSP progress"); });
-        this.player.on('seeked',         function() {   vrt.log("EVT YSP seeked"); });
-        this.player.on('waiting',        function() {
-            $(vrt).trigger('vrtevent_player_ts', {
-              status: vrt.player.statusMap('buffering','videojs')
-            });
+        this.player.on('loadedalldata', vrt.player.loadedalldata);
+        this.player.on('loadeddata', vrt.player.loadeddata);
+        this.player.on('loadedmetadata', vrt.player.loadedmetadata);
+        this.player.on('loadstart', function () {
+            vrt.log("EVT YSP loadstart");
+        });
+        this.player.on('progress', function () {
+            vrt.log("EVT YSP progress");
+        });
+        this.player.on('seeked', function () {
+            vrt.log("EVT YSP seeked");
+        });
+        this.player.on('waiting', function () {
+            $(vrt)
+                .trigger('vrtevent_player_ts', {
+                    status: vrt.player.statusMap('buffering', 'videojs')
+                });
             vrt.log("EVT ysp waiting");
         });
 
-        $(vrt).trigger('vrtstep_loaded');
+        $(vrt)
+            .trigger('vrtstep_loaded');
     };
 
     this.on_player_end = function (cb) {
-        $(vrt).trigger('vrt_event_stimuli_end');
-        if(!vrt.timedOverPlayToEnd){
+        $(vrt)
+            .trigger('vrt_event_stimuli_end');
+        if (!vrt.timedOverPlayToEnd) {
             vrt.skip_video();
         }
     };
@@ -215,7 +261,7 @@ function VjsInterface() {
     this.on_player_play = function (cb) {
         vrt.log("EVT YSP  on_player_play");
         //TODO CHECK THIS, double event
-       // $(vrt).trigger('vrtstep_play',{caller:'on_player_play'});
+        // $(vrt).trigger('vrtstep_play',{caller:'on_player_play'});
     };
 
     this.on_player_firstplay = function (cb) {
@@ -224,19 +270,31 @@ function VjsInterface() {
 
     this.loadeddata = function (cb) {
         vrt.log("EVT YSP loadeddata");
-        if(!vrt.player.isloadeddata) {
+        if (!vrt.player.isloadeddata) {
             vrt.player.isloadeddata = true;
-            $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
-            $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
+            $(vrt)
+                .trigger('vrtevent_player_ts', {
+                    status: vrt.player.statusMap('playing', 'videojs')
+                });
+            $(vrt)
+                .trigger('vrtstep_play', {
+                    caller: 'loadedalldata'
+                });
         }
     };
 
     this.loadedalldata = function (cb) {
         vrt.log("EVT YSP loadedalldata");
-        if(!vrt.player.isloadeddatas && this.techName!="Html5") {
+        if (!vrt.player.isloadeddatas && this.techName != "Html5") {
             vrt.player.isloadeddata = true;
-            $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
-            $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
+            $(vrt)
+                .trigger('vrtevent_player_ts', {
+                    status: vrt.player.statusMap('playing', 'videojs')
+                });
+            $(vrt)
+                .trigger('vrtstep_play', {
+                    caller: 'loadedalldata'
+                });
         }
     };
 
@@ -252,9 +310,17 @@ function VjsInterface() {
     };
 
     this.on_player_error = function (e) {
-        vrt.log("EVT YSP loadedalldata "+e);
-        $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('error','videojs')});
-        $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error',type:'blocking'});
+        vrt.log("EVT YSP loadedalldata " + e);
+        $(vrt)
+            .trigger('vrtevent_player_ts', {
+                status: vrt.player.statusMap('error', 'videojs')
+            });
+        $(window.vrt)
+            .trigger('vrt_event_error', {
+                component: 'player',
+                error: 'player error',
+                type: 'blocking'
+            });
     };
 
     this.on_player_fullscreenchange = function (ev) {
@@ -268,7 +334,7 @@ function VjsInterface() {
         vrt.logTime('player_dispose');
     };
 
-    this.getCurrentTime = function(){
+    this.getCurrentTime = function () {
         return vrt.player.player.currentTime();
     };
 
@@ -281,34 +347,44 @@ function VjsInterface() {
 
             var p_w = this.width;
             var p_h = this.height;
-            if(options && options.width) p_w =this.width = options.width;
-            if(options && options.height) p_h =this.height = options.height;
+            if (options && options.width) p_w = this.width = options.width;
+            if (options && options.height) p_h = this.height = options.height;
 
             this.player_starts_recorder = false;
 
-            var videoObj = $('#videoDiv').prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="'+p_w+'" height="'+p_h+'" poster=""> </video>').children();
+            var videoObj = $('#videoDiv')
+                .prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="' + p_w + '" height="' + p_h + '" poster=""> </video>')
+                .children();
 
             // { preload: 'auto' };
-            videojs(videoObj[0], { "controls": false, "autoplay": false, "preload": "none" }, vjs_on_player_ready);
+            videojs(videoObj[0], {
+                "controls": false,
+                "autoplay": false,
+                "preload": "none"
+            }, vjs_on_player_ready);
             //$(vrt).trigger('vrtstep_loaded');
-            if (options.centered && options.centered===true)  $('#videoDiv').vrtCenter();
+            if (options.centered && options.centered === true) $('#videoDiv')
+                .vrtCenter();
         } else {
-            $(vrt).trigger('vrtstep_loaded');
+            $(vrt)
+                .trigger('vrtstep_loaded');
         }
     };
 
-    this.timeout_alert = 0,
-    this.videos_preload = null,
-    this.test_media_path = this.media_path_pre + 'throughput_test.mp4', // TODO: HTTPS support, document.location.protocol
+    this.timeout_alert = 0;
+    this.videos_preload = null;
+    this.test_media_path = this.media_path_pre + 'throughput_test.mp4'; // TODO: HTTPS support, document.location.protocol
     this.enough_bandwidth = false;
     this.videos_preload = null;
 
-    this.watchdog_start = function() {
+    this.watchdog_start = function () {
         clearTimeout(this.timeout_alert);
-        this.timeout_alert = setTimeout(function(){ call_callback(false); }, 10000);
+        this.timeout_alert = setTimeout(function () {
+            call_callback(false);
+        }, 10000);
     };
 
-    this.call_callback = function(success) {
+    this.call_callback = function (success) {
         this.videos_preload.off();
         clearTimeout(this.timeout_alert);
         try {
@@ -325,7 +401,7 @@ function VjsInterface() {
         this.log('preloading start');
 
         // BUG: in IE VIDEO either doesn't work or generates unwanted calls that logs out the user
-       //TODO check if(vrt.videoList.length < 1 || (vrt.checkIeVersion(10) ||  (!vrt.checkSafariMinVer('Win', 6)))) return null;
+        //TODO check if(vrt.videoList.length < 1 || (vrt.checkIeVersion(10) ||  (!vrt.checkSafariMinVer('Win', 6)))) return null;
         return this.setupPreLoadPlayer()
 
     };
@@ -337,7 +413,7 @@ function VjsInterface() {
 
         // TODO check what loadeddata means https://developer.mozilla.org/en-US/docs/Mozilla_event_reference/loadeddata
         /*
-       // TODO 1 videos preload
+        // TODO 1 videos preload
         this.videos_preload
             .on('loadstart', function(ev){
                 //this.log(('loadstart ');
@@ -392,7 +468,7 @@ function VjsInterface() {
 
 }
 
-function vjs_on_player_ready(){
+function vjs_on_player_ready() {
     vrt.player.on_player_ready(this);
 }
 
@@ -404,7 +480,7 @@ function YtInterface() {
     this.inheritFrom();
 
     this.video_play = function (cb) {
-        this.log('>>STEP video play '+ vrt.media_path);
+        this.log('>>STEP video play ' + vrt.media_path);
         vrt.logTime('YtInterface video_play');
         if (this.player) {
             this.log("player [YT]: play" + vrt.media_path);
@@ -428,9 +504,7 @@ function YtInterface() {
              */
 
             this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
-            if(cb)cb();
-        }else{
-
+            if (cb) cb();
         }
     };
 
@@ -446,7 +520,7 @@ function YtInterface() {
             //swfobject.removeSWF('ytPlayer');
             //this.player = null;
         }
-        if(cb)cb();
+        if (cb) cb();
     };
 
     this.video_after_close_window = function () {
@@ -495,41 +569,46 @@ function YtInterface() {
      */
     this.state2string = function (state) {
         switch (state) {
-            case -1:
-                return 'unstarted';
-                break;
-            case 0:
-                return 'ended';
-                break;
-            case 1:
-                return 'playing';
-                break;
-            case 2:
-                return 'paused';
-                break;
-            case 3:
-                return 'buffering';
-                break;
-            case 5:
-                return 'video cued';
-                break;
-            default:
-                return 'unknown [' + state + ']';
-                break;
+        case -1:
+            return 'unstarted';
+            break;
+        case 0:
+            return 'ended';
+            break;
+        case 1:
+            return 'playing';
+            break;
+        case 2:
+            return 'paused';
+            break;
+        case 3:
+            return 'buffering';
+            break;
+        case 5:
+            return 'video cued';
+            break;
+        default:
+            return 'unknown [' + state + ']';
+            break;
         }
     };
 
-    this.getCurrentTime = function(){
-        if(vrt.player.player) {
+    this.getCurrentTime = function () {
+        if (vrt.player.player) {
             return vrt.player.player.getCurrentTime();
-        }else{
+        } else {
             return 0;
         }
     }
 
     this.onytplayerError = function (newState) {
-        this.log("player error [YT]: " +newState);
-        $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error'+ newState,type:'blocking'});
+        this.log("player error [YT]: " + newState);
+        $(window.vrt)
+            .trigger('vrt_event_error', {
+                component: 'player',
+                error: 'player error' + newState,
+                type: 'blocking'
+            });
     };
 
     this.loadPlayer = function (options, cbSuccess) {
@@ -544,11 +623,12 @@ function YtInterface() {
 
             var p_w = this.width;
             var p_h = this.height;
-            if(options && options.width) p_w =this.width = options.width;
-            if(options && options.height) p_h =this.height = options.height;
+            if (options && options.width) p_w = this.width = options.width;
+            if (options && options.height) p_h = this.height = options.height;
 
-            $('#videoDiv').append('<div id="ytPlayer"></div>');
-            
+            $('#videoDiv')
+                .append('<div id="ytPlayer"></div>');
+
             var tag = document.createElement('script');
 
             tag.src = "https://www.youtube.com/iframe_api";
@@ -556,19 +636,22 @@ function YtInterface() {
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
             window.onYouTubeIframeAPIReady = function () {
-              vrt.logTime('onYouTubePlayerReady');
-              vrt.log("player [YT]: onYouTubePlayerReady");
+                vrt.logTime('onYouTubePlayerReady');
+                vrt.log("player [YT]: onYouTubePlayerReady");
 
-              vrt.player.player = new YT.Player('ytPlayer', {
-                 height: p_h,
-                 width: p_w,
-                 //videoId: 'M7lc1UVf-VE',
-                 events: {
-                   'onReady': function (event) { $(vrt).trigger('vrtstep_loaded'); },
-                   'onStateChange': onytplayerStateChange,
-                   'onError': onytplayerError
-                }
-              });
+                vrt.player.player = new YT.Player('ytPlayer', {
+                    height: p_h,
+                    width: p_w,
+                    //videoId: 'M7lc1UVf-VE',
+                    events: {
+                        'onReady': function (event) {
+                            $(vrt)
+                                .trigger('vrtstep_loaded');
+                        },
+                        'onStateChange': onytplayerStateChange,
+                        'onError': onytplayerError
+                    }
+                });
             };
 
 
@@ -579,12 +662,14 @@ function YtInterface() {
                     "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1",
                 "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
             */
-            
-            if(options.centered && options.centered===true)  $('#ytPlayer').vrtCenter();
 
-            if(cbSuccess)cbSuccess();
-        }else{
-            $(vrt).trigger('vrtstep_loaded');
+            if (options.centered && options.centered === true) $('#ytPlayer')
+                .vrtCenter();
+
+            if (cbSuccess) cbSuccess();
+        } else {
+            $(vrt)
+                .trigger('vrtstep_loaded');
         }
     };
 
@@ -592,7 +677,8 @@ function YtInterface() {
         this.log('>>STEP player dispose');
         vrt.logTime('YtInterface player_dispose');
         //swfobject.removeSWF("ytPlayer");
-        $('#ytPlayer').remove();
+        $('#ytPlayer')
+            .remove();
     };
 
     this.preloadPlayer = function () {
@@ -609,30 +695,49 @@ window.ytInterface = ytInterface;
 
 window.onytplayerError = function (newState) {
     newState = newState.data;
-    $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error'+ newState,type:'blocking'});
+    $(window.vrt)
+        .trigger('vrt_event_error', {
+            component: 'player',
+            error: 'player error' + newState,
+            type: 'blocking'
+        });
 };
 
 window.onytplayerStateChange = function (newState) {
     newState = newState.data;
-    vrt.logTime('onytplayerStateChange '+newState);
+    vrt.logTime('onytplayerStateChange ' + newState);
 
     // TODO sync recording when buffering
 
-    $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(newState,'yt')});
+    $(vrt)
+        .trigger('vrtevent_player_ts', {
+            status: vrt.player.statusMap(newState, 'yt')
+        });
 
-    $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}]);
+    $(vrt)
+        .trigger('vrtstep_playerStateChange', [{
+            state: newState,
+            time: vrt.logTime('YT')
+        }]);
 
 
     if (newState == 3) {
-        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange3'});
+        $(vrt)
+            .trigger('vrtstep_play', {
+                caller: 'onytplayerStateChange3'
+            });
     }
 
     if (newState == 1) {
-        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange1'});
+        $(vrt)
+            .trigger('vrtstep_play', {
+                caller: 'onytplayerStateChange1'
+            });
     }
     if (newState == 0) {
-        $(vrt).trigger('vrt_event_stimuli_end');
-        if(!vrt.timedOverPlayToEnd){
+        $(vrt)
+            .trigger('vrt_event_stimuli_end');
+        if (!vrt.timedOverPlayToEnd) {
             vrt.skip_video();
         }
     }
