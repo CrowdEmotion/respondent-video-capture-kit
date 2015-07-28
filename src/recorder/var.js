@@ -13854,10 +13854,15 @@ var WebProducer =
 	  };
 
 	  JanusRecorder.prototype.recordingStart = function(streamName, stream) {
-	    var plugin, self;
+	    var plugin, ref, self;
 	    this.streamName = streamName;
 	    plugin = this.plugin;
 	    self = this;
+	    if (plugin != null) {
+	      if ((ref = plugin.webrtcStuff) != null) {
+	        ref.sdpSent = false;
+	      }
+	    }
 	    return plugin.createOffer({
 	      stream: stream,
 	      success: function(jsep) {
