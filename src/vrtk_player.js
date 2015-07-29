@@ -648,8 +648,15 @@ function YtInterface() {
                     //videoId: 'M7lc1UVf-VE',
                     events: {
                         'onReady': function (event) {
-                            $(vrt)
-                                .trigger('vrtstep_loaded');
+                            if (vrt.options.player && vrt.options.player.centered && vrt.options.player.centered === true) {
+                                $("#ytPlayer").vrtCenter();
+                            }
+                            $(vrt).trigger('vrtstep_loaded');
+                        },
+                        'onLoad': function (event) {
+                            if (vrt.options.player && vrt.options.player.centered && vrt.options.player.centered === true) {
+                                $("#ytPlayer").vrtCenter();
+                            }
                         },
                         'onStateChange': onytplayerStateChange,
                         'onError': onytplayerError
@@ -666,8 +673,7 @@ function YtInterface() {
                 "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
             */
 
-            if (options.centered && options.centered === true) $('#ytPlayer')
-                .vrtCenter();
+            if (options.centered && options.centered === true) $('#ytPlayer').vrtCenter();
 
             if (cbSuccess) cbSuccess();
         } else {
