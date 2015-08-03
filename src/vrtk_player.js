@@ -81,6 +81,28 @@ function PlayerInterface() {
         }
         //console.log('statusMap: ' + status + ' to ' + r);
         return r;
+    },
+    this.blockRClick= function(id){
+
+        var myVideo = document.getElementById(id);
+        if (myVideo.addEventListener) {
+            myVideo.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            }, false);
+        } else {
+            myVideo.attachEvent('oncontextmenu', function() {
+                window.event.returnValue = false;
+            });
+        }
+
+
+        var object = $('#'+id+' object');
+        if(object){
+        //    object.attr('menu',false);
+        //    object.append('<param menu="false" />');
+        }
+
+
     }
 }
 
@@ -175,6 +197,9 @@ function VjsInterface() {
     this.on_player_ready = function (el, cb) {
         this.player = el;
         this.isloadeddata = false;
+
+//        var myVideo = document.getElementById("myVideo");
+        vrt.player.blockRClick('videoDiv');
 
         this.player.on("play",              vrt.player.on_player_play); // play loadeddata
         this.player.on("firstplay",         vrt.player.on_player_firstplay); // play loadeddata
@@ -287,7 +312,7 @@ function VjsInterface() {
             var videoObj = $('#videoDiv').prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="'+p_w+'" height="'+p_h+'" poster=""> </video>').children();
 
             // { preload: 'auto' };
-            videojs(videoObj[0], { "controls": false, "autoplay": false, "preload": "none" }, vjs_on_player_ready);
+            videojs(videoObj[0], { "controls": false, "autoplay": false, "preload": "none", menu: false}, vjs_on_player_ready);
             //$(vrt).trigger('vrtstep_loaded');
             if(options.centered && options.centered===true)  $('#videoDiv').vrtCenter();
         }else{
@@ -546,12 +571,14 @@ function YtInterface() {
 
             $('#videoDiv').append('<div id="videoDivConvict"></div>');
 
-            var params = { allowScriptAccess: "always", allowFullScreen: true, wmode: this.decideWmode() }; //, bgcolor: '#FFF4D5'
+            var params = { allowScriptAccess: "always", allowFullScreen: true, wmode: this.decideWmode(), menu: false }; //, bgcolor: '#FFF4D5'
             var atts = { id: "ytPlayer" };
             swfobject.embedSWF("https://www.youtube.com/apiplayer?" +
                     "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1",
                 "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
             if(options.centered && options.centered===true)  $('#ytPlayer').vrtCenter();
+
+            vrt.player.blockRClick('ytPlayer');
 
             if(cbSuccess)cbSuccess();
         }else{
@@ -586,6 +613,8 @@ window.onYouTubePlayerReady =function() {
     vrt.player.player = document.getElementById("ytPlayer");
     vrt.player.player.addEventListener("onStateChange", "onytplayerStateChange");
     vrt.player.player.addEventListener("onError", "onytplayerError");
+
+    vrt.player.blockRClick('ytPlayer');
 
     $(vrt).trigger('vrtstep_loaded');
 };
