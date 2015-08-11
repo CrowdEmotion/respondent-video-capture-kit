@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-8-3 11:35 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-8-11 15:27 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -3842,7 +3842,7 @@ vjs.isEmpty = function(obj) {
 };
 
 vjs.addClass = function(element, classToAdd) {
-    if ((" " + element.className + " ").indexOf(" " + classToAdd + " ") == -1) {
+    if (element && element.className && (" " + element.className + " ").indexOf(" " + classToAdd + " ") == -1) {
         element.className = element.className === "" ? classToAdd : element.className + " " + classToAdd;
     }
 };
@@ -7989,6 +7989,7 @@ function PlayerInterface() {
     this.height = 400;
     this.hasStarted = false;
     this.hasStopped = false;
+    this._player_is_fullscreen = false;
     this.log = function(msg) {
         if (console.log) {
             console.log("player log: ");
@@ -8059,6 +8060,10 @@ function PlayerInterface() {
         }
         var object = $("#" + id + " object");
         if (object) {}
+    }, this.on_player_fullscreenchange = function(ev) {
+        vrt.logTime("on_player_fullscreenchange");
+        vrt.log("player [VJSnew]: on_player_fullscreenchange");
+        vrt.player._player_is_fullscreen = !vrt.player._player_is_fullscreen;
     };
 }
 
@@ -8069,6 +8074,10 @@ function VjsInterface() {
     this.video_play = function(cb) {
         if (this.player) {
             this.log("player [VJSnew]: play");
+            if (vrt.videoFullscreen && vrt.msieversion() >= 9) {
+                var w = $(window).innerWidth() - 20, h = $(window).innerHeight();
+                $("#videoDiv").parent().parent().css("left", "0px").css("top", "0px").width(w + "px").height(h + "px");
+            }
             if (typeof this.player !== "undefined" && this.player.src) {
                 var source = vrt.media_path;
                 if (source.slice(-3) == "flv") {
@@ -8113,10 +8122,16 @@ function VjsInterface() {
     };
     this.video_after_close_window = function() {};
     this.video_go_fullscreen = function() {
-        this.player.requestFullScreen();
+        if (this.player.requestFullscreen) this.player.requestFullscreen(); else {
+            this.player.requestFullScreen();
+        }
     };
     this.video_end_fullscreen = function() {
-        this.player.cancelFullScreen();
+        if (this.player.exitFullscreen) {
+            this.player.exitFullscreen();
+        } else {
+            this.player.cancelFullScreen();
+        }
     };
     this.on_player_ready = function(el, cb) {
         this.player = el;
@@ -8158,6 +8173,7 @@ function VjsInterface() {
             vrt.log("EVT ysp waiting");
         });
         $(vrt).trigger("vrtstep_loaded");
+        vrt.player_is_ready();
     };
     this.on_player_end = function(cb) {
         $(vrt).trigger("vrt_event_stimuli_end");
@@ -8208,11 +8224,6 @@ function VjsInterface() {
             error: "player error",
             type: "blocking"
         });
-    };
-    this.on_player_fullscreenchange = function(ev) {
-        vrt.logTime("on_player_fullscreenchange");
-        this.log("player [VJSnew]: on_player_fullscreenchange");
-        this._player_is_fullscreen = !this._player_is_fullscreen;
     };
     this.player_dispose = function() {
         this.player.dispose();
@@ -8301,9 +8312,12 @@ function YtInterface() {
         this.is_player_ready = false;
     };
     this.video_go_fullscreen = function() {
+        return "";
         var el = document.getElementById("videoDiv");
         if (el.requestFullScreen) {
             el.requestFullScreen();
+        } else if (el.requestFullscreen) {
+            el.requestFullscreen();
         } else if (el.mozRequestFullScreen) {
             el.mozRequestFullScreen();
         } else if (el.webkitRequestFullScreen) {
@@ -8314,6 +8328,7 @@ function YtInterface() {
         this._player_is_fullscreen = true;
     };
     this.video_end_fullscreen = function() {
+        return "";
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.mozCancelFullScreen) {
@@ -9157,7 +9172,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (s) return s.toString().replace(/[^a-z0-9]/gi, "_").toLowerCase(); else return s;
     };
     this.closeSession = function() {
-        if (this.fullscreen_needed) this.videoEndFullscreen();
+        if (this.videoFullscreen) this.videoEndFullscreen();
         this.playerDispose();
         this.producer.disconnect();
         $("#" + this.producer.id).hide();
@@ -9172,14 +9187,21 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.proceedToShow = function() {
         this.log("proceedToShow");
         this.player.loadPlayer(this.options.player);
+        if (vrt.is_player_ready) vrt.player_is_ready();
     };
     this.player_is_ready = function() {
-        this.player_is_ready_after();
+        if (this.videoFullscreen && !vrt.player._player_is_fullscreen) {
+            this.openDialog("", function() {
+                vrt.player.video_go_fullscreen();
+                vrt.player_is_ready_after();
+            }.bind(this), vrt.msieversion() > 0 || !vrt.checkSafariMinVer("Win", 6) ? "bottom" : false);
+        } else {
+            this.player_is_ready_after();
+        }
     };
     this.player_is_ready_after = function() {
-        this.log(">>STEP player is ready aft");
-        this.log("player_is_ready_after");
-        this.player.video_play();
+        this.llog("player_is_ready_after");
+        this.is_player_ready = true;
     };
     this.producerSetupConnection = function(cb) {
         this.log("!! filename " + this.producerStreamName);
@@ -9347,7 +9369,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         return date_diff.getMinutes() + " M " + date_diff.getSeconds() + " S " + date_diff.getMilliseconds() + " m ";
     };
     this.checkSafariMinVer = function(plat, ver) {
-        var bver, isSafari = $.browser.safari && window.navigator.appVersion.indexOf("Chrome") < 0;
+        var bver, ua = navigator.userAgent.toLowerCase();
+        var isSafari = false;
+        if (ua.indexOf("safari") != -1 && ua.indexOf("chrome") <= -1) {
+            isSafari = true;
+        }
         if (isSafari && (!plat || window.navigator.platform.indexOf(plat) >= 0)) return (bver = /Version\/([0-9A-z]+)/.exec(window.navigator.appVersion)) ? bver[1] >= ver : false; else return true;
     };
     this.checkIe = function() {
@@ -9398,6 +9424,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.log(">>STEP vrt stop play");
         vrt.player.video_stop(function() {
             vrt.logChrono(1, false, "player");
+            vrt.player.video_end_fullscreen();
         });
         vrt.isPlaying = false;
         clearTimeout(vrt.stop_handle);
@@ -9791,6 +9818,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (show === false) {
             $("#vrtLoader").html("");
         }
+    };
+    this.openDialog = function(msg, closeFunc, position) {
+        if (closeFunc) closeFunc();
+    };
+    this.msieversion = function() {
+        var ua = window.navigator.userAgent;
+        var msie = ua.indexOf("MSIE ");
+        if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) return parseInt(ua.substring(msie + 5, ua.indexOf(".", msie))); else return false;
+        return false;
     };
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options);
 }

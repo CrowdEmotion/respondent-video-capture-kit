@@ -15,6 +15,7 @@ function PlayerInterface() {
     this.height = 400;
     this.hasStarted = false;
     this.hasStopped = false;
+    this._player_is_fullscreen = false;
 
     this.log = function (msg) {
         if (console.log) {
@@ -103,6 +104,11 @@ function PlayerInterface() {
         }
 
 
+    },
+    this.on_player_fullscreenchange = function (ev) {
+        vrt.logTime('on_player_fullscreenchange');
+        vrt.log("player [VJSnew]: on_player_fullscreenchange");
+        vrt.player._player_is_fullscreen = !vrt.player._player_is_fullscreen;
     }
 }
 
@@ -120,12 +126,11 @@ function VjsInterface() {
         if (this.player) {
             this.log("player [VJSnew]: play");
 
-            /*
-            if(fullscreen_needed && $.browser.msie && $.browser.version >= 9) {
+
+            if(vrt.videoFullscreen && vrt.msieversion() >= 9) {
                 var w = $(window).innerWidth()-20, h = $(window).innerHeight();
                 $('#videoDiv').parent().parent().css('left','0px').css('top','0px').width(w+'px').height(h+'px');
             }
-            */
 
             //this.log( media_path_pre + '  ' + media_path );
             if (typeof (this.player) !== 'undefined' && this.player.src) {
@@ -187,11 +192,20 @@ function VjsInterface() {
     };
 
     this.video_go_fullscreen = function () {
-        this.player.requestFullScreen();
+        if(this.player.requestFullscreen)
+            this.player.requestFullscreen();
+        else {
+            this.player.requestFullScreen();
+        }
     };
 
     this.video_end_fullscreen = function () {
-        this.player.cancelFullScreen();
+        if(this.player.exitFullscreen){
+            this.player.exitFullscreen()
+        }else{
+            this.player.cancelFullScreen();
+        }
+
     };
 
     this.on_player_ready = function (el, cb) {
@@ -226,6 +240,8 @@ function VjsInterface() {
         });
 
         $(vrt).trigger('vrtstep_loaded');
+
+        vrt.player_is_ready();
     };
 
     this.on_player_end = function (cb) {
@@ -280,11 +296,6 @@ function VjsInterface() {
         $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error',type:'blocking'});
     };
 
-    this.on_player_fullscreenchange = function (ev) {
-        vrt.logTime('on_player_fullscreenchange')
-        this.log("player [VJSnew]: on_player_fullscreenchange");
-        this._player_is_fullscreen = !this._player_is_fullscreen;
-    };
 
     this.player_dispose = function () {
         this.player.dispose();
@@ -435,16 +446,16 @@ function YtInterface() {
             // TODO fullscreen
 
             /*
-            if (this.fullscreen_needed) {
+            if (vrt.videoFullscreen) {
                 // enlarge video
-                if (this.hasFullscreen) {
+                if (vrt.player.hasFullscreen) {
                     // as the screen
                     $('#ytPlayer').width(window.screen.width + 'px').height(window.screen.height + 'px');
                 } else {
                     // as the window
                     // HACK highly dependent on dialog() internal object hierarchy implementation
                     var w = $(window).innerWidth() - 20, h = $(window).innerHeight();
-                    $('#ytPlayer').parent().parent().parent().css('left', '0px').css('top', '0px').width(w + 'px').height(h + 'px');
+                    $('#ytPlayer body').css('left', '0px').css('top', '0px').width(w + 'px').height(h + 'px');
                     $('#ytPlayer').width(w - 20 + 'px').height(h - 60 + 'px');
                 }
             }
@@ -478,11 +489,14 @@ function YtInterface() {
 
     this.video_go_fullscreen = function () {
 
+        return '';
         // HACK YT player doesn't support fullscreen
 
         var el = document.getElementById('videoDiv');
         if (el.requestFullScreen) {
             el.requestFullScreen();
+        } else if(el.requestFullscreen){
+            el.requestFullscreen();
         } else if (el.mozRequestFullScreen) {
             el.mozRequestFullScreen();
         } else if (el.webkitRequestFullScreen) {
@@ -496,6 +510,9 @@ function YtInterface() {
     };
 
     this.video_end_fullscreen = function () {
+
+        return '';
+
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.mozCancelFullScreen) {
@@ -548,7 +565,7 @@ function YtInterface() {
         }else{
             return 0;
         }
-    }
+    };
 
     this.onytplayerError = function (newState) {
         this.log("player error [YT]: " +newState);
@@ -614,6 +631,7 @@ window.onYouTubePlayerReady =function() {
     vrt.player.player.addEventListener("onStateChange", "onytplayerStateChange");
     vrt.player.player.addEventListener("onError", "onytplayerError");
 
+    // vrt.player_is_ready();
     vrt.player.blockRClick('ytPlayer');
 
     $(vrt).trigger('vrtstep_loaded');
