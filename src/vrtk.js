@@ -924,33 +924,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.proceedToShow = function () {
         this.log('proceedToShow');
         this.player.loadPlayer(this.options.player);
-        if (vrt.is_player_ready)
-            vrt.player_is_ready();
+        this.player_is_ready();
     };
 
     this.player_is_ready = function(){
 
-        if (this.videoFullscreen && !vrt.player._player_is_fullscreen) {
-
-            this.openDialog('', function () {
-                vrt.player.video_go_fullscreen();
-                vrt.player_is_ready_after();
-            }.bind(this) , vrt.msieversion() > 0 || !vrt.checkSafariMinVer('Win', 6) ? 'bottom' : false);
-
-        } else {
-            this.player_is_ready_after();
-        }
-    };
-
-    this.player_is_ready_after = function(){
-
-        this.llog('player_is_ready_after');
-
-        // set inside the method onytplayerStateChange
-        //OLD
-        this.is_player_ready = true;
-
-
+        if (vrt.videoFullscreen ){// && !vrt.player._player_is_fullscreen) {
+            this.llog('player_is_ready go fs');
+            vrt.player.video_go_fullscreen();
+        };
     };
 
     this.producerSetupConnection = function(cb) {
@@ -1778,11 +1760,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         var ua = window.navigator.userAgent;
         var msie = ua.indexOf("MSIE ");
-
-        if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer, return version number
-            return (parseInt(ua.substring(msie + 5, ua.indexOf(".", msie))));
-        else
+        var match = navigator.userAgent.match(/(?:MSIE |Trident\/.*; rv:)(\d+)/)
+        if (msie > 0 || match){
+            return match ? parseInt(match[1]) : false;
+        }else{
             return false;
+        }
 
         return false;
     }

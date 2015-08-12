@@ -4317,6 +4317,17 @@ vjs.Player.prototype.requestFullscreen = function(){
   return this;
 };
 
+vjs.Player.prototype.requestFullwindow = function(){
+  var fsApi = vjs.browser.fullscreenAPI;
+
+  this.isFullscreen(true);
+
+  this.enterFullWindow();
+  this.trigger('fullscreenchange');
+
+  return this;
+};
+
 /**
  * Old naming for requestFullscreen
  * @deprecated for lower case 's' version

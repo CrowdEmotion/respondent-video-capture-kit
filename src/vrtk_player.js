@@ -128,8 +128,7 @@ function VjsInterface() {
 
 
             if(vrt.videoFullscreen && vrt.msieversion() >= 9) {
-                var w = $(window).innerWidth()-20, h = $(window).innerHeight();
-                $('#videoDiv').parent().parent().css('left','0px').css('top','0px').width(w+'px').height(h+'px');
+                this.player.requestFullscreen();
             }
 
             //this.log( media_path_pre + '  ' + media_path );
@@ -192,11 +191,15 @@ function VjsInterface() {
     };
 
     this.video_go_fullscreen = function () {
-        if(this.player.requestFullscreen)
-            this.player.requestFullscreen();
-        else {
-            this.player.requestFullScreen();
-        }
+        if(this.player){
+            if(vrt.msieversion()==11 || vrt.checkSafariMinVer(false, 1)){
+                this.player.requestFullwindow();
+            }else if(this.player.requestFullscreen)
+                this.player.requestFullscreen();
+            else {
+                this.player.requestFullScreen();
+            };
+        };
     };
 
     this.video_end_fullscreen = function () {

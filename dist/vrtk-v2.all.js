@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-8-11 15:27 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-8-12 14:58 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -5504,6 +5504,14 @@ vjs.Player.prototype.requestFullscreen = function() {
     return this;
 };
 
+vjs.Player.prototype.requestFullwindow = function() {
+    var fsApi = vjs.browser.fullscreenAPI;
+    this.isFullscreen(true);
+    this.enterFullWindow();
+    this.trigger("fullscreenchange");
+    return this;
+};
+
 vjs.Player.prototype.requestFullScreen = function() {
     vjs.log.warn('player.requestFullScreen() has been deprecated, use player.requestFullscreen() with a lowercase "s")');
     return this.requestFullscreen();
@@ -8075,8 +8083,7 @@ function VjsInterface() {
         if (this.player) {
             this.log("player [VJSnew]: play");
             if (vrt.videoFullscreen && vrt.msieversion() >= 9) {
-                var w = $(window).innerWidth() - 20, h = $(window).innerHeight();
-                $("#videoDiv").parent().parent().css("left", "0px").css("top", "0px").width(w + "px").height(h + "px");
+                this.player.requestFullscreen();
             }
             if (typeof this.player !== "undefined" && this.player.src) {
                 var source = vrt.media_path;
@@ -8122,8 +8129,12 @@ function VjsInterface() {
     };
     this.video_after_close_window = function() {};
     this.video_go_fullscreen = function() {
-        if (this.player.requestFullscreen) this.player.requestFullscreen(); else {
-            this.player.requestFullScreen();
+        if (this.player) {
+            if (vrt.msieversion() == 11 || vrt.checkSafariMinVer(false, 1)) {
+                this.player.requestFullwindow();
+            } else if (this.player.requestFullscreen) this.player.requestFullscreen(); else {
+                this.player.requestFullScreen();
+            }
         }
     };
     this.video_end_fullscreen = function() {
@@ -9187,21 +9198,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.proceedToShow = function() {
         this.log("proceedToShow");
         this.player.loadPlayer(this.options.player);
-        if (vrt.is_player_ready) vrt.player_is_ready();
+        this.player_is_ready();
     };
     this.player_is_ready = function() {
-        if (this.videoFullscreen && !vrt.player._player_is_fullscreen) {
-            this.openDialog("", function() {
-                vrt.player.video_go_fullscreen();
-                vrt.player_is_ready_after();
-            }.bind(this), vrt.msieversion() > 0 || !vrt.checkSafariMinVer("Win", 6) ? "bottom" : false);
-        } else {
-            this.player_is_ready_after();
+        if (vrt.videoFullscreen) {
+            this.llog("player_is_ready go fs");
+            vrt.player.video_go_fullscreen();
         }
-    };
-    this.player_is_ready_after = function() {
-        this.llog("player_is_ready_after");
-        this.is_player_ready = true;
     };
     this.producerSetupConnection = function(cb) {
         this.log("!! filename " + this.producerStreamName);
@@ -9825,7 +9828,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.msieversion = function() {
         var ua = window.navigator.userAgent;
         var msie = ua.indexOf("MSIE ");
-        if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) return parseInt(ua.substring(msie + 5, ua.indexOf(".", msie))); else return false;
+        var match = navigator.userAgent.match(/(?:MSIE |Trident\/.*; rv:)(\d+)/);
+        if (msie > 0 || match) {
+            return match ? parseInt(match[1]) : false;
+        } else {
+            return false;
+        }
         return false;
     };
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options);
