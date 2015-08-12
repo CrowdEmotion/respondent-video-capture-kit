@@ -1185,6 +1185,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             return true;
     };
 
+    this.checkSafari = function() {
+        var bver, ua = navigator.userAgent.toLowerCase();
+        var isSafari = false;
+        if (ua.indexOf('safari') != -1 && ua.indexOf('chrome') <= -1) {
+            isSafari = true;
+        }
+        return isSafari;
+    };
+
     this.checkIe = function()
     {
         return (/msie|trident/i).test(navigator.userAgent)

@@ -126,11 +126,6 @@ function VjsInterface() {
         if (this.player) {
             this.log("player [VJSnew]: play");
 
-
-            if(vrt.videoFullscreen && vrt.msieversion() >= 9) {
-                this.player.requestFullscreen();
-            }
-
             //this.log( media_path_pre + '  ' + media_path );
             if (typeof (this.player) !== 'undefined' && this.player.src) {
                 var source = vrt.media_path;
@@ -192,13 +187,11 @@ function VjsInterface() {
 
     this.video_go_fullscreen = function () {
         if(this.player){
-            if(vrt.msieversion()==11 || vrt.checkSafariMinVer(false, 1)){
+            if(vrt.msieversion()==11 || vrt.checkSafari() ){
                 this.player.requestFullwindow();
-            }else if(this.player.requestFullscreen)
+            }else if(this.player.requestFullscreen){
                 this.player.requestFullscreen();
-            else {
-                this.player.requestFullScreen();
-            };
+            }
         };
     };
 
