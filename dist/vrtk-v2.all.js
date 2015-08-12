@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-8-12 14:58 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-8-12 17:33 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -2011,6 +2011,16 @@ var WebProducer = function(modules) {
     module.exports = EventEmitterMixin;
 } ]);
 
+Date.now = Date.now || function() {
+    return +new Date();
+};
+
+window.console = window.console || function() {
+    var c = {};
+    c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile = c.clear = c.exception = c.trace = c.assert = function(s) {};
+    return c;
+}();
+
 var ltIE9 = !document.addEventListener;
 
 if (ltIE9) {
@@ -2103,14 +2113,6 @@ if (ltIE9) {
             };
         });
     });
-    Date.now = Date.now || function() {
-        return +new Date();
-    };
-    window.console = window.console || function() {
-        var c = {};
-        c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile = c.clear = c.exception = c.trace = c.assert = function(s) {};
-        return c;
-    }();
     (function(a) {
         if (typeof define === "function" && define.amd) {
             define([ "jquery" ], a);
@@ -8082,9 +8084,6 @@ function VjsInterface() {
     this.video_play = function(cb) {
         if (this.player) {
             this.log("player [VJSnew]: play");
-            if (vrt.videoFullscreen && vrt.msieversion() >= 9) {
-                this.player.requestFullscreen();
-            }
             if (typeof this.player !== "undefined" && this.player.src) {
                 var source = vrt.media_path;
                 if (source.slice(-3) == "flv") {
@@ -8130,10 +8129,10 @@ function VjsInterface() {
     this.video_after_close_window = function() {};
     this.video_go_fullscreen = function() {
         if (this.player) {
-            if (vrt.msieversion() == 11 || vrt.checkSafariMinVer(false, 1)) {
+            if (vrt.msieversion() == 11 || vrt.checkSafari()) {
                 this.player.requestFullwindow();
-            } else if (this.player.requestFullscreen) this.player.requestFullscreen(); else {
-                this.player.requestFullScreen();
+            } else if (this.player.requestFullscreen) {
+                this.player.requestFullscreen();
             }
         }
     };
@@ -9378,6 +9377,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             isSafari = true;
         }
         if (isSafari && (!plat || window.navigator.platform.indexOf(plat) >= 0)) return (bver = /Version\/([0-9A-z]+)/.exec(window.navigator.appVersion)) ? bver[1] >= ver : false; else return true;
+    };
+    this.checkSafari = function() {
+        var bver, ua = navigator.userAgent.toLowerCase();
+        var isSafari = false;
+        if (ua.indexOf("safari") != -1 && ua.indexOf("chrome") <= -1) {
+            isSafari = true;
+        }
+        return isSafari;
     };
     this.checkIe = function() {
         return /msie|trident/i.test(navigator.userAgent);
