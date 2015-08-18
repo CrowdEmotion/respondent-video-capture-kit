@@ -2,58 +2,52 @@
 function PlayerInterface() {
     this.player = null;
     this.player_starts_recorder = false;
-    this.timeout_alert = 0;
-    this.videos_preload = null;
-    this.media_path_pre = 'http://none';
-    this.test_media_path = this.media_path_pre + 'throughput_test.mp4'; // TODO: HTTPS support, document.location.protocol
-    this.enough_bandwidth = false;
-    this.videos_preload = null;
-    this.hasFullscreen = false;
-    this.sources = '';
-    this.swf = '';
+    this.timeout_alert = 0,
+    this.videos_preload = null,
+    this.media_path_pre = 'http://none',
+    this.test_media_path = this.media_path_pre + 'throughput_test.mp4', // TODO: HTTPS support, document.location.protocol
+    this.enough_bandwidth = false,
+    this.videos_preload = null,
+    this.hasFullscreen = false,
+    this.sources = '',
+    this.swf = '',
     this.width = 640;
     this.height = 400;
     this.hasStarted = false;
     this.hasStopped = false;
+    this._player_is_fullscreen = false;
 
     this.log = function (msg) {
-        if (console && console.log) {
-            console.log('player log: ', msg);
+        if (console.log) {
+            console.log('player log: ');
+            console.log(msg);
         }
-    };
-
+    },
     this.logTime = function (msg) {
-        if (!msg) {
-            msg = '';
-        }
+            if(!msg) msg='';
         var date = new Date();
         var datevalues = [
-            date.getFullYear(),
-            date.getMonth() + 1,
-            date.getDate(),
-            date.getHours(),
-            date.getMinutes(),
-            date.getSeconds(),
-            date.getMilliseconds()
+                date.getFullYear()
+                ,date.getMonth()+1
+                ,date.getDate()
+                ,date.getHours()
+                ,date.getMinutes()
+                ,date.getSeconds()
+                ,date.getMilliseconds()
         ];
-        if (console && console.log) {
-            console.log('TIME ' + msg + ': ' + datevalues[4] +
-                ' ' + datevalues[5] + ' ' + datevalues[6]);
-        }
-    };
-
+            if (console && console.log) console.log('TIME ' + msg +': '+datevalues[4]+' '+datevalues[5]+' '+datevalues[6]);
+    },
     this.decideWmode = function () {
         return this.checkChromeMinVer("MacIntel", 17) ? "direct" : "opaque";
-    };
+    },
     this.checkChromeMinVer = function (plat, ver) {
         var bver;
-        if (window.navigator.appVersion.indexOf('Chrome') >= 0 && window.navigator.platform.indexOf(plat) >= 0) {
+
+        if(window.navigator.appVersion.indexOf('Chrome') >= 0 && window.navigator.platform.indexOf(plat) >= 0)
             return (bver = /Chrome\/([0-9A-z]+)/.exec(window.navigator.appVersion)) ? bver[1] >= ver : false;
-        } else {
+        else
             return true;
         }
-    };
-
     /*
     CE  RECORDER        YOUTUBE                         VIDEOJS
     10                   case -1: 'unstarted';
@@ -68,52 +62,54 @@ function PlayerInterface() {
     20   publish         ---                            ---
     21   unpublish       ---                            ---
     */
-
     this.statusMap = function (status, type) {
         var r = -1;
-        if (status >= 20) {
-            r = status;
-        } //recorder
+        if(status >= 20) r =  status; //recorder
         if (type == 'yt') {
-            if (status == -1) {
-                r = 10;
-            }
-            if (status == 0) {
-                r = 12;
-            }
-            if (status == 1) {
-                r = 11;
-            }
-            if (status == 2) {
-                r = 13;
-            }
-            if (status == 3) {
-                r = 14;
-            }
-            if (status == 5) {
-                r = 15;
-            }
+            if(status==-1){ r = 10; }
+            if(status==0) { r = 12; }
+            if(status==1) { r = 11; }
+            if(status==2){ r = 13; }
+            if(status==3){ r = 14; }
+            if(status==5){ r = 15; }
         }
         if (type == 'videojs') {
-            if (status == 'playing') {
-                r = 11;
+            if(status=='playing'){ r = 11; }
+            if(status=='buffering'){ r = 14; }
+            if(status=='error'){ r = 19; }
+            if(status=='ended'){ r = 12; }
+            if(status=='paused'){ r = 13; }
             }
-            if (status == 'buffering') {
-                r = 14;
-            }
-            if (status == 'error') {
-                r = 19;
-            }
-            if (status == 'ended') {
-                r = 12;
-            }
-            if (status == 'paused') {
-                r = 13;
-            }
-        }
+        //console.log('statusMap: ' + status + ' to ' + r);
         return r;
-    };
+    },
+    this.blockRClick= function(id){
+        if(vrt.options.norclick == false) return;
+        var myVideo = document.getElementById(id);
+        if (myVideo.addEventListener) {
+            myVideo.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            }, false);
+        } else {
+            myVideo.attachEvent('oncontextmenu', function() {
+                window.event.returnValue = false;
+            });
+        }
 
+
+        var object = $('#'+id+' object');
+        if(object){
+        //    object.attr('menu',false);
+        //    object.append('<param menu="false" />');
+        }
+
+
+    },
+    this.on_player_fullscreenchange = function (ev) {
+        vrt.logTime('on_player_fullscreenchange');
+        vrt.log("player [VJSnew]: on_player_fullscreenchange");
+        vrt.player._player_is_fullscreen = !vrt.player._player_is_fullscreen;
+    }
 }
 
 // TODO video.js implementation
@@ -130,26 +126,13 @@ function VjsInterface() {
         if (this.player) {
             this.log("player [VJSnew]: play");
 
-            /*
-            if(fullscreen_needed && $.browser.msie && $.browser.version >= 9) {
-                var w = $(window).innerWidth()-20, h = $(window).innerHeight();
-                $('#videoDiv').parent().parent().css('left','0px').css('top','0px').width(w+'px').height(h+'px');
-            }
-            */
-
             //this.log( media_path_pre + '  ' + media_path );
             if (typeof (this.player) !== 'undefined' && this.player.src) {
                 var source = vrt.media_path;
                 if (source.slice(-3) == 'flv') {
-                    this.player.src([{
-                        type: "video/flv",
-                        src: vrt.media_path
-                    }]);
+                    this.player.src([{type: "video/flv", src: vrt.media_path}]);
                 } else {
-                    this.player.src([{
-                        type: "video/mp4",
-                        src: vrt.media_path
-                    }]);
+                    this.player.src([{type: "video/mp4", src: vrt.media_path}]);
                 }
             }
 
@@ -159,6 +142,8 @@ function VjsInterface() {
             // vrt.logChrono(1,'player', true);
             this.player.play();
             if (cb) cb();
+        }else{
+
         }
 
     };
@@ -184,28 +169,47 @@ function VjsInterface() {
 
                 }
             } catch (e) {
-                this.log(">> ERROR player [VJSnew]: stop");
+                this.log(">> ERROR player [VJSnew]: stop")
                 this.log(e);
             }
+            //vjsplayer.ended();
+            //producer hideVideoBox();
+            //vjsplayer.currentTime(vjsplayer.duration());  // 1000000 ?
+            //vjsplayer.src('');
 
         }
         if (cb) cb();
     };
 
 
-    this.video_after_close_window = function () {};
+    this.video_after_close_window = function () {
+    };
 
     this.video_go_fullscreen = function () {
-        this.player.requestFullScreen();
+        if(this.player){
+            if(vrt.msieversion()==11 || vrt.checkSafari() ){
+                this.player.requestFullwindow();
+            }else if(this.player.requestFullscreen){
+                this.player.requestFullscreen();
+            }
+        };
     };
 
     this.video_end_fullscreen = function () {
-        this.player.cancelFullScreen();
+        if(this.player.exitFullscreen){
+            this.player.exitFullscreen()
+        }else{
+            this.player.cancelFullScreen();
+        }
+
     };
 
     this.on_player_ready = function (el, cb) {
         this.player = el;
         this.isloadeddata = false;
+
+//        var myVideo = document.getElementById("myVideo");
+        vrt.player.blockRClick('videoDiv');
 
         this.player.on("play", vrt.player.on_player_play); // play loadeddata
         this.player.on("firstplay", vrt.player.on_player_firstplay); // play loadeddata
@@ -213,46 +217,34 @@ function VjsInterface() {
         this.player.on("fullscreenchange", vrt.player.on_player_fullscreenchange);
         this.player.on('pause', function () {
             vrt.log('EVT YSP pause');
-            $(vrt)
-                .trigger('vrtevent_player_ts', {
-                    status: vrt.player.statusMap('paused', 'videojs')
-                });
+            $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('paused','videojs')});
         });
         this.player.on('ended', function () {
             vrt.log('EVT YSP ended');
-            $(vrt)
-                .trigger('vrtevent_player_ts', {
-                    status: vrt.player.statusMap('ended', 'videojs')
-                });
+            $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('ended','videojs')});
             vrt.player.on_player_end();
         });
         this.player.on('loadedalldata', vrt.player.loadedalldata);
         this.player.on('loadeddata', vrt.player.loadeddata);
         this.player.on('loadedmetadata', vrt.player.loadedmetadata);
-        this.player.on('loadstart', function () {
-            vrt.log("EVT YSP loadstart");
-        });
-        this.player.on('progress', function () {
-            vrt.log("EVT YSP progress");
-        });
-        this.player.on('seeked', function () {
-            vrt.log("EVT YSP seeked");
-        });
+        this.player.on('loadstart',      function() {   vrt.log("EVT YSP loadstart")});
+        this.player.on('progress',       function() {   vrt.log("EVT YSP progress")});
+        this.player.on('seeked',         function() {   vrt.log("EVT YSP seeked")});
         this.player.on('waiting', function () {
-            $(vrt)
-                .trigger('vrtevent_player_ts', {
-                    status: vrt.player.statusMap('buffering', 'videojs')
+            $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('buffering','videojs')});
+            vrt.log("EVT ysp waiting")
                 });
-            vrt.log("EVT ysp waiting");
-        });
 
-        $(vrt)
-            .trigger('vrtstep_loaded');
+        if(vrt.options.recorderCenter && vrt.options.recorderCenter===true)  {
+            $('#videoDiv').vrtCenter();
+        };
+        $(vrt).trigger('vrtstep_loaded');
+
+        vrt.player_is_ready();
     };
 
     this.on_player_end = function (cb) {
-        $(vrt)
-            .trigger('vrt_event_stimuli_end');
+        $(vrt).trigger('vrt_event_stimuli_end');
         if (!vrt.timedOverPlayToEnd) {
             vrt.skip_video();
         }
@@ -272,14 +264,8 @@ function VjsInterface() {
         vrt.log("EVT YSP loadeddata");
         if (!vrt.player.isloadeddata) {
             vrt.player.isloadeddata = true;
-            $(vrt)
-                .trigger('vrtevent_player_ts', {
-                    status: vrt.player.statusMap('playing', 'videojs')
-                });
-            $(vrt)
-                .trigger('vrtstep_play', {
-                    caller: 'loadedalldata'
-                });
+            $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
+            $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
         }
     };
 
@@ -287,14 +273,8 @@ function VjsInterface() {
         vrt.log("EVT YSP loadedalldata");
         if (!vrt.player.isloadeddatas && this.techName != "Html5") {
             vrt.player.isloadeddata = true;
-            $(vrt)
-                .trigger('vrtevent_player_ts', {
-                    status: vrt.player.statusMap('playing', 'videojs')
-                });
-            $(vrt)
-                .trigger('vrtstep_play', {
-                    caller: 'loadedalldata'
-                });
+            $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
+            $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
         }
     };
 
@@ -311,23 +291,10 @@ function VjsInterface() {
 
     this.on_player_error = function (e) {
         vrt.log("EVT YSP loadedalldata " + e);
-        $(vrt)
-            .trigger('vrtevent_player_ts', {
-                status: vrt.player.statusMap('error', 'videojs')
-            });
-        $(window.vrt)
-            .trigger('vrt_event_error', {
-                component: 'player',
-                error: 'player error',
-                type: 'blocking'
-            });
+        $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('error','videojs')});
+        $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error',type:'blocking'});
     };
 
-    this.on_player_fullscreenchange = function (ev) {
-        vrt.logTime('on_player_fullscreenchange');
-        this.log("player [VJSnew]: on_player_fullscreenchange");
-        this._player_is_fullscreen = !this._player_is_fullscreen;
-    };
 
     this.player_dispose = function () {
         this.player.dispose();
@@ -336,7 +303,7 @@ function VjsInterface() {
 
     this.getCurrentTime = function () {
         return vrt.player.player.currentTime();
-    };
+    }
 
     this.loadPlayer = function (options) {
         vrt.logTime('loadPlayer');
@@ -352,36 +319,26 @@ function VjsInterface() {
 
             this.player_starts_recorder = false;
 
-            var videoObj = $('#videoDiv')
-                .prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="' + p_w + '" height="' + p_h + '" poster=""> </video>')
-                .children();
+            var videoObj = $('#videoDiv').prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="'+p_w+'" height="'+p_h+'" poster=""> </video>').children();
 
             // { preload: 'auto' };
-            videojs(videoObj[0], {
-                "controls": false,
-                "autoplay": false,
-                "preload": "none"
-            }, vjs_on_player_ready);
+            videojs(videoObj[0], { "controls": false, "autoplay": false, "preload": "none", menu: false}, vjs_on_player_ready);
             //$(vrt).trigger('vrtstep_loaded');
-            if (options.centered && options.centered === true) $('#videoDiv')
-                .vrtCenter();
+
         } else {
-            $(vrt)
-                .trigger('vrtstep_loaded');
+            $(vrt).trigger('vrtstep_loaded');
         }
     };
 
-    this.timeout_alert = 0;
-    this.videos_preload = null;
-    this.test_media_path = this.media_path_pre + 'throughput_test.mp4'; // TODO: HTTPS support, document.location.protocol
+    this.timeout_alert = 0,
+    this.videos_preload = null,
+    this.test_media_path = this.media_path_pre + 'throughput_test.mp4', // TODO: HTTPS support, document.location.protocol
     this.enough_bandwidth = false;
     this.videos_preload = null;
 
     this.watchdog_start = function () {
         clearTimeout(this.timeout_alert);
-        this.timeout_alert = setTimeout(function () {
-            call_callback(false);
-        }, 10000);
+        this.timeout_alert = setTimeout(function(){ call_callback(false); }, 10000);
     };
 
     this.call_callback = function (success) {
@@ -488,16 +445,16 @@ function YtInterface() {
             // TODO fullscreen
 
             /*
-            if (this.fullscreen_needed) {
+            if (vrt.videoFullscreen) {
                 // enlarge video
-                if (this.hasFullscreen) {
+                if (vrt.player.hasFullscreen) {
                     // as the screen
                     $('#ytPlayer').width(window.screen.width + 'px').height(window.screen.height + 'px');
                 } else {
                     // as the window
                     // HACK highly dependent on dialog() internal object hierarchy implementation
                     var w = $(window).innerWidth() - 20, h = $(window).innerHeight();
-                    $('#ytPlayer').parent().parent().parent().css('left', '0px').css('top', '0px').width(w + 'px').height(h + 'px');
+                    $('#ytPlayer body').css('left', '0px').css('top', '0px').width(w + 'px').height(h + 'px');
                     $('#ytPlayer').width(w - 20 + 'px').height(h - 60 + 'px');
                 }
             }
@@ -505,6 +462,8 @@ function YtInterface() {
 
             this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
             if (cb) cb();
+        }else{
+
         }
     };
 
@@ -529,11 +488,14 @@ function YtInterface() {
 
     this.video_go_fullscreen = function () {
 
+        return '';
         // HACK YT player doesn't support fullscreen
-
+        // ytPlayer??
         var el = document.getElementById('videoDiv');
         if (el.requestFullScreen) {
             el.requestFullScreen();
+        } else if(el.requestFullscreen){
+            el.requestFullscreen();
         } else if (el.mozRequestFullScreen) {
             el.mozRequestFullScreen();
         } else if (el.webkitRequestFullScreen) {
@@ -547,6 +509,9 @@ function YtInterface() {
     };
 
     this.video_end_fullscreen = function () {
+
+        return '';
+
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.mozCancelFullScreen) {
@@ -672,13 +637,13 @@ function YtInterface() {
                     "version=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1&playerapiid=player1",
                 "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
             */
-
             if (options.centered && options.centered === true) $('#ytPlayer').vrtCenter();
+
+            vrt.player.blockRClick('ytPlayer');
 
             if (cbSuccess) cbSuccess();
         } else {
-            $(vrt)
-                .trigger('vrtstep_loaded');
+            $(vrt).trigger('vrtstep_loaded');
         }
     };
 
@@ -701,6 +666,21 @@ var ytInterface = new YtInterface();
 window.playerInterface = playerInterface;
 window.vjsInterface = vjsInterface;
 window.ytInterface = ytInterface;
+
+
+window.onYouTubePlayerReady =function() {
+    vrt.logTime('onYouTubePlayerReady');
+    vrt.log("player [YT]: onYouTubePlayerReady");
+
+    vrt.player.player = document.getElementById("ytPlayer");
+    vrt.player.player.addEventListener("onStateChange", "onytplayerStateChange");
+    vrt.player.player.addEventListener("onError", "onytplayerError");
+
+    // vrt.player_is_ready();
+    vrt.player.blockRClick('ytPlayer');
+
+    $(vrt).trigger('vrtstep_loaded');
+};
 
 window.onytplayerError = function (newState) {
     newState = newState.data;

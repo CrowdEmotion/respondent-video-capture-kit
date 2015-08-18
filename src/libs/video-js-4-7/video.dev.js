@@ -946,7 +946,7 @@ vjs.isEmpty = function(obj) {
  * @private
  */
 vjs.addClass = function(element, classToAdd){
-  if ((' '+element.className+' ').indexOf(' '+classToAdd+' ') == -1) {
+  if (element && element.className  && (' '+element.className+' ').indexOf(' '+classToAdd+' ') == -1) {
     element.className = element.className === '' ? classToAdd : element.className + ' ' + classToAdd;
   }
 };
@@ -4313,6 +4313,17 @@ vjs.Player.prototype.requestFullscreen = function(){
     this.enterFullWindow();
     this.trigger('fullscreenchange');
   }
+
+  return this;
+};
+
+vjs.Player.prototype.requestFullwindow = function(){
+  var fsApi = vjs.browser.fullscreenAPI;
+
+  this.isFullscreen(true);
+
+  this.enterFullWindow();
+  this.trigger('fullscreenchange');
 
   return this;
 };

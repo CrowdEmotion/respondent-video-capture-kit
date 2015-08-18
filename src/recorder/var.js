@@ -73,17 +73,20 @@ var WebProducer =
 	api = {
 	  typeAutoDetect: function() {
 	    var major;
+	    if (console && console.log) {
+	      console.log('platform', platform);
+	    }
 	    if (HTML5Producer === null) {
 	      return 'flash';
 	    }
-	    if (platform.name === "Chrome") {
+	    if (platform.name.indexOf("Chrome") >= 0) {
 	      major = platform.version.split('.')[0];
 	      major = parseInt(major);
 	      if (major >= 39) {
 	        return 'html5';
 	      }
 	    }
-	    if (platform.name === "Firefox") {
+	    if (platform.name.indexOf("Firefox") >= 0) {
 	      major = platform.version.split('.')[0];
 	      major = parseInt(major);
 	      if (major >= 37) {

@@ -20,6 +20,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     //User settings
     this.videoList = null;
+    this.videoListOrdered = null;
     this.videoFullscreen = false;
     this.videoType = null; //youtube or customserver
     this.canSkip = false;
@@ -118,7 +119,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.initMediaList = function(type, list) {
         if(!list) return;
-
         this.mediaCount = list.length;
         this.videoType = type;
         this.videoList =  list;
@@ -136,7 +136,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (typeof type == 'object') { //type include all
             var data = type;
             list        = data.list || {};
-            streamUrl   = data.streamUrl || "mediabox.crowdemotion.co.uk";
+            //streamUrl   = data.streamUrl || "mediabox.crowdemotion.co.uk";
+            streamUrl   = data.streamUrl || "buildmachine.mediabox-v2.crowdemotion.co.uk";
             streamName  = data.streamName || null;
             apiDomain   = data.apiDomain || "https://api.crowdemotion.co.uk";
             apiUser     = data.apiUser || null;
@@ -195,6 +196,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.customDataInsertMediaName = true;
         this.options.customDataInsertMediaId = true;
         this.options.customDataInsertMediaPath = true;
+        this.options.norclick = this.checkOpt(options,'norclick',false);;
 
         if (this.newInit) {
           this.responseAtStart = options.responseAtStart = true;
@@ -309,7 +311,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             "           <div class='vrtHide' id='producerCamerafix' style='display:none'>"  +
             "              Can you see your face inside the box? " +
             "             <button id='yesbtn'>Yes</button> <button id='nobtn'>NO</button></div> " +
-            "           <div id='producer'><video style='display: none;'></video></div>                                                                   " +
+            "           <div id='producer'><video></video></div>                                                                   " +
             "           <div class='vrtClearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
@@ -903,7 +905,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.closeSession = function() {
-        if (this.fullscreen_needed) this.videoEndFullscreen();
+        if (this.videoFullscreen) this.videoEndFullscreen();
         this.playerDispose();
         this.producer.disconnect();
         $('#'+this.producer.id).hide();
@@ -924,36 +926,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.proceedToShow = function () {
         this.log('proceedToShow');
         this.player.loadPlayer(this.options.player);
+        this.player_is_ready();
     };
 
     this.player_is_ready = function(){
 
-        // TODO fullscreen
-
-        /*
-         if (fullscreen_needed && !_player_is_fullscreen) {
-
-         openDialog(__t.p_show_22, function () {
-         video_go_fullscreen();
-         player_is_ready_after();
-         }, $.browser.msie || !checkSafariMinVer('Win', 6) ? 'bottom' : false);
-
-         } else { */
-        this.player_is_ready_after();
-        //}
+        if (vrt.videoFullscreen ){// && !vrt.player._player_is_fullscreen) {
+            this.llog('player_is_ready go fs');
+            vrt.player.video_go_fullscreen();
     };
-
-    this.player_is_ready_after = function(){
-
-        this.log('>>STEP player is ready aft');
-        this.log('player_is_ready_after');
-
-        // set inside the method onytplayerStateChange
-        //OLD
-        //this.is_player_ready = true;
-        //this.startRecording();
-        this.player.video_play();
-
     };
 
     this.producerSetupConnection = function(cb) {
@@ -1193,12 +1174,26 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     }
     // BROWSER FUNCTIONS
     this.checkSafariMinVer = function(plat, ver) {
-        var bver, isSafari = $.browser.safari && window.navigator.appVersion.indexOf('Chrome') < 0;
+
+        var bver, ua = navigator.userAgent.toLowerCase();
+        var isSafari = false;
+        if (ua.indexOf('safari') != -1 && ua.indexOf('chrome') <= -1) {
+            isSafari = true;
+        }
 
         if (isSafari && (!plat || window.navigator.platform.indexOf(plat) >= 0))
             return (bver = /Version\/([0-9A-z]+)/.exec(window.navigator.appVersion)) ? bver[1] >= ver : false;
         else
             return true;
+    };
+
+    this.checkSafari = function() {
+        var bver, ua = navigator.userAgent.toLowerCase();
+        var isSafari = false;
+        if (ua.indexOf('safari') != -1 && ua.indexOf('chrome') <= -1) {
+            isSafari = true;
+        }
+        return isSafari;
     };
 
     this.checkIe = function()
@@ -1260,7 +1255,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.stop_playing =function() {
         vrt.log('>>STEP vrt stop play');
-        vrt.player.video_stop(function(){vrt.logChrono(1, false, 'player');});
+        vrt.player.video_stop(function(){
+            vrt.logChrono(1, false, 'player');
+            vrt.player.video_end_fullscreen();
+        });
         vrt.isPlaying=false;
         clearTimeout(vrt.stop_handle);
         vrt.exitcode = 1;
@@ -1297,7 +1295,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if(vrt.recorderCenter===true)  {
                 $('#producer').vrtCenterProd();
                 $('#producerCamerafix').vrtCenter();
-                $("#producer video").vrtCenter();
+                //$("#producer video").vrtCenter();
             }
             vrt.logTime('webpr ready');
             vrt.log('!!PRODUCER ready');
@@ -1729,11 +1727,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     //**** LAYOUT **/
     this.loaderHtml = function (){
         return ' <div id="vrtLoaderInner"> <div id="circleG"> <div id="circleG_1" class="circleG"> </div> <div id="circleG_2" class="circleG"> </div> <div id="circleG_3" class="circleG"> </div> </div> </div>';
-    }
+    };
 
     this.loaderCss = function (){
         return ' <style> #vrtLoader{width: 100%} #vrtLoaderInner{margin: 10px auto;} #circleG{width:87.5px}.circleG{background-color:#FFF;float:left;height:19px;margin-left:10px;width:19px;-moz-animation-name:bounce_circleG;-moz-animation-duration:1.35s;-moz-animation-iteration-count:infinite;-moz-animation-direction:linear;-moz-border-radius:13px;-webkit-animation-name:bounce_circleG;-webkit-animation-duration:1.35s;-webkit-animation-iteration-count:infinite;-webkit-animation-direction:linear;-webkit-border-radius:13px;-ms-animation-name:bounce_circleG;-ms-animation-duration:1.35s;-ms-animation-iteration-count:infinite;-ms-animation-direction:linear;-ms-border-radius:13px;-o-animation-name:bounce_circleG;-o-animation-duration:1.35s;-o-animation-iteration-count:infinite;-o-animation-direction:linear;-o-border-radius:13px;animation-name:bounce_circleG;animation-duration:1.35s;animation-iteration-count:infinite;animation-direction:linear;border-radius:13px}#circleG_1{-moz-animation-delay:.27s;-webkit-animation-delay:.27s;-ms-animation-delay:.27s;-o-animation-delay:.27s;animation-delay:.27s}#circleG_2{-moz-animation-delay:.63s;-webkit-animation-delay:.63s;-ms-animation-delay:.63s;-o-animation-delay:.63s;animation-delay:.63s}#circleG_3{-moz-animation-delay:.8099999999999999s;-webkit-animation-delay:.8099999999999999s;-ms-animation-delay:.8099999999999999s;-o-animation-delay:.8099999999999999s;animation-delay:.8099999999999999s}@-moz-keyframes bounce_circleG{50%{background-color:#2E2E2E}}@-webkit-keyframes bounce_circleG{50%{background-color:#2E2E2E}}@-ms-keyframes bounce_circleG{50%{background-color:#2E2E2E}}@-o-keyframes bounce_circleG{50%{background-color:#2E2E2E}}@keyframes bounce_circleG{50%{background-color:#2E2E2E}}  </style>';
-    }
+    };
     this.loader = function(name, type,show){
         if(!name) name = 'vrtkLoader'; if(!type) type = 'default'; if(show===undefined) show = false;
 
@@ -1751,7 +1749,39 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     };
 
+    this.openDialog = function (msg, closeFunc, position) {
+        if(closeFunc) closeFunc();
+        /*
+        $('#dialog-message').html('<div>'+msg+'</div>');
+        $('#dialog-message').dialog({
+            modal: true,
+            close: closeFunc,
+            closeOnEscape: false,
+            draggable: false,
+            resizable: false,
+            minWidth: 500,
+            position: position ? position : 'top center',
+            buttons: {
+                Ok: function () {
+                    $(this).dialog("close");
+                }
+            }
+        }); */
+    }
 
+    this.msieversion = function() {
+
+        var ua = window.navigator.userAgent;
+        var msie = ua.indexOf("MSIE ");
+        var match = navigator.userAgent.match(/(?:MSIE |Trident\/.*; rv:)(\d+)/)
+        if (msie > 0 || match){
+            return match ? parseInt(match[1]) : false;
+        }else{
+            return false;
+        }
+
+        return false;
+    }
 
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
 };
