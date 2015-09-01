@@ -1390,8 +1390,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             } else {
                 vrt.log('!!PRODUCER camera already unmuted');
                 vrt.log('camera aviable','producerConnStatus');
-                vrt.log("===WEBP The camera is available, user already approved");
-                $(window.vrt).trigger('producer_init_camera_ok');
+                vrt.log("===WEBP The camera is available, user already approved. " +
+                  "It does not mean its working, we wait for 'camera-works'");
+                on_camera_unmuted();
+                // $(window.vrt).trigger('producer_init_camera_ok');
             }
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('publish',function(){
