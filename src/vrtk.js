@@ -1359,8 +1359,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.producer.once('camera-works', function () {
                   // yay, at this point we are sure that camera works and we
                   // can go on
+                  // vrt.llog('camera-works');
                   self.on_camera_unmuted_and_capturing();
-                  $('#producerCamerafix').addClass('hide').hide();
+                  $('#producerCamerafix').addClass('hide').hide().remove();
                   clearTimeout(timeout);
                 });
             };
