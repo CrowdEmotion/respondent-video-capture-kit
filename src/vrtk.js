@@ -113,6 +113,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchArchived = false;
     this.researchReady = false;
     this.researchOutUrl = null;
+    this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
 
     this.reloadFlash = null;
@@ -195,6 +196,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.customDataInsertMediaName = true;
         this.options.customDataInsertMediaId = true;
         this.options.customDataInsertMediaPath = true;
+        this.options.referrer = (document.referrer)? document.referrer : '';
+        this.options.locationHref = (document.location.href)? document.location.href : '';
 
         if (this.newInit) {
           this.responseAtStart = options.responseAtStart = true;
@@ -1660,6 +1663,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                             if(vrt.options.respondentCustomData){
                                 vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
                             }
+                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId,{'vrt_locationHref': vrt.options.locationHref});
                         });
                 }
 
@@ -1673,7 +1677,21 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.researchComplete = research.complete;
                         vrt.researchArchived = research.archived? research.archived:false;
                         vrt.researchReady = research.ready;
-                        vrt.researchOutUrl = research.outgoingUrl;
+                        vrt.researchOutUrlOriginal = vrt.researchOutUrl = research.outgoingUrl;
+                        if(vrt.researchOutUrl && vrt.researchOutUrl.length>0 && vrt.options.locationHref && vrt.options.locationHref.length >0){
+                            var myRe = /{(.*?)}/g;
+                            var myReN = /{(.*?)}/;
+                            var str = vrt.researchOutUrlOriginal;
+
+                            var exec = null;
+                            while ((exec = myRe.exec(str)) !== null) {
+                                console.log(exec);
+                                var newval = vrt.gup(exec[1],vrt.options.locationHref);
+                                if(newval!==null){
+                                    vrt.researchOutUrl = vrt.researchOutUrl.replace(exec[0],newval);
+                                }
+                            }
+                        }
                         vrt.researchCustomData = research.customData;
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
                     }, function(res){
@@ -1763,7 +1781,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 }
             }
         }); */
-    }
+    };
+
+    //url checker gup('q', 'hxxp://example.com/?q=abc')
+    this.gup = function( name, url ) {
+        if (!url) url = location.href;
+        name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        var regexS = "[\\?&]"+name+"=([^&#]*)";
+        var regex = new RegExp( regexS );
+        var results = regex.exec( url );
+        return results == null ? null : results[1];
+    };
 
     this.msieversion = function() {
 
@@ -1777,7 +1805,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
 
         return false;
-    }
+    };
 
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
 };
