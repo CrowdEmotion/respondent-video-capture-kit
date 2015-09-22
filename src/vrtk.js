@@ -310,8 +310,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
             "           <div class='vrtHide' id='producerCamerafix' style='display:none'>"  +
-            "              Can you see your face inside the box? " +
-            "             <button id='yesbtn'>Yes</button> <button id='nobtn'>NO</button></div> " +
+            "              Sorry, there is a problem accessing yout camera. " +
+            "              Please, check your browser dialogs in order to allow camera access and then click " +
+            "             <button id='retrybtn'>Try again</button></div> " +
             "           <div id='producer'></div>                                                                   " +
             "           <div class='vrtClearfix'></div>                                                                " +
             "       </div>                                                                                          " +
@@ -1328,6 +1329,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             };
 
 
+            var self = this;
             var on_camera_unmuted = function () {
                 vrt.log('!!on_camera_unmuted');
                 // now camera has been unmuted but we want to check that it
@@ -1335,23 +1337,24 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 // and we wait for 'camera-works' response event. if it takes 
                 // too long we assume somthing is wrong and we advice the user
                 // to check the browser
-                var self = this;
                 vrt.producer.isCameraWorking();
 
                 var toolong = function () {
                   $('#producerCamerafix').removeClass('vrtHide').show();
-                  $('#producerCamerafix button#nobtn').off().on('click', function () {
-                      $(vrt).trigger('vrt_event_user_click_no_camera');
+                  $('#producerCamerafix button#retrybtn').off().on('click', function () {
+                      //$(vrt).trigger('vrt_event_user_click_no_camera');
                       vrt.producer.reloadFlashElement(function () {
                           $('#producerCamerafix').addClass('vrtHide').hide();
                           var timeout = setTimeout(toolong, 5000);
                           vrt.producer.once('camera-unmuted', on_camera_unmuted.bind(self));
                       });
                   });
-                $('#producerCamerafix button#yesbtn').off().on('click', function () {
-                    $('#producerCamerafix').addClass('vrtHide').hide();
-                    $(vrt).trigger('vrt_event_user_click_yes_camera');
-                });
+                  /*
+                  $('#producerCamerafix button#yesbtn').off().on('click', function () {
+                      $('#producerCamerafix').addClass('vrtHide').hide();
+                      $(vrt).trigger('vrt_event_user_click_yes_camera');
+                  });
+                  */
                 };
 
                 var timeout = setTimeout(toolong, 5000);
@@ -1359,8 +1362,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.producer.once('camera-works', function () {
                   // yay, at this point we are sure that camera works and we
                   // can go on
+                  // vrt.llog('camera-works');
                   self.on_camera_unmuted_and_capturing();
-                  $('#producerCamerafix').addClass('hide').hide();
+                  $('#producerCamerafix').addClass('hide').hide().remove();
                   clearTimeout(timeout);
                 });
             };
@@ -1393,8 +1397,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             } else {
                 vrt.log('!!PRODUCER camera already unmuted');
                 vrt.log('camera aviable','producerConnStatus');
-                vrt.log("===WEBP The camera is available, user already approved");
-                $(window.vrt).trigger('producer_init_camera_ok');
+                vrt.log("===WEBP The camera is available, user already approved. " +
+                  "It does not mean its working, we wait for 'camera-works'");
+                on_camera_unmuted();
+                // $(window.vrt).trigger('producer_init_camera_ok');
             }
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('publish',function(){
