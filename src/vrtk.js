@@ -312,7 +312,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             "           <div class='vrtHide' id='producerCamerafix' style='display:none'>"  +
             "              Sorry, there is a problem accessing yout camera. " +
             "              Please, check your browser dialogs in order to allow camera access and then click " +
-            "             <button id='retrybtn'>Try again</button></div> " +
+            "             <input id='retrybtn' type='button' value='Try again'></div> " +
             "           <div id='producer'></div>                                                                   " +
             "           <div class='vrtClearfix'></div>                                                                " +
             "       </div>                                                                                          " +
@@ -1341,7 +1341,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
                 var toolong = function () {
                   $('#producerCamerafix').removeClass('vrtHide').show();
-                  $('#producerCamerafix button#retrybtn').off().on('click', function () {
+                  $('#producerCamerafix #retrybtn').off().on('click', function () {
                       //$(vrt).trigger('vrt_event_user_click_no_camera');
                       vrt.producer.reloadFlashElement(function () {
                           $('#producerCamerafix').addClass('vrtHide').hide();
