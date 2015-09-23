@@ -113,12 +113,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchArchived = false;
     this.researchReady = false;
     this.researchOutUrl = null;
+    this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
 
     this.reloadFlash = null;
 
-    this.initMediaList = function(type, list) {
-        if(!list) return;
+    this.initMediaList = function (type, list) {
+        if (!list)return;
         this.mediaCount = list.length;
         this.videoType = type;
         this.videoList =  list;
@@ -136,6 +137,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (typeof type == 'object') { //type include all
             var data = type;
             list        = data.list || {};
+            //TODO change this
             //streamUrl   = data.streamUrl || "mediabox.crowdemotion.co.uk";
             streamUrl   = data.streamUrl || "buildmachine.mediabox-v2.crowdemotion.co.uk";
             streamName  = data.streamName || null;
@@ -196,7 +198,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.customDataInsertMediaName = true;
         this.options.customDataInsertMediaId = true;
         this.options.customDataInsertMediaPath = true;
-        this.options.norclick = this.checkOpt(options,'norclick',false);;
+        this.options.norclick = this.checkOpt(options,'norclick',false);
+        this.options.referrer = (document.referrer)? document.referrer : '';
+        this.options.locationHref = (document.location.href)? document.location.href : '';
 
         if (this.newInit) {
           this.responseAtStart = options.responseAtStart = true;
@@ -309,8 +313,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
             "           <div class='vrtHide' id='producerCamerafix' style='display:none'>"  +
-            "              Can you see your face inside the box? " +
-            "             <button id='yesbtn'>Yes</button> <button id='nobtn'>NO</button></div> " +
+            "              Sorry, there is a problem accessing yout camera. " +
+            "              Please, check your browser dialogs in order to allow camera access and then click " +
+            "             <input id='retrybtn' type='button' value='Try again'></div> " +
             "           <div id='producer'><video></video></div>                                                                   " +
             "           <div class='vrtClearfix'></div>                                                                " +
             "       </div>                                                                                          " +
@@ -934,7 +939,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (vrt.videoFullscreen ){// && !vrt.player._player_is_fullscreen) {
             this.llog('player_is_ready go fs');
             vrt.player.video_go_fullscreen();
-    };
+        };
     };
 
     this.producerSetupConnection = function(cb) {
@@ -1341,18 +1346,20 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
                 var toolong = function () {
                   $('#producerCamerafix').removeClass('vrtHide').show();
-                  $('#producerCamerafix button#nobtn').off().on('click', function () {
-                      $(vrt).trigger('vrt_event_user_click_no_camera');
+                  $('#producerCamerafix #retrybtn').off().on('click', function () {
+                      //$(vrt).trigger('vrt_event_user_click_no_camera');
                       vrt.producer.reloadFlashElement(function () {
                           $('#producerCamerafix').addClass('vrtHide').hide();
                           var timeout = setTimeout(toolong, 5000);
                           vrt.producer.once('camera-unmuted', on_camera_unmuted.bind(self));
                       });
                   });
-                $('#producerCamerafix button#yesbtn').off().on('click', function () {
-                    $('#producerCamerafix').addClass('vrtHide').hide();
-                    $(vrt).trigger('vrt_event_user_click_yes_camera');
-                });
+                  /*
+                  $('#producerCamerafix button#yesbtn').off().on('click', function () {
+                      $('#producerCamerafix').addClass('vrtHide').hide();
+                      $(vrt).trigger('vrt_event_user_click_yes_camera');
+                  });
+                  */
                 };
 
                 var timeout = setTimeout(toolong, 5000);
@@ -1360,8 +1367,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.producer.once('camera-works', function () {
                   // yay, at this point we are sure that camera works and we
                   // can go on
+                  // vrt.llog('camera-works');
                   self.on_camera_unmuted_and_capturing();
-                  $('#producerCamerafix').addClass('hide').hide();
+                  $('#producerCamerafix').addClass('hide').hide().remove();
                   clearTimeout(timeout);
                 });
             };
@@ -1394,8 +1402,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             } else {
                 vrt.log('!!PRODUCER camera already unmuted');
                 vrt.log('camera aviable','producerConnStatus');
-                vrt.log("===WEBP The camera is available, user already approved");
-                $(window.vrt).trigger('producer_init_camera_ok');
+                vrt.log("===WEBP The camera is available, user already approved. " +
+                  "It does not mean its working, we wait for 'camera-works'");
+                on_camera_unmuted();
+                // $(window.vrt).trigger('producer_init_camera_ok');
             }
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('publish',function(){
@@ -1664,6 +1674,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                             if(vrt.options.respondentCustomData){
                                 vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
                             }
+                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId,{'vrt_locationHref': vrt.options.locationHref});
                         });
                 }
 
@@ -1677,7 +1688,19 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.researchComplete = research.complete;
                         vrt.researchArchived = research.archived? research.archived:false;
                         vrt.researchReady = research.ready;
-                        vrt.researchOutUrl = research.outgoingUrl;
+                        vrt.researchOutUrlOriginal = vrt.researchOutUrl = research.outgoingUrl;
+                        if(vrt.researchOutUrl && vrt.researchOutUrl.length>0 && vrt.options.locationHref && vrt.options.locationHref.length >0){
+                            var myRe = /{(.*?)}/g;
+                            var myReN = /{(.*?)}/;
+                            var str = vrt.researchOutUrlOriginal;
+                            var exec = null;
+                            while ((exec = myRe.exec(str)) !== null) {
+                                var newval = vrt.gup(exec[1],vrt.options.locationHref);
+                                if(newval!==null){
+                                    vrt.researchOutUrl = vrt.researchOutUrl.replace(exec[0],newval);
+                                }
+                            }
+                        }
                         vrt.researchCustomData = research.customData;
                         apiClientSetupLoadMedia(research.id, apiClientCreateRespondent());
                     }, function(res){
@@ -1767,7 +1790,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 }
             }
         }); */
-    }
+    };
+
+    //url checker gup('q', 'hxxp://example.com/?q=abc')
+    this.gup = function( name, url ) {
+        if (!url) url = location.href;
+        name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        var regexS = "[\\?&]"+name+"=([^&#]*)";
+        var regex = new RegExp( regexS );
+        var results = regex.exec( url );
+        return results == null ? null : results[1];
+    };
 
     this.msieversion = function() {
 
@@ -1781,7 +1814,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
 
         return false;
-    }
+    };
 
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
 };

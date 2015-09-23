@@ -1,9 +1,9 @@
-    Date.now = Date.now || function() { return +new Date; };
+Date.now = Date.now || function() { return +new Date; };
 
-    window.console = window.console || (function(){
-        var c = {}; c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile = c.clear = c.exception = c.trace = c.assert = function(s){};
-        return c;
-    })();
+window.console = window.console || (function(){
+    var c = {}; c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile = c.clear = c.exception = c.trace = c.assert = function(s){};
+    return c;
+})();
 
 var ltIE9 = !document.addEventListener;
 if(ltIE9){
