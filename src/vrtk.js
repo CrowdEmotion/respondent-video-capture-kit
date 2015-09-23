@@ -1688,10 +1688,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                             var myRe = /{(.*?)}/g;
                             var myReN = /{(.*?)}/;
                             var str = vrt.researchOutUrlOriginal;
-
                             var exec = null;
                             while ((exec = myRe.exec(str)) !== null) {
-                                console.log(exec);
                                 var newval = vrt.gup(exec[1],vrt.options.locationHref);
                                 if(newval!==null){
                                     vrt.researchOutUrl = vrt.researchOutUrl.replace(exec[0],newval);
