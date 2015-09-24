@@ -17,7 +17,6 @@ module.exports = function(grunt) {
                     compress: false
                 },
                 src: [
-                    'src/libs/swfobject.js',
                     'src/recorder/var.js',
                     'src/libs/browsercompatibility.js',
                     'src/APIClient/sha256.js',
@@ -39,7 +38,6 @@ module.exports = function(grunt) {
                     beautify: true
                 },
                 src: [
-                    'src/libs/swfobject.js',
                     'src/recorder/var.js',
                     'src/libs/browsercompatibility.js',
                     'src/APIClient/sha256.js',

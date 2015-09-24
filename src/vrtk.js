@@ -237,33 +237,44 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         //todo insert resizingWindovs
 
-        //todo -  autodetect
-        this.playerVersion = false; //swfobject.getFlashPlayerVersion();
-
-        this.log("playerVersion");
-        this.log(this.playerVersion.major);
-        this.log(this.playerVersion.minor);
-
-        this.log('EVT flash' + this.playerVersion.major);
-        // TODO move Flash version check on the first page
-        if (this.playerVersion.major == 0) {
-            this.results.flash.present = false;
-            $(window.vrt).trigger('vrt_event_flash_no');
-            this.log('EVT no flash');
+        var producer  = WebProducer.webProducerClassGet();
+        this.log(" WebProducer.webProducerClassGet");
+        this.log(producer);
+        if(producer.name && producer.name === 'HTML5Producer'){
+            this.playerVersion = false; //swfobject.getFlashPlayerVersion();
         }else{
-            this.results.flash.present = true;
-            $(window.vrt).trigger('vrt_event_flash_is_present');
+            // TODO dinamyc load swfobject
+            //var fileref=document.createElement('script')
+            //fileref.setAttribute("type","text/javascript")
+            //fileref.setAttribute("src", '../dist/libs/swfobject.js')
+            this.log("playerVersion");
+            this.log(this.playerVersion.major);
+            this.log(this.playerVersion.minor);
+
+            this.log('EVT flash' + this.playerVersion.major);
+            // TODO move Flash version check on the first page
+            if (this.playerVersion.major == 0) {
+                this.results.flash.present = false;
+                $(window.vrt).trigger('vrt_event_flash_no');
+                this.log('EVT no flash');
+            }else{
+                this.results.flash.present = true;
+                $(window.vrt).trigger('vrt_event_flash_is_present');
+            }
         }
+
+
+
 
         if(this.playerVersion===false || (vrt.options.apiClientOnly && vrt.options.apiClientOnly===true)) {
             this.results.flash.version = false;
-            $(window.vrt).trigger('vrt_event_flash_version_ok');
-            this.loadProducer(vrt.swfPath);
+            $(window.vrt).trigger('vrt_event_recorder_html5');
+            this.loadProducer(vrt.swfPath, producer);
         }else{
             if (swfobject.getFlashPlayerVersion("11.1.0")) {
                 this.results.flash.version = true;
                 $(window.vrt).trigger('vrt_event_flash_version_ok');
-                this.loadProducer(vrt.swfPath);
+                this.loadProducer(vrt.swfPath, producer);
             } else {
                 this.results.flash.version = false;
                 this.log('Flash is old=' + this.playerVersion.major + '.' + this.playerVersion.minor);
@@ -801,7 +812,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }else if ((verOffset=nAgt.indexOf("Firefox"))!=-1) {
                 browserName = "Firefox";
             }
-            videojs.options.techOrder = ["flash", "html5"];
+            videojs.options.techOrder = ["html5", "flash"];
             if (browserName == "Chrome" || browserName == "Firefox") {
                 videojs.options.techOrder = ["html5", "flash"];
             }
@@ -978,14 +989,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(cb)cb();
     };
 
-    this.loadProducer = function(swfPath){
+    this.loadProducer = function(swfPath, producer){
         this.log('loadProducer');
         this.log('>>STEP producer init')
 
         //$('#'+this.producerID).css('display', 'inline-block');
         //$('#'+this.producerID).addClass('rotating-loader');
 
-        this.webProducerInit(swfPath);
+        this.webProducerInit(swfPath, producer);
     };
 
     // TODO popOverCe
@@ -1283,11 +1294,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     // WEBPRODUCER FUNCTION
-    this.webProducerInit = function(path){
+    this.webProducerInit = function(path, producer){
         this.log("===WEBP Webpr_init");
         vrt.logTime('webProducerInit');
         vrt.log('!!PRODUCER webProducerInit');
-        var Producer = WebProducer.webProducerClassGet();
+        var Producer = producer;
         this.producer = new Producer({
             id: this.producerID, // the html object id
             width: this.producerWidth, // these are sizes of the player on the page
