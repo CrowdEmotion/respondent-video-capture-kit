@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-9-23 18:5 */ var swfobject = function() {
+/* Playcorder crowdemotion.co.uk 2015-9-24 10:54 */ var swfobject = function() {
     var UNDEF = "undefined", OBJECT = "object", SHOCKWAVE_FLASH = "Shockwave Flash", SHOCKWAVE_FLASH_AX = "ShockwaveFlash.ShockwaveFlash", FLASH_MIME_TYPE = "application/x-shockwave-flash", EXPRESS_INSTALL_ID = "SWFObjectExprInst", ON_READY_STATE_CHANGE = "onreadystatechange", win = window, doc = document, nav = navigator, plugin = false, domLoadFnArr = [ main ], regObjArr = [], objIdArr = [], listenersArr = [], storedAltContent, storedAltContentId, storedCallbackFn, storedCallbackObj, isDomLoaded = false, isExpressInstallActive = false, dynamicStylesheet, dynamicStylesheetMedia, autoHideShow = true, ua = function() {
         var w3cdom = typeof doc.getElementById != UNDEF && typeof doc.getElementsByTagName != UNDEF && typeof doc.createElement != UNDEF, u = nav.userAgent.toLowerCase(), p = nav.platform.toLowerCase(), windows = p ? /win/.test(p) : /win/.test(u), mac = p ? /mac/.test(p) : /mac/.test(u), webkit = /webkit/.test(u) ? parseFloat(u.replace(/^.*webkit\/(\d+(\.\d+)?).*$/, "$1")) : false, ie = !+"1", playerVersion = [ 0, 0, 0 ], d = null;
         if (typeof nav.plugins != UNDEF && typeof nav.plugins[SHOCKWAVE_FLASH] == OBJECT) {
@@ -17183,7 +17183,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.injectLayout();
         this.initVar();
         this.vrtOn();
-        this.playerVersion = swfobject.getFlashPlayerVersion();
+        this.playerVersion = false;
         this.log("playerVersion");
         this.log(this.playerVersion.major);
         this.log(this.playerVersion.minor);
@@ -17196,7 +17196,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.results.flash.present = true;
             $(window.vrt).trigger("vrt_event_flash_is_present");
         }
-        if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
+        if (this.playerVersion === false || vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {
+            this.results.flash.version = false;
+            $(window.vrt).trigger("vrt_event_flash_version_ok");
+            this.loadProducer(vrt.swfPath);
+        } else {
             if (swfobject.getFlashPlayerVersion("11.1.0")) {
                 this.results.flash.version = true;
                 $(window.vrt).trigger("vrt_event_flash_version_ok");

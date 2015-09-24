@@ -237,7 +237,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
         //todo insert resizingWindovs
 
-        this.playerVersion = swfobject.getFlashPlayerVersion();
+        //todo -  autodetect
+        this.playerVersion = false; //swfobject.getFlashPlayerVersion();
 
         this.log("playerVersion");
         this.log(this.playerVersion.major);
@@ -254,8 +255,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $(window.vrt).trigger('vrt_event_flash_is_present');
         }
 
-        if(vrt.options.apiClientOnly && vrt.options.apiClientOnly===true) {
-
+        if(this.playerVersion===false || (vrt.options.apiClientOnly && vrt.options.apiClientOnly===true)) {
+            this.results.flash.version = false;
+            $(window.vrt).trigger('vrt_event_flash_version_ok');
+            this.loadProducer(vrt.swfPath);
         }else{
             if (swfobject.getFlashPlayerVersion("11.1.0")) {
                 this.results.flash.version = true;
