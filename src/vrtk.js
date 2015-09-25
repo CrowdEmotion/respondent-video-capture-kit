@@ -1322,7 +1322,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger('vrt_event_producer_no_camera_found');
                 $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else if (numCameras == undefined){
-                $(window.vrt).trigger('vrt_event_producer_no_mediabox.crowdemotion.co.ukcamera_found');
+                $(window.vrt).trigger('vrt_event_producer_no_camera_found');
                 $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else{
                 $(window.vrt).trigger('vrt_event_producer_camera_found');
