@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-9-24 16:31 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-9-25 17:52 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16357,6 +16357,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.userError = false;
     this.playerVersion = null;
     this.producer = null;
+    this.Producer = null;
     this.producerID = null;
     this.producerID = null;
     this.producerWidth = null;
@@ -16507,6 +16508,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.norclick = this.checkOpt(options, "norclick", false);
         this.options.referrer = document.referrer ? document.referrer : "";
         this.options.locationHref = document.location.href ? document.location.href : "";
+        this.options.swfobjectLocation = options.swfobjectLocation ? options.swfobjectLocation : "//cdn.crowdemotion.co.uk/playcorder/swfobject.js";
         if (this.newInit) {
             this.responseAtStart = options.responseAtStart = true;
         }
@@ -16531,38 +16533,22 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.injectLayout();
         this.initVar();
         this.vrtOn();
-        var producer = WebProducer.webProducerClassGet();
-        this.log(" WebProducer.webProducerClassGet");
-        this.log(producer);
-        if (producer.name && producer.name === "HTML5Producer") {
-            this.playerVersion = false;
-        } else {
-            this.log("playerVersion");
-            this.log(this.playerVersion.major);
-            this.log(this.playerVersion.minor);
-            this.log("EVT flash" + this.playerVersion.major);
-            if (this.playerVersion.major == 0) {
-                this.results.flash.present = false;
-                $(window.vrt).trigger("vrt_event_flash_no");
-                this.log("EVT no flash");
-            } else {
-                this.results.flash.present = true;
-                $(window.vrt).trigger("vrt_event_flash_is_present");
-            }
-        }
-        if (this.playerVersion === false || vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {
-            this.results.flash.version = false;
-            $(window.vrt).trigger("vrt_event_recorder_html5");
-            this.loadProducer(vrt.swfPath, producer);
-        } else {
-            if (swfobject.getFlashPlayerVersion("11.1.0")) {
-                this.results.flash.version = true;
-                $(window.vrt).trigger("vrt_event_flash_version_ok");
-                this.loadProducer(vrt.swfPath, producer);
-            } else {
+        if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
+            if (WebProducer.typeAutoDetect() == "html5") {
+                this.playerVersion = false;
                 this.results.flash.version = false;
-                this.log("Flash is old=" + this.playerVersion.major + "." + this.playerVersion.minor);
-                $(window.vrt).trigger("vrt_event_flash_old");
+                $(window.vrt).trigger("vrt_event_recorder_html5");
+                this.loadProducer(vrt.swfPath);
+            } else {
+                var head = document.getElementsByTagName("head")[0];
+                var script = document.createElement("script");
+                script.type = "text/javascript";
+                script.onreadystatechange = function() {
+                    if (this.readyState == "complete") vrt.loadFlashElements().bind(vrt);
+                };
+                script.onload = vrt.loadFlashElements;
+                script.src = this.options.swfobjectLocation;
+                head.appendChild(script);
             }
         }
         this.ceclient = new CEClient();
@@ -16575,6 +16561,30 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(this).trigger("vrt_init_ok");
     };
+    this.loadFlashElements = function() {
+        vrt.playerVersion = swfobject.getFlashPlayerVersion();
+        vrt.log("playerVersion");
+        vrt.log(vrt.playerVersion.major);
+        vrt.log(vrt.playerVersion.minor);
+        vrt.log("EVT flash" + vrt.playerVersion.major);
+        if (vrt.playerVersion.major == 0) {
+            vrt.results.flash.present = false;
+            $(window.vrt).trigger("vrt_event_flash_no");
+            vrt.log("EVT no flash");
+        } else {
+            vrt.results.flash.present = true;
+            $(window.vrt).trigger("vrt_event_flash_is_present");
+        }
+        if (swfobject.getFlashPlayerVersion("11.1.0")) {
+            vrt.results.flash.version = true;
+            $(window.vrt).trigger("vrt_event_flash_version_ok");
+            vrt.loadProducer(vrt.swfPath);
+        } else {
+            vrt.results.flash.version = false;
+            vrt.log("Flash is old=" + vrt.playerVersion.major + "." + vrt.playerVersion.minor);
+            $(window.vrt).trigger("vrt_event_flash_old");
+        }
+    };
     this.initVar = function() {};
     this.injectLayout = function() {
         var pre = this.vrtID;
@@ -16585,7 +16595,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (this.options.apiClientOnly && this.options.apiClientOnly === true) {
             this.options.recStyle = "height: 1px; width: 1px; position: absolute: left: -1000000px";
         }
-        var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " + "<style>.vrtHide{display:none};.vrtClearfix{clear:both}</style>" + "<div id='vrtLoader'></div>" + "<div id='vrtFrameWr'></div>" + (this.options.htmlVideoPre ? this.options.htmlVideoPre : "") + "<div id='vrtVideoWrapper' class='vrtWrap' style='" + this.options.videoStyle + "'>                                                      " + "      <div id='vrtvideo' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='videoDiv' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='ytPlayer' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div class='vrtClearfix'></div>                                                                     " + "</div>                                                                                               " + (this.options.htmlVideoPost ? this.options.htmlVideoPost : "") + (this.options.htmlRecorderPre ? this.options.htmlRecorderPre : "") + "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " + "           <div class='vrtHide' id='producerCamerafix' style='display:none'>" + "              Sorry, there is a problem accessing yout camera. " + "              Please, check your browser dialogs in order to allow camera access and then click " + "             <input id='retrybtn' type='button' value='Try again'></div> " + "           <div id='producer'><video></video></div>                                                                   " + "           <div class='vrtClearfix'></div>                                                                " + "       </div>                                                                                          " + (this.options.htmlRecorderPost ? this.options.htmlRecorderPost : "") + "<div id='vrtLogWrapper' class='vrtWrap'>                                                      " + "      <div id='vrtalert'></div>                                                                        " + "      <div id='vrt_timer_player'></div>                                                                       " + "      <div id='vrt_timer_recorder'></div>                                                                       " + "      <div class='vrtClearfix'></div>                                                                     " + "</div>                                                                                               " + "</div>";
+        var html = " <div id='vrtWrapper' class='vrtWrap' style='" + this.options.mainStyle + "'> " + "<style>.vrtHide{display:none};.vrtClearfix{clear:both}</style>" + "<div id='vrtLoader'></div>" + "<div id='vrtFrameWr'></div>" + (this.options.htmlVideoPre ? this.options.htmlVideoPre : "") + "<div id='vrtVideoWrapper' class='vrtWrap' style='" + this.options.videoStyle + "'>                                                      " + "      <div id='vrtvideo' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='videoDiv' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div id='ytPlayer' class='" + this.options.htmlVideoClass + "'></div>                                " + "      <div class='vrtClearfix'></div>                                                                     " + "</div>                                                                                               " + (this.options.htmlVideoPost ? this.options.htmlVideoPost : "") + (this.options.htmlRecorderPre ? this.options.htmlRecorderPre : "") + "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " + "           <div class='vrtHide' id='producerCamerafix' style='display:none'>" + "              Sorry, there is a problem accessing your camera. " + "              Please, check your browser dialogs in order to allow camera access and then click " + "             <input id='retrybtn' type='button' value='Try again'></div> " + "           <div id='producer'><video></video></div>                                                                   " + "           <div class='vrtClearfix'></div>                                                                " + "       </div>                                                                                          " + (this.options.htmlRecorderPost ? this.options.htmlRecorderPost : "") + "<div id='vrtLogWrapper' class='vrtWrap'>                                                      " + "      <div id='vrtalert'></div>                                                                        " + "      <div id='vrt_timer_player'></div>                                                                       " + "      <div id='vrt_timer_recorder'></div>                                                                       " + "      <div class='vrtClearfix'></div>                                                                     " + "</div>                                                                                               " + "</div>";
         var debugHtml = "<div id='vrtValues' class='vrtWrap'>                                                             " + "          <h4>Info</h4>                                                                                " + "          <div id='vrtVal_type'>Type: <span></span></div>                                              " + "          <div id='vrtVal_mediaCount'>media count: <span></span></div>                                 " + "          <div id='vrtVal_currentMedia'>current media: <span></span></div>                             " + "          <div id='vrtVal_list'>List: <span></span></div>                                              " + "          <div id='vrtVal_producerStreamUrl'>Producer stream URL: <span></span></div>                  " + "          <div id='vrtVal_producerStreamName'>Producer stream name: <span></span></div>                " + "          <div id='vrtVal_producerConnStatus'>Producer conn status: <span>Not connected</span></div>   " + "          <div id='vrtVal_apiStatus'>API status: <span>Not connected</span></div>                      " + "          <div id='vrtVal_fileUpload'>Files: <span>Not connected</span></div>                          " + "      </div>                                                                                           " + "      <div id='vrtLog'></div>                                                                          ";
         $("#" + pre).html(html);
     };
@@ -17080,10 +17090,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $("#vjsPlayer").hide();
         if (cb) cb();
     };
-    this.loadProducer = function(swfPath, producer) {
+    this.loadProducer = function(swfPath) {
         this.log("loadProducer");
         this.log(">>STEP producer init");
-        this.webProducerInit(swfPath, producer);
+        this.webProducerInit(swfPath);
     };
     this.popOverCe = function(type) {};
     this.llog = function(msg) {
@@ -17297,12 +17307,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.llog("REC STOP");
         clearTimeout(vrt.stop_handle_rec);
     };
-    this.webProducerInit = function(path, producer) {
+    this.webProducerInit = function(path) {
         this.log("===WEBP Webpr_init");
         vrt.logTime("webProducerInit");
         vrt.log("!!PRODUCER webProducerInit");
-        var Producer = producer;
-        this.producer = new Producer({
+        this.Producer = WebProducer.webProducerClassGet();
+        this.producer = new this.Producer({
             id: this.producerID,
             width: this.producerWidth,
             height: this.producerHeight,
@@ -17341,7 +17351,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     type: "blocking"
                 });
             } else if (numCameras == undefined) {
-                $(window.vrt).trigger("vrt_event_producer_no_mediabox.crowdemotion.co.ukcamera_found");
+                $(window.vrt).trigger("vrt_event_producer_no_camera_found");
                 $(window.vrt).trigger("vrt_event_error", {
                     component: "producer",
                     error: "no webcam",

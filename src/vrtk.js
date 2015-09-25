@@ -38,6 +38,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     //Producer
     this.playerVersion = null;
     this.producer = null;
+    this.Producer = null;
     this.producerID = null;
     this.producerID = null;
     this.producerWidth = null;
@@ -202,6 +203,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.norclick = this.checkOpt(options,'norclick',false);
         this.options.referrer = (document.referrer)? document.referrer : '';
         this.options.locationHref = (document.location.href)? document.location.href : '';
+        this.options.swfobjectLocation = options.swfobjectLocation? options.swfobjectLocation : '//cdn.crowdemotion.co.uk/playcorder/swfobject.js';
 
         if (this.newInit) {
           this.responseAtStart = options.responseAtStart = true;
@@ -237,51 +239,31 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
 
         //todo insert resizingWindovs
-
-        var producer  = WebProducer.webProducerClassGet();
-        this.log(" WebProducer.webProducerClassGet");
-        this.log(producer);
-        if(producer.name && producer.name === 'HTML5Producer'){
-            this.playerVersion = false; //swfobject.getFlashPlayerVersion();
+        if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {
         }else{
-            // TODO dinamyc load swfobject
-            //var fileref=document.createElement('script')
-            //fileref.setAttribute("type","text/javascript")
-            //fileref.setAttribute("src", '../dist/libs/swfobject.js')
-            this.log("playerVersion");
-            this.log(this.playerVersion.major);
-            this.log(this.playerVersion.minor);
 
-            this.log('EVT flash' + this.playerVersion.major);
-            // TODO move Flash version check on the first page
-            if (this.playerVersion.major == 0) {
-                this.results.flash.present = false;
-                $(window.vrt).trigger('vrt_event_flash_no');
-                this.log('EVT no flash');
-            }else{
-                this.results.flash.present = true;
-                $(window.vrt).trigger('vrt_event_flash_is_present');
-            }
-        }
-
-
-
-
-        if(this.playerVersion===false || (vrt.options.apiClientOnly && vrt.options.apiClientOnly===true)) {
-            this.results.flash.version = false;
-            $(window.vrt).trigger('vrt_event_recorder_html5');
-            this.loadProducer(vrt.swfPath, producer);
-        }else{
-            if (swfobject.getFlashPlayerVersion("11.1.0")) {
-                this.results.flash.version = true;
-                $(window.vrt).trigger('vrt_event_flash_version_ok');
-                this.loadProducer(vrt.swfPath, producer);
-            } else {
+            if (WebProducer.typeAutoDetect() == 'html5') {
+                this.playerVersion = false; //swfobject.getFlashPlayerVersion();
                 this.results.flash.version = false;
-                this.log('Flash is old=' + this.playerVersion.major + '.' + this.playerVersion.minor);
-                $(window.vrt).trigger('vrt_event_flash_old');
+                $(window.vrt).trigger('vrt_event_recorder_html5');
+
+                this.loadProducer(vrt.swfPath);
+            } else {
+
+                var head = document.getElementsByTagName('head')[0];
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.onreadystatechange= function () {
+                    if (this.readyState == 'complete') vrt.loadFlashElements().bind(vrt);
+                };
+                script.onload = vrt.loadFlashElements;
+                script.src = this.options.swfobjectLocation;
+                head.appendChild(script);
+
             }
-        }
+        };
+
+
 
         this.ceclient = new CEClient();
 
@@ -299,6 +281,34 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(this).trigger('vrt_init_ok');
     };
 
+    this.loadFlashElements = function(){
+
+            vrt.playerVersion = swfobject.getFlashPlayerVersion();
+            vrt.log("playerVersion");
+            vrt.log(vrt.playerVersion.major);
+            vrt.log(vrt.playerVersion.minor);
+
+            vrt.log('EVT flash' + vrt.playerVersion.major);
+            // TODO move Flash version check on the first page
+            if (vrt.playerVersion.major == 0) {
+                vrt.results.flash.present = false;
+                $(window.vrt).trigger('vrt_event_flash_no');
+                vrt.log('EVT no flash');
+            } else {
+                vrt.results.flash.present = true;
+                $(window.vrt).trigger('vrt_event_flash_is_present');
+            }
+            if (swfobject.getFlashPlayerVersion("11.1.0")) {
+                vrt.results.flash.version = true;
+                $(window.vrt).trigger('vrt_event_flash_version_ok');
+                vrt.loadProducer(vrt.swfPath);
+            } else {
+                vrt.results.flash.version = false;
+                vrt.log('Flash is old=' + vrt.playerVersion.major + '.' + vrt.playerVersion.minor);
+                $(window.vrt).trigger('vrt_event_flash_old');
+            }
+
+    };
     this.initVar = function () {
     };
 
@@ -328,7 +338,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             ((this.options.htmlRecorderPre) ? this.options.htmlRecorderPre : '') +
             "       <div id='vrtProducer' class='vrtWrap " + this.options.htmlRecorderClass + "' style='" + this.options.recStyle + "'>                      " +
             "           <div class='vrtHide' id='producerCamerafix' style='display:none'>"  +
-            "              Sorry, there is a problem accessing yout camera. " +
+            "              Sorry, there is a problem accessing your camera. " +
             "              Please, check your browser dialogs in order to allow camera access and then click " +
             "             <input id='retrybtn' type='button' value='Try again'></div> " +
             "           <div id='producer'><video></video></div>                                                                   " +
@@ -990,14 +1000,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(cb)cb();
     };
 
-    this.loadProducer = function(swfPath, producer){
+    this.loadProducer = function(swfPath){
         this.log('loadProducer');
         this.log('>>STEP producer init')
 
         //$('#'+this.producerID).css('display', 'inline-block');
         //$('#'+this.producerID).addClass('rotating-loader');
 
-        this.webProducerInit(swfPath, producer);
+        this.webProducerInit(swfPath);
     };
 
     // TODO popOverCe
@@ -1295,12 +1305,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     // WEBPRODUCER FUNCTION
-    this.webProducerInit = function(path, producer){
+    this.webProducerInit = function(path){
         this.log("===WEBP Webpr_init");
         vrt.logTime('webProducerInit');
         vrt.log('!!PRODUCER webProducerInit');
-        var Producer = producer;
-        this.producer = new Producer({
+        this.Producer= WebProducer.webProducerClassGet();
+        this.producer = new this.Producer({ // Producer[ FlashProducer | HTML5Producer ]
             id: this.producerID, // the html object id
             width: this.producerWidth, // these are sizes of the player on the page
             height: this.producerHeight, // not related to the stream resolution
@@ -1342,13 +1352,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger('vrt_event_producer_no_camera_found');
                 $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else if (numCameras == undefined){
-                $(window.vrt).trigger('vrt_event_producer_no_mediabox.crowdemotion.co.ukcamera_found');
+                $(window.vrt).trigger('vrt_event_producer_no_camera_found');
                 $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'no webcam',type:'blocking'});
             }else{
                 $(window.vrt).trigger('vrt_event_producer_camera_found');
             };
 
 
+            //var self = this;
             var on_camera_unmuted = function () {
                 vrt.log('!!on_camera_unmuted');
                 // now camera has been unmuted but we want to check that it
