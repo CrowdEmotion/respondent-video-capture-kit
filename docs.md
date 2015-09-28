@@ -142,6 +142,40 @@ Custom data could be added in two ways:
 
 To implement `respondent` custom data just add the options `respondentName` , `respondentCustomDataString`, `respondentCustomData` to PlayCorder initialization.
 
+###### External page integration
+
+Every research could integrate and outgoing url. To use this option
+- Go to [Maker](api.crowdemotion.co.uk)
+- Insert a valid URL inside the “outgoing url” option in your research
+- Add to your javascript code this snippet
+
+```
+$(window.vrt).on(‘vrt_event_preview_loaded’, function () {
+                        var url = vrt.researchOutUrl; 
+                        var urlOriginal = vrt.researchOutUrlOriginal;
+                        //insert you code here for redirect
+                    });
+```
+
+Also, it's possible for an outgoing url to change dynamically according to url parameters of your PlayCorder page. This could be useful if you integrate an external page as surveys.
+  
+How to: If your *entry page* include any query parameters, and your *outgoing url* include the same query parameters inside curly brackets,
+The values between curly brackets will be changed with query values from entry url.
+
+Example:
+
+*Entry page*: http://yousite.com/index.html?**id=100**&**value=AAA**
+*Outgoing Url*: http://newsite.com/index.htm?user={**id**}&number={**value**}
+
+The values for outgoing Url will be: 
+- vrt.researchOutUrl:  http://newsite.com/index.htm?**user=100&number=AAA**
+- vrt.researchOutUrlOriginal:  http://newsite.com/index.htm?user={id}&number={value} - no changes
+   
+  
+   
+   
+
+
 
 ##NOTES
 
