@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function(event) {
+            var val1, val2;
+            val1 = Math.floor((Math.random() * 10000) + 1);
+            val2 = Math.floor((Math.random() * 1000) + 1);
+            //window.location.href=document.getElementById('url').innerHTML;
+            document.getElementById('ref_link_1').setAttribute("href", 'sample_project_local.html?user=' + val1 + '&testid=' + val2);
+            document.getElementById('ref_link_2').setAttribute("href", 'sample_project_local.html?usr=' + val1 + '&testid=' + val2);
+            document.getElementById('ref_link_3').setAttribute("href", 'sample_project_local.html?usr=' + val1 + '&testidn=' + val2);
+            document.getElementById('ref_link_4').setAttribute("href", 'sample_project_local.html');
+        });
+    </script>
+</head>
+
+<body>
+
+1 - Set outgoing url in your project
+        <pre>
+         http://yourpage.com/exitpage.html?tester={user}&user={testid}
+        </pre>
+<br/>
+2 - click on one of the following test url<br/>
+<a id="ref_link_1" href="sample_project_local.html">both params right</a><br/>
+<a id="ref_link_2" href="sample_project_local.html">one params right</a><br/>
+<a id="ref_link_3" href="sample_project_local.html">no params right</a><br/>
+<a id="ref_link_4" href="sample_project_local.html">no params at all</a><br/>
+
+</body>
+</html>
