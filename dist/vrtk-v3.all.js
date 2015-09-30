@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-9-26 13:26 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-9-29 17:38 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -18,14 +18,14 @@
 }([ function(module, exports, __webpack_require__) {
     module.exports = __webpack_require__(1);
 }, function(module, exports, __webpack_require__) {
-    var FlashProducer, HTML5Producer, api, e, message, platform;
+    var FlashProducer, HTML5Producer, api, e, error, message, platform;
     platform = __webpack_require__(2);
     window.FlashProducer = FlashProducer = __webpack_require__(4);
     HTML5Producer = null;
     try {
         HTML5Producer = __webpack_require__(5);
-    } catch (_error) {
-        e = _error;
+    } catch (error) {
+        e = error;
         if (console && console.error) {
             message = "Can't use HTML5Producer -> " + e.message;
             console.error(message, e);
@@ -33,21 +33,21 @@
     }
     api = {
         typeAutoDetect: function() {
-            var major;
+            var major, ref;
             if (console && console.log) {
                 console.log("platform", platform);
             }
             if (HTML5Producer === null) {
                 return "flash";
             }
-            if (platform.name.indexOf("Chrome") >= 0) {
-                major = platform.version.split(".")[0];
-                major = parseInt(major);
+            major = platform.version.split(".")[0];
+            major = parseInt(major);
+            if ((ref = platform.name) === "Chrome" || ref === "Chrome Mobile") {
                 if (major >= 39) {
                     return "html5";
                 }
             }
-            if (platform.name.indexOf("Firefox") >= 0) {
+            if (platform.name.indexOf("Firefox") >= 0 || window.navigator.userAgent.indexOf("Firefox") >= 0) {
                 major = platform.version.split(".")[0];
                 major = parseInt(major);
                 if (major >= 37) {
@@ -57,6 +57,7 @@
             return "flash";
         },
         webProducerClassGet: function(type) {
+            var error1;
             type = type || api.typeAutoDetect();
             if (console && console.log) {
                 console.log("WebProducer type", type);
@@ -65,8 +66,8 @@
                 if (type === "html5") {
                     return HTML5Producer;
                 }
-            } catch (_error) {
-                e = _error;
+            } catch (error1) {
+                e = error1;
             }
             return FlashProducer;
         }
@@ -2030,11 +2031,11 @@
         child.__super__ = parent.prototype;
         return child;
     }, hasProp = {}.hasOwnProperty;
-    Adapter = __webpack_require__(8);
+    Adapter = __webpack_require__(6);
     $ = __webpack_require__(7);
     FlashProducer = __webpack_require__(4);
     mixins = FlashProducer.mixins;
-    Hub = __webpack_require__(6);
+    Hub = __webpack_require__(8);
     Urls = __webpack_require__(9);
     JanusRecorder = __webpack_require__(10);
     EventEmitterMixin = mixins.EventEmitterMixin;
@@ -2232,9 +2233,14 @@
             this.hub.contents.once("save", function(url, streamName) {
                 return self.fire("save", url, streamName);
             });
-            return this.hub.contents.once("save-metadata", function(url, streamName) {
+            this.hub.contents.once("save-metadata", function(url, streamName) {
                 return self.fire("save-metadata", url, streamName);
             });
+            return setTimeout(function(_this) {
+                return function() {
+                    return _this.previewStart();
+                };
+            }(this), 500);
         };
         HTML5Producer.prototype.unpublishCheckUnexpected = function() {
             if (!this.unpublishExpected) {
@@ -2242,11 +2248,11 @@
             }
         };
         HTML5Producer.prototype.log = function(message) {
-            var e;
+            var e, error;
             try {
                 this.remoteLoggerLog("log", "trace", Array.prototype.slice.call(arguments));
-            } catch (_error) {
-                e = _error;
+            } catch (error) {
+                e = error;
             }
             if (!this.trace) {
                 return;
@@ -2352,171 +2358,185 @@
         return HTML5Producer;
     }(JanusRecorder);
     module.exports = HTML5Producer;
-}, function(module, exports, __webpack_require__) {
-    var $, EventEmitterMixin, Hub, HubContents, HubJobs, HubStreams;
-    $ = __webpack_require__(7);
-    EventEmitterMixin = __webpack_require__(4).mixins.EventEmitterMixin;
-    HubContents = function() {
-        HubContents.extend = function(source) {
-            var prop;
-            for (prop in source) {
-                this.prototype[prop] = source[prop];
-            }
-        };
-        function HubContents() {
-            this.constructor.extend(EventEmitterMixin);
-            this.url = null;
+}, function(module, exports) {
+    "use strict";
+    var RTCPeerConnection = null;
+    var getUserMedia = null;
+    var attachMediaStream = null;
+    var reattachMediaStream = null;
+    var webrtcDetectedBrowser = null;
+    var webrtcDetectedVersion = null;
+    function trace(text) {
+        if (text[text.length - 1] === "\n") {
+            text = text.substring(0, text.length - 1);
         }
-        HubContents.prototype.urlSet = function(url) {
-            this.url = url;
-            return this.urlStatic = url.replace("/api", "");
+        if (window.performance) {
+            var now = (window.performance.now() / 1e3).toFixed(3);
+            console.log(now + ": " + text);
+        } else {
+            console.log(text);
+        }
+    }
+    function maybeFixConfiguration(pcConfig) {
+        if (!pcConfig) {
+            return;
+        }
+        for (var i = 0; i < pcConfig.iceServers.length; i++) {
+            if (pcConfig.iceServers[i].hasOwnProperty("urls")) {
+                pcConfig.iceServers[i].url = pcConfig.iceServers[i].urls;
+                delete pcConfig.iceServers[i].urls;
+            }
+        }
+    }
+    if (navigator.mozGetUserMedia) {
+        console.log("This appears to be Firefox");
+        webrtcDetectedBrowser = "firefox";
+        webrtcDetectedVersion = parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+        RTCPeerConnection = function(pcConfig, pcConstraints) {
+            maybeFixConfiguration(pcConfig);
+            return new mozRTCPeerConnection(pcConfig, pcConstraints);
         };
-        HubContents.prototype.checkReady = function(name, kind) {
-            var destinationUrl, fileName, metadataFileName, metadataUrl, self;
-            self = this;
-            kind = kind || "mp4";
-            fileName = [ name, kind ].join(".");
-            destinationUrl = this.urlStatic + "/" + fileName;
-            metadataFileName = [ name, "json" ].join(".");
-            metadataUrl = this.urlStatic + "/" + metadataFileName;
-            return this._checkReadyPoll(name, function() {
-                self.fire("save", destinationUrl, name);
-                return self.fire("save-metadata", metadataUrl, name);
-            });
+        window.RTCSessionDescription = mozRTCSessionDescription;
+        window.RTCIceCandidate = mozRTCIceCandidate;
+        getUserMedia = navigator.mozGetUserMedia.bind(navigator);
+        navigator.getUserMedia = getUserMedia;
+        MediaStreamTrack.getSources = function(successCb) {
+            setTimeout(function() {
+                var infos = [ {
+                    kind: "audio",
+                    id: "default",
+                    label: "",
+                    facing: ""
+                }, {
+                    kind: "video",
+                    id: "default",
+                    label: "",
+                    facing: ""
+                } ];
+                successCb(infos);
+            }, 0);
         };
-        HubContents.prototype._checkReadyPoll = function(name, cb) {
-            var poll, url;
-            url = this.url + "/" + name + "/ready";
-            poll = function() {
-                var d;
-                d = $.ajax({
-                    url: url,
-                    dataType: "jsonp"
-                });
-                d.done(function(result) {
-                    if (result.error) {
-                        return setTimeout(poll, 1e3);
+        window.createIceServer = function(url, username, password) {
+            var iceServer = null;
+            var urlParts = url.split(":");
+            if (urlParts[0].indexOf("stun") === 0) {
+                iceServer = {
+                    url: url
+                };
+            } else if (urlParts[0].indexOf("turn") === 0) {
+                if (webrtcDetectedVersion < 27) {
+                    var turnUrlParts = url.split("?");
+                    if (turnUrlParts.length === 1 || turnUrlParts[1].indexOf("transport=udp") === 0) {
+                        iceServer = {
+                            url: turnUrlParts[0],
+                            credential: password,
+                            username: username
+                        };
                     }
-                    return cb(result);
-                });
-                return d.fail(function() {
-                    return setTimeout(poll, 1e3);
-                });
-            };
-            return poll();
-        };
-        return HubContents;
-    }();
-    HubJobs = function() {
-        HubJobs.extend = function(source) {
-            var prop;
-            for (prop in source) {
-                this.prototype[prop] = source[prop];
-            }
-        };
-        function HubJobs() {
-            this.constructor.extend(EventEmitterMixin);
-            this.url = null;
-        }
-        HubJobs.prototype.urlSet = function(url) {
-            return this.url = url;
-        };
-        HubJobs.prototype.enableRealtimeAnalysis = function(engine, success, error) {
-            var data, dfr, dfr_done, dfr_error, url;
-            url = this.url + "/submit/jsonp";
-            data = {
-                streamName: this.streamName,
-                engine: engine || "kanako_live"
-            };
-            dfr = new $.Deferred();
-            dfr_error = function(err) {
-                dfr.reject(err);
-            };
-            dfr_done = function(result, b, c) {
-                if (result.error) {
-                    return dfr_error(result.error, b, c);
+                } else {
+                    iceServer = {
+                        url: url,
+                        credential: password,
+                        username: username
+                    };
                 }
-                dfr.resolve(result, b, c);
-            };
-            $.ajax({
-                url: url,
-                dataType: "jsonp",
-                contentType: "application/json",
-                data: data,
-                type: "get"
-            }).fail(dfr_error).fail(error).done(dfr_done).done(success);
-            return dfr;
+            }
+            return iceServer;
         };
-        return HubJobs;
-    }();
-    HubStreams = function() {
-        HubStreams.extend = function(source) {
-            var prop;
-            for (prop in source) {
-                this.prototype[prop] = source[prop];
+        window.createIceServers = function(urls, username, password) {
+            var iceServers = [];
+            for (var i = 0; i < urls.length; i++) {
+                var iceServer = window.createIceServer(urls[i], username, password);
+                if (iceServer !== null) {
+                    iceServers.push(iceServer);
+                }
+            }
+            return iceServers;
+        };
+        attachMediaStream = function(element, stream) {
+            console.log("Attaching media stream");
+            element.mozSrcObject = stream;
+        };
+        reattachMediaStream = function(to, from) {
+            console.log("Reattaching media stream");
+            to.mozSrcObject = from.mozSrcObject;
+        };
+    } else if (navigator.webkitGetUserMedia) {
+        console.log("This appears to be Chrome");
+        webrtcDetectedBrowser = "chrome";
+        var result = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+        if (result !== null) {
+            webrtcDetectedVersion = parseInt(result[2], 10);
+        } else {
+            webrtcDetectedVersion = 999;
+        }
+        window.createIceServer = function(url, username, password) {
+            var iceServer = null;
+            var urlParts = url.split(":");
+            if (urlParts[0].indexOf("stun") === 0) {
+                iceServer = {
+                    url: url
+                };
+            } else if (urlParts[0].indexOf("turn") === 0) {
+                iceServer = {
+                    url: url,
+                    credential: password,
+                    username: username
+                };
+            }
+            return iceServer;
+        };
+        window.createIceServers = function(urls, username, password) {
+            return {
+                urls: urls,
+                credential: password,
+                username: username
+            };
+        };
+        RTCPeerConnection = function(pcConfig, pcConstraints) {
+            return new webkitRTCPeerConnection(pcConfig, pcConstraints);
+        };
+        getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
+        navigator.getUserMedia = getUserMedia;
+        attachMediaStream = function(element, stream) {
+            if (typeof element.srcObject !== "undefined") {
+                element.srcObject = stream;
+            } else if (typeof element.mozSrcObject !== "undefined") {
+                element.mozSrcObject = stream;
+            } else if (typeof element.src !== "undefined") {
+                element.src = URL.createObjectURL(stream);
+            } else {
+                console.log("Error attaching stream to element.");
             }
         };
-        function HubStreams() {
-            this.constructor.extend(EventEmitterMixin);
-            this.url = null;
-        }
-        HubStreams.prototype.urlSet = function(url1) {
-            this.url = url1;
+        reattachMediaStream = function(to, from) {
+            to.src = from.src;
         };
-        HubStreams.prototype.publish = function(streamName) {
-            var data, dfr, url;
-            url = this.url + "/on_publish";
-            data = {
-                streamName: streamName
+    } else {
+        console.log("Browser does not appear to be WebRTC-capable");
+    }
+    function requestUserMedia(constraints) {
+        return new Promise(function(resolve, reject) {
+            var onSuccess = function(stream) {
+                resolve(stream);
             };
-            dfr = $.ajax({
-                url: url,
-                dataType: "json",
-                contentType: "application/json",
-                data: JSON.stringify(data),
-                type: "post"
-            });
-            return dfr;
-        };
-        HubStreams.prototype.unpublish = function(streamName) {
-            var data, dfr, url;
-            url = this.url + "/on_publish_done";
-            data = {
-                streamName: streamName
+            var onError = function(error) {
+                reject(error);
             };
-            dfr = $.ajax({
-                url: url,
-                dataType: "json",
-                contentType: "application/json",
-                data: JSON.stringify(data),
-                type: "post"
-            });
-            return dfr;
-        };
-        return HubStreams;
-    }();
-    Hub = function() {
-        function Hub() {
-            this.url = null;
-            this.contents = new HubContents();
-            this.jobs = new HubJobs();
-            this.streams = new HubStreams();
-        }
-        Hub.prototype.urlSet = function(url) {
-            this.url = url;
-            this.contents.urlSet(this.url + "/contents");
-            this.jobs.urlSet(this.url + "/jobs");
-            return this.streams.urlSet(this.url + "/janus");
-        };
-        Hub.prototype.info = function() {
-            return $.ajax({
-                url: this.url + "/info/jsonp",
-                dataType: "jsonp"
-            });
-        };
-        return Hub;
-    }();
-    module.exports = Hub;
+            try {
+                getUserMedia(constraints, onSuccess, onError);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+    exports["getUserMedia"] = getUserMedia;
+    exports["attachMediaStream"] = attachMediaStream;
+    exports["webrtcDetectedBrowser"] = webrtcDetectedBrowser;
+    exports["webrtcDetectedVersion"] = webrtcDetectedVersion;
+    exports["RTCPeerConnection"] = RTCPeerConnection;
+    exports["RTCIceCandidate"] = RTCIceCandidate;
+    exports["RTCSessionDescription"] = RTCSessionDescription;
 }, function(module, exports, __webpack_require__) {
     var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
     (function(global, factory) {
@@ -7897,188 +7917,174 @@
         }
         return jQuery;
     });
-}, function(module, exports) {
-    "use strict";
-    var RTCPeerConnection = null;
-    var getUserMedia = null;
-    var attachMediaStream = null;
-    var reattachMediaStream = null;
-    var webrtcDetectedBrowser = null;
-    var webrtcDetectedVersion = null;
-    function trace(text) {
-        if (text[text.length - 1] === "\n") {
-            text = text.substring(0, text.length - 1);
-        }
-        if (window.performance) {
-            var now = (window.performance.now() / 1e3).toFixed(3);
-            console.log(now + ": " + text);
-        } else {
-            console.log(text);
-        }
-    }
-    function maybeFixConfiguration(pcConfig) {
-        if (!pcConfig) {
-            return;
-        }
-        for (var i = 0; i < pcConfig.iceServers.length; i++) {
-            if (pcConfig.iceServers[i].hasOwnProperty("urls")) {
-                pcConfig.iceServers[i].url = pcConfig.iceServers[i].urls;
-                delete pcConfig.iceServers[i].urls;
+}, function(module, exports, __webpack_require__) {
+    var $, EventEmitterMixin, Hub, HubContents, HubJobs, HubStreams;
+    $ = __webpack_require__(7);
+    EventEmitterMixin = __webpack_require__(4).mixins.EventEmitterMixin;
+    HubContents = function() {
+        HubContents.extend = function(source) {
+            var prop;
+            for (prop in source) {
+                this.prototype[prop] = source[prop];
             }
+        };
+        function HubContents() {
+            this.constructor.extend(EventEmitterMixin);
+            this.url = null;
         }
-    }
-    if (navigator.mozGetUserMedia) {
-        console.log("This appears to be Firefox");
-        webrtcDetectedBrowser = "firefox";
-        webrtcDetectedVersion = parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
-        RTCPeerConnection = function(pcConfig, pcConstraints) {
-            maybeFixConfiguration(pcConfig);
-            return new mozRTCPeerConnection(pcConfig, pcConstraints);
+        HubContents.prototype.urlSet = function(url) {
+            this.url = url;
+            return this.urlStatic = url.replace("/api", "");
         };
-        window.RTCSessionDescription = mozRTCSessionDescription;
-        window.RTCIceCandidate = mozRTCIceCandidate;
-        getUserMedia = navigator.mozGetUserMedia.bind(navigator);
-        navigator.getUserMedia = getUserMedia;
-        MediaStreamTrack.getSources = function(successCb) {
-            setTimeout(function() {
-                var infos = [ {
-                    kind: "audio",
-                    id: "default",
-                    label: "",
-                    facing: ""
-                }, {
-                    kind: "video",
-                    id: "default",
-                    label: "",
-                    facing: ""
-                } ];
-                successCb(infos);
-            }, 0);
+        HubContents.prototype.checkReady = function(name, kind) {
+            var destinationUrl, fileName, metadataFileName, metadataUrl, self;
+            self = this;
+            kind = kind || "mp4";
+            fileName = [ name, kind ].join(".");
+            destinationUrl = this.urlStatic + "/" + fileName;
+            metadataFileName = [ name, "json" ].join(".");
+            metadataUrl = this.urlStatic + "/" + metadataFileName;
+            return this._checkReadyPoll(name, function() {
+                self.fire("save", destinationUrl, name);
+                return self.fire("save-metadata", metadataUrl, name);
+            });
         };
-        window.createIceServer = function(url, username, password) {
-            var iceServer = null;
-            var urlParts = url.split(":");
-            if (urlParts[0].indexOf("stun") === 0) {
-                iceServer = {
-                    url: url
-                };
-            } else if (urlParts[0].indexOf("turn") === 0) {
-                if (webrtcDetectedVersion < 27) {
-                    var turnUrlParts = url.split("?");
-                    if (turnUrlParts.length === 1 || turnUrlParts[1].indexOf("transport=udp") === 0) {
-                        iceServer = {
-                            url: turnUrlParts[0],
-                            credential: password,
-                            username: username
-                        };
-                    }
-                } else {
-                    iceServer = {
-                        url: url,
-                        credential: password,
-                        username: username
-                    };
-                }
-            }
-            return iceServer;
-        };
-        window.createIceServers = function(urls, username, password) {
-            var iceServers = [];
-            for (var i = 0; i < urls.length; i++) {
-                var iceServer = window.createIceServer(urls[i], username, password);
-                if (iceServer !== null) {
-                    iceServers.push(iceServer);
-                }
-            }
-            return iceServers;
-        };
-        attachMediaStream = function(element, stream) {
-            console.log("Attaching media stream");
-            element.mozSrcObject = stream;
-        };
-        reattachMediaStream = function(to, from) {
-            console.log("Reattaching media stream");
-            to.mozSrcObject = from.mozSrcObject;
-        };
-    } else if (navigator.webkitGetUserMedia) {
-        console.log("This appears to be Chrome");
-        webrtcDetectedBrowser = "chrome";
-        var result = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
-        if (result !== null) {
-            webrtcDetectedVersion = parseInt(result[2], 10);
-        } else {
-            webrtcDetectedVersion = 999;
-        }
-        window.createIceServer = function(url, username, password) {
-            var iceServer = null;
-            var urlParts = url.split(":");
-            if (urlParts[0].indexOf("stun") === 0) {
-                iceServer = {
-                    url: url
-                };
-            } else if (urlParts[0].indexOf("turn") === 0) {
-                iceServer = {
+        HubContents.prototype._checkReadyPoll = function(name, cb) {
+            var poll, url;
+            url = this.url + "/" + name + "/ready";
+            poll = function() {
+                var d;
+                d = $.ajax({
                     url: url,
-                    credential: password,
-                    username: username
-                };
-            }
-            return iceServer;
-        };
-        window.createIceServers = function(urls, username, password) {
-            return {
-                urls: urls,
-                credential: password,
-                username: username
+                    dataType: "jsonp"
+                });
+                d.done(function(result) {
+                    if (result.error) {
+                        return setTimeout(poll, 1e3);
+                    }
+                    return cb(result);
+                });
+                return d.fail(function() {
+                    return setTimeout(poll, 1e3);
+                });
             };
+            return poll();
         };
-        RTCPeerConnection = function(pcConfig, pcConstraints) {
-            return new webkitRTCPeerConnection(pcConfig, pcConstraints);
-        };
-        getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
-        navigator.getUserMedia = getUserMedia;
-        attachMediaStream = function(element, stream) {
-            if (typeof element.srcObject !== "undefined") {
-                element.srcObject = stream;
-            } else if (typeof element.mozSrcObject !== "undefined") {
-                element.mozSrcObject = stream;
-            } else if (typeof element.src !== "undefined") {
-                element.src = URL.createObjectURL(stream);
-            } else {
-                console.log("Error attaching stream to element.");
+        return HubContents;
+    }();
+    HubJobs = function() {
+        HubJobs.extend = function(source) {
+            var prop;
+            for (prop in source) {
+                this.prototype[prop] = source[prop];
             }
         };
-        reattachMediaStream = function(to, from) {
-            to.src = from.src;
+        function HubJobs() {
+            this.constructor.extend(EventEmitterMixin);
+            this.url = null;
+        }
+        HubJobs.prototype.urlSet = function(url) {
+            return this.url = url;
         };
-    } else {
-        console.log("Browser does not appear to be WebRTC-capable");
-    }
-    function requestUserMedia(constraints) {
-        return new Promise(function(resolve, reject) {
-            var onSuccess = function(stream) {
-                resolve(stream);
+        HubJobs.prototype.enableRealtimeAnalysis = function(engine, success, error) {
+            var data, dfr, dfr_done, dfr_error, url;
+            url = this.url + "/submit/jsonp";
+            data = {
+                streamName: this.streamName,
+                engine: engine || "kanako_live"
             };
-            var onError = function(error) {
-                reject(error);
+            dfr = new $.Deferred();
+            dfr_error = function(err) {
+                dfr.reject(err);
             };
-            try {
-                getUserMedia(constraints, onSuccess, onError);
-            } catch (e) {
-                reject(e);
+            dfr_done = function(result, b, c) {
+                if (result.error) {
+                    return dfr_error(result.error, b, c);
+                }
+                dfr.resolve(result, b, c);
+            };
+            $.ajax({
+                url: url,
+                dataType: "jsonp",
+                contentType: "application/json",
+                data: data,
+                type: "get"
+            }).fail(dfr_error).fail(error).done(dfr_done).done(success);
+            return dfr;
+        };
+        return HubJobs;
+    }();
+    HubStreams = function() {
+        HubStreams.extend = function(source) {
+            var prop;
+            for (prop in source) {
+                this.prototype[prop] = source[prop];
             }
-        });
-    }
-    exports["getUserMedia"] = getUserMedia;
-    exports["attachMediaStream"] = attachMediaStream;
-    exports["webrtcDetectedBrowser"] = webrtcDetectedBrowser;
-    exports["webrtcDetectedVersion"] = webrtcDetectedVersion;
-    exports["RTCPeerConnection"] = RTCPeerConnection;
-    exports["RTCIceCandidate"] = RTCIceCandidate;
-    exports["RTCSessionDescription"] = RTCSessionDescription;
+        };
+        function HubStreams() {
+            this.constructor.extend(EventEmitterMixin);
+            this.url = null;
+        }
+        HubStreams.prototype.urlSet = function(url1) {
+            this.url = url1;
+        };
+        HubStreams.prototype.publish = function(streamName) {
+            var data, dfr, url;
+            url = this.url + "/on_publish";
+            data = {
+                streamName: streamName
+            };
+            dfr = $.ajax({
+                url: url,
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                type: "post"
+            });
+            return dfr;
+        };
+        HubStreams.prototype.unpublish = function(streamName) {
+            var data, dfr, url;
+            url = this.url + "/on_publish_done";
+            data = {
+                streamName: streamName
+            };
+            dfr = $.ajax({
+                url: url,
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                type: "post"
+            });
+            return dfr;
+        };
+        return HubStreams;
+    }();
+    Hub = function() {
+        function Hub() {
+            this.url = null;
+            this.contents = new HubContents();
+            this.jobs = new HubJobs();
+            this.streams = new HubStreams();
+        }
+        Hub.prototype.urlSet = function(url) {
+            this.url = url;
+            this.contents.urlSet(this.url + "/contents");
+            this.jobs.urlSet(this.url + "/jobs");
+            return this.streams.urlSet(this.url + "/janus");
+        };
+        Hub.prototype.info = function() {
+            return $.ajax({
+                url: this.url + "/info/jsonp",
+                dataType: "jsonp"
+            });
+        };
+        return Hub;
+    }();
+    module.exports = Hub;
 }, function(module, exports, __webpack_require__) {
     var EventEmitterMixin, Hub, Urls;
-    Hub = __webpack_require__(6);
+    Hub = __webpack_require__(8);
     EventEmitterMixin = __webpack_require__(4).mixins.EventEmitterMixin;
     Urls = function() {
         Urls.extend = function(source) {
@@ -8139,7 +8145,7 @@
 }, function(module, exports, __webpack_require__) {
     var Adapter, EventEmitterMixin, Janus, JanusRecorder;
     Janus = __webpack_require__(11);
-    Adapter = __webpack_require__(8);
+    Adapter = __webpack_require__(6);
     EventEmitterMixin = __webpack_require__(4).EventEmitterMixin;
     JanusRecorder = function() {
         JanusRecorder.extend = function(source) {
@@ -8425,7 +8431,7 @@
 }, function(module, exports, __webpack_require__) {
     var jQuery = __webpack_require__(7);
     var $ = __webpack_require__(7);
-    var adapter = __webpack_require__(8);
+    var adapter = __webpack_require__(6);
     var RTCPeerConnection = adapter.RTCPeerConnection;
     var RTCIceCandidate = adapter.RTCIceCandidate;
     var RTCSessionDescription = adapter.RTCSessionDescription;
@@ -9761,6 +9767,7 @@
             if (config.myStream !== null && config.myStream !== undefined) {
                 Janus.log("Stopping local stream");
                 config.myStream.stop();
+                config.myStream.ended = true;
             }
             config.myStream = null;
             try {
