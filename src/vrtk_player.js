@@ -238,6 +238,16 @@ function VjsInterface() {
         if(vrt.options.recorderCenter && vrt.options.recorderCenter===true)  {
             $('#videoDiv').vrtCenter();
         };
+
+        if (!vrt.canAutoplay() && typeof (this.player) !== 'undefined' && this.player.src) {
+            var source = vrt.media_path;
+            if (source.slice(-3) == 'flv') {
+                this.player.src([{type: "video/flv", src: vrt.media_path}]);
+            } else {
+                this.player.src([{type: "video/mp4", src: vrt.media_path}]);
+            }
+        };
+
         $(vrt).trigger('vrtstep_loaded');
 
         vrt.player_is_ready();
@@ -320,10 +330,11 @@ function VjsInterface() {
             this.player_starts_recorder = false;
 
             var videoObj = $('#videoDiv').prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="'+p_w+'" height="'+p_h+'" poster=""> </video>').children();
-
-            // { preload: 'auto' };
-            videojs(videoObj[0], { "controls": false, "autoplay": false, "preload": "none", menu: false}, vjs_on_player_ready);
-            //$(vrt).trigger('vrtstep_loaded');
+            var options = { "controls": false, "autoplay": false, "preload": "none", menu: false};
+            if(!vrt.canAutoplay()){
+                options = { "controls": true, "autoplay": false, "preload": "none", menu: false};
+            }
+            videojs(videoObj[0], options, vjs_on_player_ready);
             if(options.centered && options.centered===true)  $('#videoDiv').vrtCenter();
         } else {
             $(vrt).trigger('vrtstep_loaded');
