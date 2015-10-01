@@ -460,7 +460,7 @@ function YtInterface() {
             }
            */
 
-            this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
+            if(vrt.canAutoplay())  this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
             if (cb) cb();
         }else{
 
