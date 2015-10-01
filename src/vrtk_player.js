@@ -239,14 +239,6 @@ function VjsInterface() {
             $('#videoDiv').vrtCenter();
         };
 
-        if (!vrt.canAutoplay() && typeof (this.player) !== 'undefined' && this.player.src) {
-            var source = vrt.media_path;
-            if (source.slice(-3) == 'flv') {
-                this.player.src([{type: "video/flv", src: vrt.media_path}]);
-            } else {
-                this.player.src([{type: "video/mp4", src: vrt.media_path}]);
-            }
-        };
 
         $(vrt).trigger('vrtstep_loaded');
 
@@ -471,7 +463,8 @@ function YtInterface() {
             }
            */
 
-            if(vrt.canAutoplay())  this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
+            //if(vrt.canAutoplay())
+                this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
             if (cb) cb();
         }else{
 
@@ -635,7 +628,8 @@ function YtInterface() {
                 };
 
                 if(!vrt.canAutoplay()){
-                    ytoptions.videoId = vrt.videoId = vrt.media_path;
+                    ytoptions.playerVars = {'controls': 0, autoplay:0};
+                    //ytoptions.videoId = vrt.videoId = vrt.media_path;
                 }
                 vrt.player.player = new YT.Player('ytPlayer', ytoptions);
             };
