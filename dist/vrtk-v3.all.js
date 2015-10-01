@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-9-29 17:38 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-1 16:26 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -15919,7 +15919,7 @@ function VjsInterface() {
             }
             this.log("video_play");
             this.logTime("video_play");
-            this.player.play();
+            if (vrt.canAutoplay()) this.player.play();
             if (cb) cb();
         } else {}
     };
@@ -16073,12 +16073,21 @@ function VjsInterface() {
             if (options && options.height) p_h = this.height = options.height;
             this.player_starts_recorder = false;
             var videoObj = $("#videoDiv").prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="' + p_w + '" height="' + p_h + '" poster=""> </video>').children();
-            videojs(videoObj[0], {
+            var options = {
                 controls: false,
                 autoplay: false,
                 preload: "none",
                 menu: false
-            }, vjs_on_player_ready);
+            };
+            if (!vrt.canAutoplay()) {
+                options = {
+                    controls: true,
+                    autoplay: false,
+                    preload: "none",
+                    menu: false
+                };
+            }
+            videojs(videoObj[0], options, vjs_on_player_ready);
             if (options.centered && options.centered === true) $("#videoDiv").vrtCenter();
         } else {
             $(vrt).trigger("vrtstep_loaded");
@@ -16234,7 +16243,7 @@ function YtInterface() {
             window.onYouTubeIframeAPIReady = function() {
                 vrt.logTime("onYouTubePlayerReady");
                 vrt.log("player [YT]: onYouTubePlayerReady");
-                vrt.player.player = new YT.Player("ytPlayer", {
+                var ytoptions = {
                     height: p_h,
                     width: p_w,
                     playerVars: {
@@ -16255,7 +16264,14 @@ function YtInterface() {
                         onStateChange: onytplayerStateChange,
                         onError: onytplayerError
                     }
-                });
+                };
+                if (!vrt.canAutoplay()) {
+                    ytoptions.playerVars = {
+                        controls: 1,
+                        autoplay: 0
+                    };
+                }
+                vrt.player.player = new YT.Player("ytPlayer", ytoptions);
             };
             if (options.centered && options.centered === true) $("#ytPlayer").vrtCenter();
             vrt.player.blockRClick("ytPlayer");
@@ -16439,6 +16455,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchOutUrl = null;
     this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
+    this.browser = {
+        isChromeMobile: false
+    };
     this.reloadFlash = null;
     this.initMediaList = function(type, list) {
         if (!list) return;
@@ -16519,6 +16538,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (this.newInit) {
             this.responseAtStart = options.responseAtStart = true;
         }
+        this.browser.isChromeMobile = this.checkChromeMobileVersion();
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
         this.initMediaList(type, list);
@@ -17259,6 +17279,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.checkIeVersion = function(version) {
         return navigator.userAgent.toLowerCase().indexOf("msie ") + version != -1 || navigator.userAgent.toLowerCase().indexOf("trident 6") != -1;
     };
+    this.checkChromeMobileVersion = function(version) {
+        return navigator.userAgent.indexOf("Android") !== -1 && navigator.userAgent.indexOf("Chrome") !== -1 && navigator.userAgent.indexOf("Mobile") !== -1;
+    };
     this.youtubeParser = function(url) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
         var match = url.match(regExp);
@@ -17728,6 +17751,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             return false;
         }
         return false;
+    };
+    this.canAutoplay = function() {
+        return !vrt.browser.isChromeMobile;
     };
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options);
 }
