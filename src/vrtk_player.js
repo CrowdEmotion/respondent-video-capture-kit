@@ -628,7 +628,7 @@ function YtInterface() {
                 };
 
                 if(!vrt.canAutoplay()){
-                    ytoptions.playerVars = {'controls': 0, autoplay:0};
+                    ytoptions.playerVars = {'controls': 1, 'autoplay':0};
                     //ytoptions.videoId = vrt.videoId = vrt.media_path;
                 }
                 vrt.player.player = new YT.Player('ytPlayer', ytoptions);
