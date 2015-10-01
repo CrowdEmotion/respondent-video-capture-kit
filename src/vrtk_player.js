@@ -140,7 +140,7 @@ function VjsInterface() {
             this.logTime('video_play');
             // this.player.currentTime(0);
             // vrt.logChrono(1,'player', true);
-            this.player.play();
+            if(vrt.canAutoplay()) this.player.play();
             if (cb) cb();
         }else{
 
@@ -599,7 +599,7 @@ function YtInterface() {
                 vrt.logTime('onYouTubePlayerReady');
                 vrt.log("player [YT]: onYouTubePlayerReady");
 
-                vrt.player.player = new YT.Player('ytPlayer', {
+                var ytoptions = {
                     height: p_h,
                     width: p_w,
                     playerVars: {
@@ -621,7 +621,12 @@ function YtInterface() {
                         'onStateChange': onytplayerStateChange,
                         'onError': onytplayerError
                     }
-                });
+                };
+
+                if(!vrt.canAutoplay()){
+                    ytoptions.videoId = vrt.videoId = vrt.media_path;
+                }
+                vrt.player.player = new YT.Player('ytPlayer', ytoptions);
             };
 
 

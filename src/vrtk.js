@@ -116,6 +116,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchOutUrl = null;
     this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
+    this.browser = {isChromeMobile: false};
 
     this.reloadFlash = null;
 
@@ -208,6 +209,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (this.newInit) {
           this.responseAtStart = options.responseAtStart = true;
         }
+        this.browser.isChromeMobile = this.checkChromeMobileVersion();
 
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
@@ -1230,12 +1232,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     {
         return (/msie|trident/i).test(navigator.userAgent)
 
-    }
+    };
 
     this.checkIeVersion = function(version)
     {
         return ((navigator.userAgent.toLowerCase().indexOf('msie ')+version != -1) || (navigator.userAgent.toLowerCase().indexOf('trident 6') != -1));
-    }
+    };
+
+    this.checkChromeMobileVersion = function(version)
+    {
+        return (navigator.userAgent).indexOf('Android')!==-1 && (navigator.userAgent).indexOf('Chrome')!==-1 && (navigator.userAgent).indexOf('Mobile')!==-1;
+    };
 
     this.youtubeParser = function(url) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
@@ -1839,6 +1846,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
 
         return false;
+    };
+
+    this.canAutoplay = function(){
+        return !vrt.browser.isChromeMobile;
     };
 
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);
