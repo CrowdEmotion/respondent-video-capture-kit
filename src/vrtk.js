@@ -819,15 +819,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (this.videoType == "youtube") {
             this.player = window.ytInterface
         } else {
-            var browserName = null, nAgt = navigator.userAgent;
-            if ((verOffset = nAgt.indexOf("Chrome")) != -1) {
-                browserName = "Chrome";
-            }else if ((verOffset=nAgt.indexOf("Firefox"))!=-1) {
-                browserName = "Firefox";
-            }
             videojs.options.techOrder = ["html5", "flash"];
-            if (browserName == "Chrome" || browserName == "Firefox") {
-                videojs.options.techOrder = ["html5", "flash"];
+            if (this.checkIe() || this.checkEdge()) {
+                videojs.options.techOrder = ["flash","html5"];
             }
             this.player = window.vjsInterface
         }
@@ -1228,13 +1222,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         return isSafari;
     };
 
-    this.checkIe = function()
-    {
+    this.checkIe = function() {
         return (/msie|trident/i).test(navigator.userAgent)
-
     };
 
-    this.checkIeVersion = function(version)
+    this.checkEdge = function() {
+        return (/Edge\/\d+/i).test(navigator.userAgent)
+    };
+
+    this.checkIeVersion = function(version) //todo fixit
     {
         return ((navigator.userAgent.toLowerCase().indexOf('msie ')+version != -1) || (navigator.userAgent.toLowerCase().indexOf('trident 6') != -1));
     };

@@ -165,6 +165,10 @@
             $(vrt).on('vrt_event_producer_camera_muted',function(){
                 alertMessage('Please click on the "Allow" on your webcam request');
             });
+            $(vrt).on('vrt_event_fatal_error',function(){
+                alertMessage('FATAL ERROR ');
+            });
+
 
             vrt.init();
         });

@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-1 16:26 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-6 14:34 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16977,15 +16977,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (this.videoType == "youtube") {
             this.player = window.ytInterface;
         } else {
-            var browserName = null, nAgt = navigator.userAgent;
-            if ((verOffset = nAgt.indexOf("Chrome")) != -1) {
-                browserName = "Chrome";
-            } else if ((verOffset = nAgt.indexOf("Firefox")) != -1) {
-                browserName = "Firefox";
-            }
             videojs.options.techOrder = [ "html5", "flash" ];
-            if (browserName == "Chrome" || browserName == "Firefox") {
-                videojs.options.techOrder = [ "html5", "flash" ];
+            if (this.checkIe() || this.checkEdge()) {
+                videojs.options.techOrder = [ "flash", "html5" ];
             }
             this.player = window.vjsInterface;
         }
@@ -17275,6 +17269,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
     this.checkIe = function() {
         return /msie|trident/i.test(navigator.userAgent);
+    };
+    this.checkEdge = function() {
+        return /Edge\/\d+/i.test(navigator.userAgent);
     };
     this.checkIeVersion = function(version) {
         return navigator.userAgent.toLowerCase().indexOf("msie ") + version != -1 || navigator.userAgent.toLowerCase().indexOf("trident 6") != -1;
