@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-7 10:46 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-7 14:15 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16400,8 +16400,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.recorderCenter = true;
     this.randomOrder = false;
     this.flash_allowed = false;
-    this.ww = 0;
-    this.wh = 0;
+    this.ww = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    this.wh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
     this.media_id = null;
     this.media_name = null;
     this.media_name_real = null;
@@ -16523,6 +16523,23 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.player.centered = this.checkOpt(options, "playerCentered", true);
         this.options.player.width = options.playerWidth || 640;
         this.options.player.height = options.playerHeight || 400;
+        this.options.NotResizeBiggerPlayer = this.checkOpt(options, "NotResizeBiggerPlayer", false);
+        if (this.options.NotResizeBiggerPlayer !== true) {
+            var biggerSize = null;
+            var wparent = !!$("#vrt").parent().width() && $("#vrt").parent().width() > this.ww ? this.ww : $("#vrt").parent().width();
+            wparent < options.player.width ? biggerSize = true : "";
+            if (biggerSize == true) {
+                var pro = options.player.width / options.player.height;
+                biggerSize = "w";
+                if (options.player.width < options.player.height) {
+                    biggerSize = "h";
+                }
+                if (biggerSize == "w") {
+                    options.player.width = wparent;
+                    options.player.height = wparent / pro;
+                }
+            }
+        }
         this.options.apiSandbox = this.checkOpt(options, "apiSandbox", false);
         this.responseAtStart = this.checkOpt(options, "responseAtStart", true);
         this.options.engineType = options.engineType || "kanako";

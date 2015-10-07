@@ -57,8 +57,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     //Various
     this.flash_allowed = false;
-    this.ww = 0;            //windows width
-    this.wh = 0;            //windows height
+    this.ww = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;            //windows width
+    this.wh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;            //windows height
     this.media_id = null;   //media played
     this.media_name = null;   //media played
     this.media_name_real = null;   //media played
@@ -190,6 +190,23 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.player.centered = this.checkOpt(options,'playerCentered',true);
         this.options.player.width = options.playerWidth || 640;
         this.options.player.height = options.playerHeight || 400;
+        this.options.NotResizeBiggerPlayer = this.checkOpt(options,'NotResizeBiggerPlayer',false);
+        if(this.options.NotResizeBiggerPlayer!==true){
+            var biggerSize = null;
+            var wparent = !!$('#vrt').parent().width() && $('#vrt').parent().width() > this.ww ? this.ww : $('#vrt').parent().width() ;
+            wparent < options.player.width ? biggerSize = true : '';
+            if(biggerSize==true){
+                var pro = options.player.width / options.player.height;
+                biggerSize = 'w';
+                if(options.player.width < options.player.height){
+                    biggerSize = 'h';
+                };
+                if(biggerSize == 'w'){
+                    options.player.width = wparent;
+                    options.player.height  = wparent / pro;
+                }
+            }
+        }
         this.options.apiSandbox = this.checkOpt(options,'apiSandbox',false);
         this.responseAtStart = this.checkOpt(options,'responseAtStart',true);
         this.options.engineType = options.engineType || 'kanako';
