@@ -473,7 +473,7 @@ easily in the skin designer. http://designer.videojs.com/
 /* Hide on mobile devices. Remove when we stop using native controls
     by default on mobile  */
 .vjs-default-skin.vjs-using-native-controls .vjs-big-play-button {
-  display: none;
+
 }
 .vjs-default-skin:hover .vjs-big-play-button,
 .vjs-default-skin .vjs-big-play-button:focus {

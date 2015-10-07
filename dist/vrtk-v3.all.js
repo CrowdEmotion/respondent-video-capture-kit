@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-6 14:34 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-7 10:46 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16082,6 +16082,9 @@ function VjsInterface() {
             if (!vrt.canAutoplay()) {
                 options = {
                     controls: true,
+                    bigPlayButton: true,
+                    BigPlayButton: true,
+                    bigplaybutton: true,
                     autoplay: false,
                     preload: "none",
                     menu: false
