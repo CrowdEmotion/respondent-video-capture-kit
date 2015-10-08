@@ -119,6 +119,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.browser = {isChromeMobile: false};
     this.platform = null;
 
+
     this.reloadFlash = null;
 
     this.initMediaList = function (type, list) {
@@ -209,6 +210,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
         }
         this.options.apiSandbox = this.checkOpt(options,'apiSandbox',false);
+        this.options.savePlatform = this.checkOpt(options,'savePlatform',false);
         this.responseAtStart = this.checkOpt(options,'responseAtStart',true);
         this.options.engineType = options.engineType || 'kanako';
         this.options.respondentCustomDataString = options.respondentCustomDataString || {};
@@ -1722,9 +1724,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                             if(vrt.options.respondentCustomData){
                                 vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
                             }
-                            var vrtdata = {'vrt_locationHref': vrt.options.locationHref, 'vrt_platform': {}, 'vrt_ua': {}};
-                            vrt.platform.description  ? vrtdata.vrt_platform =  vrt.platform.description : '';
-                            vrt.platform.ua  ?vrtdata.vrt_ua = vrt.platform.ua : '';
+                            var vrtdata = {'vrt_locationHref': vrt.options.locationHref};
+                            if(vrt.options.savePlatform && vrt.options.savePlatform===true){
+                                vrtdata = {'vrt_locationHref': vrt.options.locationHref, 'vrt_platform': {}, 'vrt_ua': {}};
+                                vrt.platform.description  ? vrtdata.vrt_platform =  vrt.platform.description : '';
+                                vrt.platform.ua  ?vrtdata.vrt_ua = vrt.platform.ua : '';
+                            }
                             vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrtdata);
                         });
                 }
