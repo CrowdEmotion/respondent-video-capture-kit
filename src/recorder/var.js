@@ -71,6 +71,9 @@ var WebProducer =
 		}
 
 		api = {
+			getPlatform: function() {
+					return platform;
+			},
 			typeAutoDetect: function() {
 				var major, ref;
 				if (console && console.log) {

@@ -117,6 +117,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
     this.browser = {isChromeMobile: false};
+    this.platform = null;
 
     this.reloadFlash = null;
 
@@ -238,6 +239,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.researchToken = options.researchToken;
         this.appToken = options.appToken;
         this.recordingAudio = options.recordingAudio || false;
+        this.platform  = WebProducer.getPlatform();
+
     };
 
 
@@ -1719,7 +1722,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                             if(vrt.options.respondentCustomData){
                                 vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
                             }
-                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId,{'vrt_locationHref': vrt.options.locationHref});
+                            var vrtdata = {'vrt_locationHref': vrt.options.locationHref, 'vrt_platform': {}, 'vrt_ua': {}};
+                            vrt.platform.description  ? vrtdata.vrt_platform =  vrt.platform.description : '';
+                            vrt.platform.ua  ?vrtdata.vrt_ua = vrt.platform.ua : '';
+                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrtdata);
                         });
                 }
 
