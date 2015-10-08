@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-8 12:31 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-8 15:14 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16545,6 +16545,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
         }
         this.options.apiSandbox = this.checkOpt(options, "apiSandbox", false);
+        this.options.savePlatform = this.checkOpt(options, "savePlatform", false);
         this.responseAtStart = this.checkOpt(options, "responseAtStart", true);
         this.options.engineType = options.engineType || "kanako";
         this.options.respondentCustomDataString = options.respondentCustomDataString || {};
@@ -17667,12 +17668,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                             vrt.ceclient.writeRespondentCustomData(vrt.respondentId, vrt.options.respondentCustomData);
                         }
                         var vrtdata = {
-                            vrt_locationHref: vrt.options.locationHref,
-                            vrt_platform: {},
-                            vrt_ua: {}
+                            vrt_locationHref: vrt.options.locationHref
                         };
-                        vrt.platform.description ? vrtdata.vrt_platform = vrt.platform.description : "";
-                        vrt.platform.ua ? vrtdata.vrt_ua = vrt.platform.ua : "";
+                        if (vrt.options.savePlatform && vrt.options.savePlatform === true) {
+                            vrtdata = {
+                                vrt_locationHref: vrt.options.locationHref,
+                                vrt_platform: {},
+                                vrt_ua: {}
+                            };
+                            vrt.platform.description ? vrtdata.vrt_platform = vrt.platform.description : "";
+                            vrt.platform.ua ? vrtdata.vrt_ua = vrt.platform.ua : "";
+                        }
                         vrt.ceclient.writeRespondentCustomData(vrt.respondentId, vrtdata);
                     });
                 };
