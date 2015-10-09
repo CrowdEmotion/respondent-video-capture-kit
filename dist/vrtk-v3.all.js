@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-8 15:14 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-9 15:40 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -17416,6 +17416,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             var on_camera_unmuted = function() {
                 vrt.log("!!on_camera_unmuted");
                 var self = this;
+                if (self.document) self = vrt.producer;
                 vrt.producer.isCameraWorking();
                 var toolong = function() {
                     $("#producerCamerafix").removeClass("vrtHide").show();
@@ -17432,9 +17433,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     self.on_camera_unmuted_and_capturing();
                     $("#producerCamerafix").addClass("hide").hide().remove();
                     clearTimeout(timeout);
-                });
+                }.bind(self));
             };
-            this.once("camera-unmuted", on_camera_unmuted);
+            this.once("camera-unmuted", on_camera_unmuted.bind(self));
             this.on_camera_unmuted_and_capturing = function() {
                 vrt.log("!!on_camera_unmuted_and_capturing");
                 vrt.log("===WEBP Camera is now available");

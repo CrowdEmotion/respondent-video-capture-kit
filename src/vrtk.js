@@ -1392,6 +1392,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 // too long we assume somthing is wrong and we advice the user
                 // to check the browser
                 var self = this;
+                if(self.document) self = vrt.producer;
                 vrt.producer.isCameraWorking();
 
                 var toolong = function () {
@@ -1421,11 +1422,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                   self.on_camera_unmuted_and_capturing();
                   $('#producerCamerafix').addClass('hide').hide().remove();
                   clearTimeout(timeout);
-                });
+                }.bind(self));
             };
 
             // checking user permissions on camera
-            this.once('camera-unmuted', on_camera_unmuted);
+            this.once('camera-unmuted', on_camera_unmuted.bind(self));
 
             this.on_camera_unmuted_and_capturing = function () {
                 vrt.log("!!on_camera_unmuted_and_capturing");
