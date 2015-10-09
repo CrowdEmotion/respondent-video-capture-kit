@@ -31,7 +31,7 @@
                 $('#message').slideUp('slow', function () {
                     $('#send').slideUp('slow')
                 });
-                    $('#feedback').hide();
+                $('#feedback').hide();
                 $('#feedbackarea').html('Thank for your for feedback');
             });
 
@@ -87,7 +87,7 @@
                 // watch first video
                 $('#start').on('click', function () {
                     alertMessage();
-                    $('#start').hide();
+                    $('#start').hide().remove();
                     $(vrt).trigger('vrt_event_start_video_session');
                     //if (vrt.continuosPlay !== true)$('#next').show();
                 });
@@ -127,13 +127,15 @@
 
                 $('#feedback').on('click', function () {
 
-                    $('#feedbackarea').slideDown('slow', function(){$('#feedback').hide();});
+                    $('#feedbackarea').slideDown('slow', function () {
+                        $('#feedback').hide();
+                    });
                 });
 
                 $(vrt).on('vrt_event_respondent_created',
-                        function(){
+                        function () {
                             var mail = $('#mail').val();
-                            if(mail) vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {mail: mail});
+                            if (mail) vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {mail: mail});
                         }
                 );
 
@@ -179,6 +181,15 @@
     </script>
 
     <style>
+        @import url(https://fonts.googleapis.com/css?family=Lato:100,300,400,700);
+
+        body {
+            font-family: 'Lato', sans-serif;
+            font-weight: 300;
+            color: #586474;
+            background: transparent url('//cdn.crowdemotion.co.uk/images/bground-1_2560.jpg') 50% 50% repeat-x;
+        }
+
         .hide {
             display: none;
         }
@@ -208,28 +219,29 @@
         }
 
         #intro, #main {
-            border: 1px #d8d8d8 solid;
-            border-radius: 10px;
-            margin: 10px ;
+            margin: 10px;
             padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            text-align: center;
         }
 
-        #main{
+        #main {
             min-height: 400px;
         }
 
         .vrtbtn {
-            border: 1px #6a6a6a solid;
+            border: 1px rgb(157, 196, 35) solid;
             border-radius: 5px;
             margin: 10px 10px 10px 0;
             padding: 10px;
             width: 150px;
             color: white;
-            background-color: rgba(29, 130, 183, 1);
+            background-color: rgb(157, 196, 35);
+            text-align: center;
         }
 
         .vrtinput {
-            border: 1px #6a6a6a solid;
+            border: 1px rgb(157, 196, 35) solid;
             border-radius: 5px;
             margin: 10px 10px 10px 0;
             padding: 10px;
@@ -240,14 +252,44 @@
             height: 200px;
         }
 
-
         #alerts.pure-button {
             padding: 5px;
             margin: 5px 5px 5px 0;
         }
+
         #alerts {
             background-color: #FFCA00;
+        }
 
+        #logo {
+            display: block;
+            margin: auto;
+            height: 50px;
+        }
+
+        #header {
+            margin: 50px 0 50px 0;
+        }
+        .smalltitle{
+            border-bottom: 1px #9399a5 solid;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            padding-top: 10px;
+            color: #9399a5;
+        }
+        .smalltitle span{
+            font-weight: 100;
+            font-size: 15px;
+            line-height: 33px;
+            text-align: center;
+        }
+        .smalltitle img{
+            height: 25px
+        }
+        #next, #start, #skip, #buttons, #feedback, #send{
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
         }
     </style>
 
@@ -255,29 +297,41 @@
 
 <body>
 <header id="header">
-    <div class="banner-head">
-        <img src="https://cdn.crowdemotion.co.uk/images/logo320_100.jpg" align="left">
-
-        <h1>Playcorder Demo</h1>
-    </div>
+    <img id="logo" src="//cdn.crowdemotion.co.uk/images/CE-logo-1.png" align="middle">
 </header>
 
 <article id="content">
 
 
     <section id="intro">
-        <h3>Welcome to Playcorder Demo</h3>
+        <div class="smalltitle">
+            <span class="floatleft">PlayCorder demo</span>
+            <img id="balls" class="floatright" src="//cdn.crowdemotion.co.uk/images/balls-1.png" align="right">
+            <div class="clearfix"></div>
+        </div>
+        <div class="clearfix" ><b>Welcome to the Playcorder Demo</b></div>
+
+        <p>
         We use facial recognition to tease out how audiences emotionally engage with videos.<br/>
         It adds a whole new layer of insight above and beyond what our audiences claim.<br/>
-        Watch two shorts videos. Is the video a Guilty Pleasure for you or do you Love it?<br/>
-        Click Next to find out.<br/>
-        <label class="block"> Before proceed, please leave you mail. We will contact you only for feedback
-            <input id="mail" name="mail" placeholder="please insert you mail" value="" class="vrtinput"/>
-        </label>
-        <quote class="block">Your videos will be deleted after analysis</quote>
+        Watch two shorts videos.<br/>
+        </p>
+        <p>
+        Is the video a Guilty Pleasure for you or do you Love it?
+        </p>
+        <label class="block">please leave your mail. We will contact you only for feedback</label>
+
+        <div><input id="mail" name="mail" placeholder="please insert you mail" value="" class="vrtinput"/></div>
+
+        <b class="block">Your videos will be deleted after analysis</b>
         <input id="proceed" name="proceed" value="Proceed" class="vrtbtn"/>
     </section>
     <section id="main" class="hide">
+        <div class="smalltitle">
+            <span class="floatleft">PlayCorder demo</span>
+            <img id="balls" class="floatright" src="//cdn.crowdemotion.co.uk/images/balls-1.png" align="right">
+            <div class="clearfix"></div>
+        </div>
         <div id="alerts" class=""></div>
         <div id="buttons" class="">
             <div id="start" class="hide vrtbtn">Start Session</div>
@@ -289,7 +343,7 @@
         <aside id="feedbackarea" class="hide">
             <label for="message" class="block clearfix">Please, can you describe your experience? </label>
             <textarea id="message" name="message" placeholder="Please write any feedback or bugs" value=""
-                   class="vrtinput"></textarea>
+                      class="vrtinput"></textarea>
             <input id="send" name="send" value="Send feedback" class="vrtbtn block clearfix"/>
         </aside>
         <div class="clearfix"></div>
