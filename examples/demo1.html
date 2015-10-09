@@ -15,9 +15,8 @@
 
         //DEMO SCRIPTS
         $(document).ready(function () {
-            var mail = '';
             $("#proceed").click(function (event) {
-                mail = $('#mail').val();
+
                 $('#intro').slideUp('slow', function () {
                     $('#main').slideDown('slow', function () {
                                 window.createVrt();
@@ -140,7 +139,8 @@
 
                 $(vrt).on('vrt_event_respondent_created',
                         function(){
-                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {mail: mail});
+                            var mail = $('#mail').val();
+                            if(mail) vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {mail: mail});
                         }
                 );
 
