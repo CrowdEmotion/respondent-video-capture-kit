@@ -35,6 +35,7 @@
                 $('#feedbackarea').html('Thank for your for feedback');
             });
 
+
         });
         $(document).ready(function () {
 
@@ -165,7 +166,38 @@
 
 
                 vrt.init();
+
+
+
+                $(vrt).on('vrt_event_producer_ready', function () {
+                    var el = $('object');
+                    if (el) {
+                        var h = el.height();
+                        var w = el.width();
+                        var w_box = $(window).width();
+                        var h_box = $(window).height();
+                        var w_total = (w_box - w) / 2; //400
+                        var h_total = h +80;
+                        var css = {"position": 'relative', "left": w_total + "px", top:  '0 px'};
+                        el.css(css)
+                    }
+                });
+
+                vrt.llog('platform');
+                vrt.llog(vrt.platform);
+                vrt.llog(vrt.platform.name);
+                vrt.llog(vrt.platform.version);
+                vrt.llog(vrt.platform.version.split('.'));
+                if(vrt.platform.version.split('.').length>0){
+                    var mv = vrt.platform.version.split('.')[0].toString();
+                    if(vrt.platform.name == 'IE' && mv <=9){
+                        alert('Your browser is too old.')
+                    }
+                }
+
                 if (cb)cb();
+
+
             };
 
             window.createVrt = createVrt;
@@ -239,6 +271,7 @@
             color: white;
             background-color: rgb(157, 196, 35);
             text-align: center;
+            cursor: pointer;
         }
 
         .vrtinput {
@@ -271,23 +304,37 @@
         #header {
             margin: 50px 0 50px 0;
         }
-        .smalltitle{
+
+        .smalltitle {
             border-bottom: 1px #9399a5 solid;
             padding-bottom: 15px;
             margin-bottom: 15px;
             padding-top: 10px;
             color: #9399a5;
         }
-        .smalltitle span{
+
+        .smalltitle span {
             font-weight: 100;
             font-size: 15px;
             line-height: 33px;
             text-align: center;
         }
-        .smalltitle img{
+
+        .smalltitle img {
             height: 25px
         }
-        #next, #start, #skip, #buttons, #feedback, #send{
+
+        #next, #start, #skip, #buttons, #feedback, #send {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        #alerts_wrap, #buttons_wrap {
+            min-height: 30px;
+        }
+
+        .ccenter {
             margin-left: auto;
             margin-right: auto;
             text-align: center;
@@ -308,17 +355,19 @@
         <div class="smalltitle">
             <span class="floatleft">PlayCorder demo</span>
             <img id="balls" class="floatright" src="//cdn.crowdemotion.co.uk/images/balls-1.png" align="right">
+
             <div class="clearfix"></div>
         </div>
-        <div class="clearfix" ><b>Welcome to the Playcorder Demo</b></div>
+        <div class="clearfix"><b>Welcome to the Playcorder Demo</b></div>
 
         <p>
-        We use facial recognition to tease out how audiences emotionally engage with videos.<br/>
-        It adds a whole new layer of insight above and beyond what our audiences claim.<br/>
-        Watch two shorts videos.<br/>
+            We use facial recognition to tease out how audiences emotionally engage with videos.<br/>
+            It adds a whole new layer of insight above and beyond what our audiences claim.<br/>
+            Watch two shorts videos.<br/>
         </p>
+
         <p>
-        Is the video a Guilty Pleasure for you or do you Love it?
+            Is the video a Guilty Pleasure for you or do you Love it?
         </p>
         <label class="block">please leave your mail. We will contact you only for feedback</label>
 
@@ -331,22 +380,31 @@
         <div class="smalltitle">
             <span class="floatleft">PlayCorder demo</span>
             <img id="balls" class="floatright" src="//cdn.crowdemotion.co.uk/images/balls-1.png" align="right">
+
             <div class="clearfix"></div>
         </div>
-        <div id="alerts" class=""></div>
-        <div id="buttons" class="">
-            <div id="start" class="hide vrtbtn">Start Session</div>
-            <div id="skip" class="hide vrtbtn">Skip</div>
-            <div id="next" class="hide vrtbtn">Next video</div>
+        <div id="alerts_wrap" class="block clearfix">
+            <div id="alerts" class=""></div>
         </div>
-        <div id="vrt" style=""></div>
-        <div id="feedback" class="vrtbtn">Write your feedback</div>
-        <aside id="feedbackarea" class="hide">
-            <label for="message" class="block clearfix">Please, can you describe your experience? </label>
+        <div id="buttons_wrap" class="block clearfix">
+            <div id="buttons">
+                <div id="start" class="hide vrtbtn">Start Session</div>
+                <div id="skip" class="hide vrtbtn">Skip</div>
+                <div id="next" class="hide vrtbtn">Next video</div>
+            </div>
+        </div>
+        <div id="vrt_wrap" class="block clearfix ccenter" style="">
+            <div id="vrt" style=""></div>
+        </div>
+        <div class="block clearfix">
+            <div id="feedback" class="vrtbtn">Write your feedback</div>
+            <aside id="feedbackarea" class="hide">
+                <label for="message" class="block clearfix">Please, can you describe your experience? </label>
             <textarea id="message" name="message" placeholder="Please write any feedback or bugs" value=""
                       class="vrtinput"></textarea>
-            <input id="send" name="send" value="Send feedback" class="vrtbtn block clearfix"/>
-        </aside>
+                <input id="send" name="send" value="Send feedback" class="vrtbtn block clearfix"/>
+            </aside>
+        </div>
         <div class="clearfix"></div>
     </section>
 
