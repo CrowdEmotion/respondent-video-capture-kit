@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-13 10:6 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-13 11:37 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -15922,7 +15922,11 @@ function VjsInterface() {
             }
             this.log("video_play");
             this.logTime("video_play");
-            if (vrt.canAutoplay()) this.player.play();
+            if (vrt.canAutoplay()) {
+                setTimeout(function() {
+                    vrt.player.player.play();
+                }, 0);
+            }
             if (cb) cb();
         } else {}
     };

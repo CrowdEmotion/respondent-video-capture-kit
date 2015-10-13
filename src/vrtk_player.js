@@ -140,7 +140,11 @@ function VjsInterface() {
             this.logTime('video_play');
             // this.player.currentTime(0);
             // vrt.logChrono(1,'player', true);
-            if(vrt.canAutoplay()) this.player.play();
+            if(vrt.canAutoplay()) {
+                setTimeout(function(){
+                    vrt.player.player.play();
+                },0);
+            }
             if (cb) cb();
         }else{
 
