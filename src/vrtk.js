@@ -1364,11 +1364,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.log('Is preview mirrored ? ' + this.getMirroredPreview());
 
             if(vrt.recordingAudio) {
-                this.setAudioStreamActive(true);
+                vrt.producer.setAudioStreamActive(true);
             }else{
-                this.setAudioStreamActive(false);
+                vrt.producer.setAudioStreamActive(false);
             }
-            vrt.llog('Is audio streaming active ? ' + this.getAudioStreamActive());
+            //vrt.llog('Is audio streaming active ? ' + vrt.producer.getAudioStreamActive(vrt.recordingAudio));
 
             var numCameras = this.countCameras();
 
@@ -1481,7 +1481,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 //this.setMirroredPreview(true);
                 vrt.log('Is preview mirrored ? ', this.getMirroredPreview());
                 //this.setAudioStreamActive(false);
-                vrt.log('Is audio streaming active ? ', this.getAudioStreamActive());
+                //vrt.log('Is audio streaming active ? ', this.getAudioStreamActive());
                 //this.setStreamFPS(15);
                 vrt.log('FPS ', this.getStreamFPS());
                 setTimeout(function(){

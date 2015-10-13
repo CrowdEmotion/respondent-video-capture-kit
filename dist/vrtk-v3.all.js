@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-9 15:40 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-13 10:6 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -2305,8 +2305,8 @@
         HTML5Producer.prototype.setAudioStreamActive = function(val) {
             return this.audioStreamActive = val;
         };
-        HTML5Producer.prototype.getAudioStreamActive = function(val) {
-            return this.audioStreamActive = val;
+        HTML5Producer.prototype.getAudioStreamActive = function() {
+            return this.audioStreamActive;
         };
         HTML5Producer.prototype.countCameras = function() {
             return 1;
@@ -17389,11 +17389,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.setMirroredPreview(true);
             vrt.log("Is preview mirrored ? " + this.getMirroredPreview());
             if (vrt.recordingAudio) {
-                this.setAudioStreamActive(true);
+                vrt.producer.setAudioStreamActive(true);
             } else {
-                this.setAudioStreamActive(false);
+                vrt.producer.setAudioStreamActive(false);
             }
-            vrt.llog("Is audio streaming active ? " + this.getAudioStreamActive());
             var numCameras = this.countCameras();
             vrt.log("===WEBP We have " + numCameras + " camera(s) available");
             if (numCameras == 0) {
@@ -17482,7 +17481,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.on("connect", function() {
                 vrt.log("!!PRODUCER connect");
                 vrt.log("Is preview mirrored ? ", this.getMirroredPreview());
-                vrt.log("Is audio streaming active ? ", this.getAudioStreamActive());
                 vrt.log("FPS ", this.getStreamFPS());
                 setTimeout(function() {
                     $(window.vrt).trigger("vrt_event_producer_camera_ok");
