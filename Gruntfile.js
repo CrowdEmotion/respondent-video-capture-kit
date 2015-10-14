@@ -49,6 +49,22 @@ module.exports = function(grunt) {
                     'src/vrtk.js'
                 ],
                 dest: 'dist/vrtk-v3.all.js'
+            },
+            client : {
+                options: {
+                    banner: '/* Javascript client crowdemotion.co.uk ' + w + ' */ ',
+                    mangle : false,
+                    compress: false,
+                    expand: true,
+                    beautify: true
+                },
+                src: [
+                    'src/APIClient/sha256.js',
+                    'src/APIClient/enc-base64-min.js',
+                    'src/APIClient/store.js',
+                    'src/APIClient/CEClient.js'
+                ],
+                dest: 'dist/ce-api-client.js'
             }
         }
     });
