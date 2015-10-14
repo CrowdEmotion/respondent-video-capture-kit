@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-14 13:39 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-14 16:33 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16083,14 +16083,14 @@ function VjsInterface() {
             if (options && options.height) p_h = this.height = options.height;
             this.player_starts_recorder = false;
             var videoObj = $("#videoDiv").prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="' + p_w + '" height="' + p_h + '" poster=""> </video>').children();
-            var options = {
+            var optionsplayer = {
                 controls: false,
                 autoplay: false,
                 preload: "none",
                 menu: false
             };
             if (!vrt.canAutoplay()) {
-                options = {
+                optionsplayer = {
                     controls: true,
                     bigPlayButton: true,
                     BigPlayButton: true,
@@ -16100,7 +16100,7 @@ function VjsInterface() {
                     menu: false
                 };
             }
-            videojs(videoObj[0], options, vjs_on_player_ready);
+            videojs(videoObj[0], optionsplayer, vjs_on_player_ready);
             if (options.centered && options.centered === true) $("#videoDiv").vrtCenter();
             if (options.hcentered && options.hcentered === true) $("#videoDiv").vrtHCenter();
         } else {
@@ -17849,6 +17849,7 @@ function vrtUpdateTimer() {}
 jQuery.fn.vrtCenterProd = function() {
     return this.each(function() {
         var el = $(this);
+        if (!el) return "";
         var h = el.height();
         var w = el.width();
         var w_box = $(window).width();
@@ -17867,6 +17868,7 @@ jQuery.fn.vrtCenterProd = function() {
 jQuery.fn.vrtHCenterProd = function() {
     return this.each(function() {
         var el = $(this);
+        if (!el) return "";
         if (el.prop("tagName") == "OBJECT") {
             var h = el.height();
             var w = el.width();
@@ -17893,6 +17895,7 @@ jQuery.fn.vrtHCenterProd = function() {
 jQuery.fn.vrtCenter = function() {
     return this.each(function() {
         var el = $(this);
+        if (!el) return "";
         var h = el.height();
         var w = el.width();
         var w_box = $(window).width();
@@ -17901,7 +17904,8 @@ jQuery.fn.vrtCenter = function() {
         var h_total = (h_box - h) / 2;
         var css = {
             position: "absolute",
-            left: w_total + "px"
+            left: w_total + "px",
+            top: h_total + "px"
         };
         el.css(css);
     });
@@ -17910,12 +17914,26 @@ jQuery.fn.vrtCenter = function() {
 jQuery.fn.vrtHCenter = function() {
     return this.each(function() {
         var el = $(this);
-        var css = {
-            "text-align": "center",
-            "margin-left": "auto",
-            "margin-right": "auto"
-        };
-        el.hasClass("vrtHide") ? "" : css.display = "block";
+        if (!el) return "";
+        if (el.prop("tagName") == "OBJECT") {
+            var h = el.height();
+            var w = el.width();
+            var w_box = $(window).width();
+            var h_box = $(window).height();
+            var w_total = (w_box - w) / 2;
+            var h_total = h;
+            var css = {
+                position: "relative",
+                left: w_total + "px"
+            };
+        } else {
+            var css = {
+                "text-align": "center",
+                "margin-left": "auto",
+                "margin-right": "auto"
+            };
+            el.hasClass("vrtHide") ? "" : css.display = "block";
+        }
         el.css(css);
     });
 };

@@ -329,11 +329,11 @@ function VjsInterface() {
             this.player_starts_recorder = false;
 
             var videoObj = $('#videoDiv').prepend('<video id="vjsPlayer" class="video-js vjs-default-skin" width="'+p_w+'" height="'+p_h+'" poster=""> </video>').children();
-            var options = { "controls": false, "autoplay": false, "preload": "none", menu: false};
+            var optionsplayer = { "controls": false, "autoplay": false, "preload": "none", menu: false};
             if(!vrt.canAutoplay()){
-                options = { "controls": true ,'bigPlayButton': true, 'BigPlayButton':true,'bigplaybutton':true, "autoplay": false, "preload": "none", menu: false};
+                optionsplayer = { "controls": true ,'bigPlayButton': true, 'BigPlayButton':true,'bigplaybutton':true, "autoplay": false, "preload": "none", menu: false};
             }
-            videojs(videoObj[0], options, vjs_on_player_ready);
+            videojs(videoObj[0], optionsplayer, vjs_on_player_ready);
             if(options.centered && options.centered===true)  $('#videoDiv').vrtCenter();
             if(options.hcentered && options.hcentered===true)  $('#videoDiv').vrtHCenter();
         } else {

@@ -406,6 +406,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             "      <div id='vrtLog'></div>                                                                          "
 
         $("#" + pre).html(html);
+        //if (vrt.options && vrt.options.player && vrt.options.player.width )$("#" + pre).width(vrt.options.player.width+'px');
 
     };
 
@@ -1925,6 +1926,7 @@ function vrtUpdateTimer() {
 jQuery.fn.vrtCenterProd = function () {
     return this.each(function () {
         var el = $(this);
+        if(!el) return'';
         var h = el.height();
         var w = el.width();
         var w_box = $(window).width();
@@ -1938,6 +1940,7 @@ jQuery.fn.vrtCenterProd = function () {
 jQuery.fn.vrtHCenterProd = function () {
     return this.each(function () {
         var el = $(this);
+        if(!el) return'';
         if(el.prop("tagName") == 'OBJECT'){
             var h = el.height();
             var w = el.width();
@@ -1957,21 +1960,33 @@ jQuery.fn.vrtHCenterProd = function () {
 jQuery.fn.vrtCenter = function () {
     return this.each(function () {
         var el = $(this);
+        if(!el) return'';
         var h = el.height();
         var w = el.width();
         var w_box = $(window).width();
         var h_box = $(window).height();
         var w_total = (w_box - w) / 2; //400
         var h_total = (h_box - h) / 2;
-        var css = {"position": 'absolute', "left": w_total + "px"/*, "top": h_total + "px"*/};
+        var css = {"position": 'absolute', "left": w_total + "px", "top": h_total + "px"};
         el.css(css)
     });
 };
 jQuery.fn.vrtHCenter = function () {
     return this.each(function () {
         var el = $(this);
-        var css = {"text-align":'center', "margin-left": 'auto',"margin-right": 'auto'};
-        el.hasClass('vrtHide')? '':css.display = 'block';
+        if(!el) return'';
+        if(el.prop("tagName") == 'OBJECT'){
+            var h = el.height();
+            var w = el.width();
+            var w_box = $(window).width();
+            var h_box = $(window).height();
+            var w_total = (w_box - w) / 2; //400
+            var h_total = (h);
+            var css = {"position": 'relative', "left": w_total + "px"};
+        }else{
+            var css = {"text-align":'center', "margin-left": 'auto',"margin-right": 'auto'};
+            el.hasClass('vrtHide')? '':css.display = 'block';
+        }
         el.css(css)
     });
 };
