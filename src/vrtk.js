@@ -52,7 +52,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.producerStreamHeight = 480;
     this.stream_code = null;
     this.recAutoHide = true;
-    this.recorderCenter = true;
+    this.recorderCentered = false;
+    this.recorderHCentered = false;
     this.randomOrder = false;
 
     //Various
@@ -116,7 +117,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchOutUrl = null;
     this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
-    this.browser = {isChromeMobile: false};
+    this.browser = {isChromeMobile: false, old: false};
     this.platform = null;
 
 
@@ -180,7 +181,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producerStreamWidth = options.producerStreamWidth || 640;
         this.producerStreamHeight = options.producerStreamHeight || 480;
         this.avgPreLoadTime = options.avgPreLoadTime || 0;
-        this.recorderCenter = this.checkOpt(options,'recorderCenter',true);
+        this.recorderCentered = this.checkOpt(options,'recorderCentered',false);
+        this.recorderHCentered = this.checkOpt(options,'recorderHorizontallyCentered',false);
+
         this.randomOrder = this.checkOpt(options,'randomOrder',false);
         this.apiHttps = options.apiHttps || true;
         this.continuosPlay = this.checkOpt(options,'continuosPlay',false);
@@ -190,6 +193,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options = options;
 
         this.options.player.centered = this.checkOpt(options,'playerCentered',true);
+        this.options.player.hcentered = this.checkOpt(options,'playerHorizontallyCentered',true);
         this.options.player.width = options.playerWidth || 640;
         this.options.player.height = options.playerHeight || 400;
         this.options.NotResizeBiggerPlayer = this.checkOpt(options,'NotResizeBiggerPlayer',false);
@@ -242,6 +246,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.appToken = options.appToken;
         this.recordingAudio = options.recordingAudio || false;
         this.platform  = WebProducer.getPlatform();
+        if(this.platform.version.split('.').length>0){
+            var mv = this.platform.version.split('.')[0].toString();
+            if(this.platform.name == 'IE' && mv <=9){
+               this.browser.old = true;
+            }
+        }
 
     };
 
@@ -261,6 +271,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.initVar();
         this.vrtOn();
 
+        if(vrt.browser.old){
+            $(vrt).trigger('vrt_event_browser_old');
+            $(vrt).trigger('vrt_event_error', {component:'browser',error:'the browser is old',type:'blocking'});
+        }
 
         //todo insert resizingWindovs
         if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {
@@ -1347,9 +1361,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producer.once('ready', function () {
             $(window.vrt).trigger('vrt_event_producer_ready');
             var vrt = window.vrt;
-            if(vrt.recorderCenter===true)  {
+            if(vrt.recorderCentered===true)  {
                 $('#producer').vrtCenterProd();
                 $('#producerCamerafix').vrtCenter();
+                //$("#producer video").vrtCenter();
+            }
+            if(vrt.recorderHCentered===true)  {
+                $('#producer').vrtHCenterProd();
+                $('#producerCamerafix').vrtHCenter();
                 //$("#producer video").vrtCenter();
             }
             vrt.logTime('webpr ready');
@@ -1916,6 +1935,25 @@ jQuery.fn.vrtCenterProd = function () {
         el.css(css)
     });
 };
+jQuery.fn.vrtHCenterProd = function () {
+    return this.each(function () {
+        var el = $(this);
+        if(el.prop("tagName") == 'OBJECT'){
+            var h = el.height();
+            var w = el.width();
+            var w_box = $(window).width();
+            var h_box = $(window).height();
+            var w_total = (w_box - w) / 2; //400
+            var h_total = (h);
+            var css = {"position": 'relative', "left": w_total + "px"};
+        }else{
+            var css = {"text-align":'center', "margin-left": 'auto',"margin-right": 'auto'};
+            el.hasClass('vrtHide')? '':css.display = 'block';
+        }
+
+        el.css(css);
+    });
+};
 jQuery.fn.vrtCenter = function () {
     return this.each(function () {
         var el = $(this);
@@ -1926,6 +1964,14 @@ jQuery.fn.vrtCenter = function () {
         var w_total = (w_box - w) / 2; //400
         var h_total = (h_box - h) / 2;
         var css = {"position": 'absolute', "left": w_total + "px"/*, "top": h_total + "px"*/};
+        el.css(css)
+    });
+};
+jQuery.fn.vrtHCenter = function () {
+    return this.each(function () {
+        var el = $(this);
+        var css = {"text-align":'center', "margin-left": 'auto',"margin-right": 'auto'};
+        el.hasClass('vrtHide')? '':css.display = 'block';
         el.css(css)
     });
 };

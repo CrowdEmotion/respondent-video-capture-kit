@@ -55,7 +55,9 @@
                     debug: true,
                     respondentCustomData: {user_video_behavior: 'delete_video'},
                     playerCentered: false,
-                    recorderCenter: false,
+                    recorderCentered: false,
+                    playerHorizontallyCentered: false,
+                    recorderHorizontallyCentered: true,
                     fullscreen: false,
                     randomOrder: false,
                     savePlatform: true,
@@ -166,35 +168,18 @@
                 });
 
 
+                $(vrt).on('vrt_event_browser_old', function () {
+                    alert('Your browser is too old.')
+                });
                 vrt.init();
 
 
 
                 $(vrt).on('vrt_event_producer_ready', function () {
-                    var el = $('object');
-                    if (el) {
-                        var h = el.height();
-                        var w = el.width();
-                        var w_box = $(window).width();
-                        var h_box = $(window).height();
-                        var w_total = (w_box - w) / 2; //400
-                        var h_total = h +80;
-                        var css = {"position": 'relative', "left": w_total + "px", top:  '0 px'};
-                        el.css(css)
-                    }
+
                 });
 
-                vrt.llog('platform');
-                vrt.llog(vrt.platform);
-                vrt.llog(vrt.platform.name);
-                vrt.llog(vrt.platform.version);
-                vrt.llog(vrt.platform.version.split('.'));
-                if(vrt.platform.version.split('.').length>0){
-                    var mv = vrt.platform.version.split('.')[0].toString();
-                    if(vrt.platform.name == 'IE' && mv <=9){
-                        alert('Your browser is too old.')
-                    }
-                }
+
 
                 if (cb)cb();
 
@@ -336,9 +321,11 @@
         }
 
         .ccenter {
+            /*
             margin-left: auto;
             margin-right: auto;
             text-align: center;
+            */
         }
     </style>
 

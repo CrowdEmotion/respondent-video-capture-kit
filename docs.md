@@ -72,6 +72,8 @@ To upload media, just follow these steps:
 - `vrt_event_frame_open`:                  use this event to open a frame OR user the `openFrame()` method 
 - `vrt_event_frame_close`:                 triggere by the `closeFrame()` method
 - `vrt_event_create_response`:             if the option `responseAtStart` is `true`, this event will send you the response id before the video play
+- `vrt_event_browser_old`:                 this error is trigger when the browser is IE 9 or older
+
 
 Example:
 

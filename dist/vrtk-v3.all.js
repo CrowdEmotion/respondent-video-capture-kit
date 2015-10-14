@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-13 11:37 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-14 12:54 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16008,8 +16008,11 @@ function VjsInterface() {
             });
             vrt.log("EVT ysp waiting");
         });
-        if (vrt.options.recorderCenter && vrt.options.recorderCenter === true) {
+        if (vrt.options.recorderCentered && vrt.options.recorderCentered === true) {
             $("#videoDiv").vrtCenter();
+        }
+        if (vrt.options.recorderHCentered && vrt.options.recorderHCentered === true) {
+            $("#videoDiv").vrtHCenter();
         }
         $(vrt).trigger("vrtstep_loaded");
         vrt.player_is_ready();
@@ -16099,6 +16102,7 @@ function VjsInterface() {
             }
             videojs(videoObj[0], options, vjs_on_player_ready);
             if (options.centered && options.centered === true) $("#videoDiv").vrtCenter();
+            if (options.hcentered && options.hcentered === true) $("#videoDiv").vrtHCenter();
         } else {
             $(vrt).trigger("vrtstep_loaded");
         }
@@ -16264,11 +16268,17 @@ function YtInterface() {
                             if (vrt.options.player && vrt.options.player.centered && vrt.options.player.centered === true) {
                                 $("#ytPlayer").vrtCenter();
                             }
+                            if (vrt.options.player && vrt.options.player.hcentered && vrt.options.player.hcentered === true) {
+                                $("#ytPlayer").vrtHCenter();
+                            }
                             $(vrt).trigger("vrtstep_loaded");
                         },
                         onLoad: function(event) {
                             if (vrt.options.player && vrt.options.player.centered && vrt.options.player.centered === true) {
                                 $("#ytPlayer").vrtCenter();
+                            }
+                            if (vrt.options.player && vrt.options.player.hcentered && vrt.options.player.hcentered === true) {
+                                $("#ytPlayer").vrtHCenter();
                             }
                         },
                         onStateChange: onytplayerStateChange,
@@ -16284,6 +16294,7 @@ function YtInterface() {
                 vrt.player.player = new YT.Player("ytPlayer", ytoptions);
             };
             if (options.centered && options.centered === true) $("#ytPlayer").vrtCenter();
+            if (options.hcentered && options.hcentered === true) $("#ytPlayer").vrtHCenter();
             vrt.player.blockRClick("ytPlayer");
             if (cbSuccess) cbSuccess();
         } else {
@@ -16404,7 +16415,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.producerStreamHeight = 480;
     this.stream_code = null;
     this.recAutoHide = true;
-    this.recorderCenter = true;
+    this.recorderCentered = false;
+    this.recorderHCentered = false;
     this.randomOrder = false;
     this.flash_allowed = false;
     this.ww = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -16466,7 +16478,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
     this.browser = {
-        isChromeMobile: false
+        isChromeMobile: false,
+        old: false
     };
     this.platform = null;
     this.reloadFlash = null;
@@ -16521,7 +16534,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producerStreamWidth = options.producerStreamWidth || 640;
         this.producerStreamHeight = options.producerStreamHeight || 480;
         this.avgPreLoadTime = options.avgPreLoadTime || 0;
-        this.recorderCenter = this.checkOpt(options, "recorderCenter", true);
+        this.recorderCentered = this.checkOpt(options, "recorderCentered", false);
+        this.recorderHCentered = this.checkOpt(options, "recorderHorizontallyCentered", false);
         this.randomOrder = this.checkOpt(options, "randomOrder", false);
         this.apiHttps = options.apiHttps || true;
         this.continuosPlay = this.checkOpt(options, "continuosPlay", false);
@@ -16529,6 +16543,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.timedOverPlayToEnd = options.timedOverPlayToEnd || false;
         this.options = options;
         this.options.player.centered = this.checkOpt(options, "playerCentered", true);
+        this.options.player.hcentered = this.checkOpt(options, "playerHorizontallyCentered", true);
         this.options.player.width = options.playerWidth || 640;
         this.options.player.height = options.playerHeight || 400;
         this.options.NotResizeBiggerPlayer = this.checkOpt(options, "NotResizeBiggerPlayer", false);
@@ -16579,6 +16594,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.appToken = options.appToken;
         this.recordingAudio = options.recordingAudio || false;
         this.platform = WebProducer.getPlatform();
+        if (this.platform.version.split(".").length > 0) {
+            var mv = this.platform.version.split(".")[0].toString();
+            if (this.platform.name == "IE" && mv <= 9) {
+                this.browser.old = true;
+            }
+        }
     };
     this.init = function() {
         this.log(">>STEP: vrt init");
@@ -16590,6 +16611,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.injectLayout();
         this.initVar();
         this.vrtOn();
+        if (vrt.browser.old) {
+            $(vrt).trigger("vrt_event_browser_old");
+            $(vrt).trigger("vrt_event_error", {
+                component: "browser",
+                error: "the browser is old",
+                type: "blocking"
+            });
+        }
         if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
             if (WebProducer.typeAutoDetect() == "html5") {
                 this.playerVersion = false;
@@ -17380,9 +17409,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.producer.once("ready", function() {
             $(window.vrt).trigger("vrt_event_producer_ready");
             var vrt = window.vrt;
-            if (vrt.recorderCenter === true) {
+            if (vrt.recorderCentered === true) {
                 $("#producer").vrtCenterProd();
                 $("#producerCamerafix").vrtCenter();
+            }
+            if (vrt.recorderHCentered === true) {
+                $("#producer").vrtHCenterProd();
+                $("#producerCamerafix").vrtHCenter();
             }
             vrt.logTime("webpr ready");
             vrt.log("!!PRODUCER ready");
@@ -17831,6 +17864,32 @@ jQuery.fn.vrtCenterProd = function() {
     });
 };
 
+jQuery.fn.vrtHCenterProd = function() {
+    return this.each(function() {
+        var el = $(this);
+        if (el.prop("tagName") == "OBJECT") {
+            var h = el.height();
+            var w = el.width();
+            var w_box = $(window).width();
+            var h_box = $(window).height();
+            var w_total = (w_box - w) / 2;
+            var h_total = h;
+            var css = {
+                position: "relative",
+                left: w_total + "px"
+            };
+        } else {
+            var css = {
+                "text-align": "center",
+                "margin-left": "auto",
+                "margin-right": "auto"
+            };
+            el.hasClass("vrtHide") ? "" : css.display = "block";
+        }
+        el.css(css);
+    });
+};
+
 jQuery.fn.vrtCenter = function() {
     return this.each(function() {
         var el = $(this);
@@ -17844,6 +17903,19 @@ jQuery.fn.vrtCenter = function() {
             position: "absolute",
             left: w_total + "px"
         };
+        el.css(css);
+    });
+};
+
+jQuery.fn.vrtHCenter = function() {
+    return this.each(function() {
+        var el = $(this);
+        var css = {
+            "text-align": "center",
+            "margin-left": "auto",
+            "margin-right": "auto"
+        };
+        el.hasClass("vrtHide") ? "" : css.display = "block";
         el.css(css);
     });
 };

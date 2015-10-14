@@ -239,8 +239,11 @@ function VjsInterface() {
             vrt.log("EVT ysp waiting")
                 });
 
-        if(vrt.options.recorderCenter && vrt.options.recorderCenter===true)  {
+        if(vrt.options.recorderCentered && vrt.options.recorderCentered===true)  {
             $('#videoDiv').vrtCenter();
+        };
+        if(vrt.options.recorderHCentered && vrt.options.recorderHCentered===true)  {
+            $('#videoDiv').vrtHCenter();
         };
 
 
@@ -332,6 +335,7 @@ function VjsInterface() {
             }
             videojs(videoObj[0], options, vjs_on_player_ready);
             if(options.centered && options.centered===true)  $('#videoDiv').vrtCenter();
+            if(options.hcentered && options.hcentered===true)  $('#videoDiv').vrtHCenter();
         } else {
             $(vrt).trigger('vrtstep_loaded');
         }
@@ -619,11 +623,17 @@ function YtInterface() {
                             if (vrt.options.player && vrt.options.player.centered && vrt.options.player.centered === true) {
                                 $("#ytPlayer").vrtCenter();
                             }
+                            if (vrt.options.player && vrt.options.player.hcentered && vrt.options.player.hcentered === true) {
+                                $("#ytPlayer").vrtHCenter();
+                            }
                             $(vrt).trigger('vrtstep_loaded');
                         },
                         'onLoad': function (event) {
                             if (vrt.options.player && vrt.options.player.centered && vrt.options.player.centered === true) {
                                 $("#ytPlayer").vrtCenter();
+                            }
+                            if (vrt.options.player && vrt.options.player.hcentered && vrt.options.player.hcentered === true) {
+                                $("#ytPlayer").vrtHCenter();
                             }
                         },
                         'onStateChange': onytplayerStateChange,
@@ -647,6 +657,7 @@ function YtInterface() {
                 "videoDivConvict", p_w, p_h, "11.1", null, null, params, atts);
             */
             if (options.centered && options.centered === true) $('#ytPlayer').vrtCenter();
+            if (options.hcentered && options.hcentered === true) $('#ytPlayer').vrtHCenter();
 
             vrt.player.blockRClick('ytPlayer');
 
