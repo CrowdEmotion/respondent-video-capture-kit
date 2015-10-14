@@ -32,7 +32,7 @@
                     $('#send').slideUp('slow')
                 });
                 $('#feedback').hide();
-                $('#feedbackarea').html('Thank for your for feedback');
+                $('#feedbackarea').html('<div class="textline">Thank for your for feedback</div>');
             });
 
 
@@ -56,7 +56,7 @@
                     respondentCustomData: {user_video_behavior: 'delete_video'},
                     playerCentered: false,
                     recorderCentered: false,
-                    playerHorizontallyCentered: false,
+                    playerHorizontallyCentered: true,
                     recorderHorizontallyCentered: true,
                     fullscreen: false,
                     randomOrder: false,
@@ -203,6 +203,7 @@
 
         body {
             font-family: 'Lato', sans-serif;
+            font-size: 14px;
             font-weight: 300;
             color: #586474;
             background: transparent url('//cdn.crowdemotion.co.uk/images/bground-1_2560.jpg') 50% 0 repeat-x;
@@ -238,10 +239,16 @@
         }
 
         #intro, #main {
-            margin: 10px;
-            padding: 10px;
             background-color: rgba(255, 255, 255, 0.9);
             text-align: center;
+        }
+        #intro, #main {
+            padding-left: 20px;
+            padding-right: 20px;
+            margin-left: 10px;
+            margin-right: 10px;
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
 
         #main {
@@ -251,7 +258,7 @@
         .vrtbtn {
             border: 1px rgb(157, 196, 35) solid;
             border-radius: 5px;
-            margin: 10px 10px 10px 0;
+            margin: 20px 10px 20px 0;
             padding: 10px;
             width: 150px;
             color: white;
@@ -263,8 +270,12 @@
         .vrtinput {
             border: 1px rgb(157, 196, 35) solid;
             border-radius: 5px;
-            margin: 10px 10px 10px 0;
+            margin: 20px 10px 20px 0;
             padding: 10px;
+        }
+        #message.vrtinput {
+            margin: 20px 0 0 0;
+            text-align: center;
         }
 
         textarea.vrtinput {
@@ -288,15 +299,14 @@
         }
 
         #header {
-            margin: 50px 0 50px 0;
+            margin: 20px 0 20px 0;
         }
 
         .smalltitle {
             border-bottom: 1px #9399a5 solid;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-            padding-top: 10px;
             color: #9399a5;
+            padding-bottom: 10px;
+            margin-bottom: 40px;
         }
 
         .smalltitle span {
@@ -317,15 +327,24 @@
         }
 
         #alerts_wrap, #buttons_wrap {
-            min-height: 30px;
         }
 
         .ccenter {
-            /*
             margin-left: auto;
             margin-right: auto;
             text-align: center;
-            */
+        }
+        #balls img{
+            height: 20px;
+        }
+        #label_message{
+            margin-top: 20px;
+        }
+        .textline{
+            margin: 20px 0;
+        }
+        #vjsPlayer{
+            margin: 0 auto;
         }
     </style>
 
@@ -342,7 +361,7 @@
     <section id="intro">
         <div class="smalltitle">
             <span class="floatleft">PlayCorder demo</span>
-            <img id="balls" class="floatright" src="//cdn.crowdemotion.co.uk/images/balls-1.png" align="right">
+            <img id="balls" class="floatright" src="//cdn.crowdemotion.co.uk/images/balls_20px.png" align="right">
 
             <div class="clearfix"></div>
         </div>
@@ -387,7 +406,7 @@
         <div class="block clearfix">
             <div id="feedback" class="vrtbtn">Write your feedback</div>
             <aside id="feedbackarea" class="hide">
-                <label for="message" class="block clearfix">Please, can you describe your experience? </label>
+                <label id="label_message" for="message" class="block clearfix">Please, can you describe your experience? </label>
             <textarea id="message" name="message" placeholder="Please write any feedback or bugs" value=""
                       class="vrtinput"></textarea>
                 <input id="send" name="send" value="Send feedback" class="vrtbtn block clearfix"/>
