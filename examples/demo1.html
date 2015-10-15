@@ -12,17 +12,24 @@
     <script type="text/javascript" charset="utf-8">
 
         // example implementation
-
+        function validateEmail(email) {
+            var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+            return re.test(email);
+        }
         //DEMO SCRIPTS
         $(document).ready(function () {
             $("#proceed").click(function (event) {
-
-                $('#intro').slideUp('slow', function () {
-                    $('#main').slideDown('slow', function () {
-                                window.createVrt();
-                            }
-                    );
-                });
+                if(true || validateEmail($("#mail").val())){ //mail check
+                    $('#mail_alert').hide();
+                    $('#intro').slideUp('slow', function () {
+                        $('#main').slideDown('slow', function () {
+                                    window.createVrt();
+                                }
+                        );
+                    });
+                }else{
+                    $('#mail_alert').show().removeClass('vrthide');
+                }
             });
 
             $("#send").click(function (event) {
@@ -277,6 +284,12 @@
             color: white;
             text-align: center;
         }
+        .vrtbtntextalert {
+            margin: 20px 10px 20px 0;
+            padding: 10px;
+            color: #e53a17;
+            text-align: center;
+        }
 
         .vrtinput {
             border: 1px rgb(157, 196, 35) solid;
@@ -386,6 +399,7 @@
             Is the video a Guilty Pleasure for you or do you Love it?
         </p>
         <label class="block">please leave your mail. We will contact you only for feedback</label>
+        <div id="mail_alert" class="hide vrtbtntextalert">Please insert a valid mail before proceed</div>
 
         <div><input id="mail" name="mail" placeholder="please insert you mail" value="" class="vrtinput"/></div>
 
