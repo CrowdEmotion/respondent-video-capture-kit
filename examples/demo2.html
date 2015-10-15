@@ -128,6 +128,11 @@
                     alertMessage();
                     $(vrt).trigger('vrt_event_user_next_video');
                 });
+                $(vrt).on('vrt_event_video_session_complete',function(){
+                    alertMessage();
+                    $('#next').hide();
+                    $('#end').show();
+                });
 
                 $('#feedback').on('click', function () {
 
@@ -266,6 +271,12 @@
             text-align: center;
             cursor: pointer;
         }
+        .vrtbtntext {
+            margin: 20px 10px 20px 0;
+            padding: 10px;
+            color: white;
+            text-align: center;
+        }
 
         .vrtinput {
             border: 1px rgb(157, 196, 35) solid;
@@ -343,9 +354,7 @@
         .textline{
             margin: 20px 0;
         }
-        #vjsPlayer{
-            margin: 0 auto;
-        }
+
     </style>
 
 </head>
@@ -398,6 +407,7 @@
                 <div id="start" class="hide vrtbtn">Start Session</div>
                 <div id="skip" class="hide vrtbtn">Skip</div>
                 <div id="next" class="hide vrtbtn">Next video</div>
+                <div id="end" class="hide vrtbtntext">Thank you for your partecipation</div>
             </div>
         </div>
         <div id="vrt_wrap" class="block clearfix ccenter" style="">
