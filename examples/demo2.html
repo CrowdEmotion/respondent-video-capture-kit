@@ -12,6 +12,7 @@
     <script type="text/javascript" charset="utf-8">
         var vrtIsTest = true;
         window.vrtIsTest = vrtIsTest;
+        window.vrtFinished = {comment: false, end: false};
         // example implementation
         function validateEmail(email) {
             var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
@@ -41,7 +42,8 @@
 
             $("#send").click(function (event) {
                 var msg = $('#message').val();
-                vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {feedback: msg})
+                window.vrtFinished.comment = true;
+                vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {feedback: msg}, function(){ window.turnOffWebcam()})
                 $('#message').slideUp('slow', function () {
                     $('#send').slideUp('slow')
                 });
@@ -91,6 +93,14 @@
                         $('#alerts').addClass('button-b');
                     }
                 };
+                var turnOffWebcam = function(){
+                    if(window.vrtFinished.comment && window.vrtFinished.end){
+                        $(vrt).trigger('vrt_event_user_session_complete')
+                        window.vrt.producer.stream.stop();
+                    }
+                };
+                window.turnOffWebcam = turnOffWebcam;
+
 
                 $('#alerts').on('click', function () {
                     alertMessage();
@@ -145,6 +155,11 @@
                 });
                 $(vrt).on('vrt_event_video_session_complete',function(){
                     alertMessage();
+                    window.vrtFinished.end= true;
+                    $('#vrt').animate({height: "1px"}, 1500 );
+                    $('#vrt *').animate({height: "1px"}, 1500 );
+                    window.turnOffWebcam();
+                    $('iframe').remove();
                     $('#next').hide();
                     $('#end').show();
                 });
@@ -187,18 +202,25 @@
                     alertMessage('FATAL ERROR ');
                 });
 
-
                 $(vrt).on('vrt_event_browser_old', function () {
                     alert('Your browser is too old.')
                 });
+
                 vrt.init();
-
-
 
                 $(vrt).on('vrt_event_producer_ready', function () {
 
                 });
-
+                //no Flash - flash version only
+                $(vrt).on('vrt_event_flash_no', function(){
+                    alertMessage('Error: no Adobe Flash founded');
+                    alert('No Flash detected on your computer');
+                });
+                //old Flash version  - flash version only
+                $(vrt).on('vrt_event_flash_old', function(){
+                    alertMessage('Error: the version of Adobe Flash is old');
+                    alert('the version of Adobe Flash on your computer is old');
+                });
 
 
                 if (cb)cb();
@@ -289,7 +311,7 @@
         .vrtbtntext {
             margin: 20px 10px 20px 0;
             padding: 10px;
-            color: white;
+            color: #476D8C;
             text-align: center;
         }
         .vrtbtntextalert {
