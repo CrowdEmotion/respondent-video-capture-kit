@@ -10,16 +10,23 @@
 
 
     <script type="text/javascript" charset="utf-8">
-
+        var vrtIsTest = true;
+        window.vrtIsTest = vrtIsTest;
         // example implementation
         function validateEmail(email) {
             var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
             return re.test(email);
         }
+        function validateQuestion(){
+            return $('input[name=user_video_behavior]:checked').val()
+        }
+
+
         //DEMO SCRIPTS
         $(document).ready(function () {
+            window.vrtIsTest?  $('#video_saving_demo').hide():$('#video_saving_test').hide();
             $("#proceed").click(function (event) {
-                if(true || validateEmail($("#mail").val())){ //mail check
+                if(window.vrtIsTest || (validateEmail($("#mail").val()) && validateQuestion())){ //mail check
                     $('#mail_alert').hide();
                     $('#intro').slideUp('slow', function () {
                         $('#main').slideDown('slow', function () {
@@ -54,13 +61,14 @@
 
             var createVrt = function (cb) {
 
+                var vb = window.vrtIsTest ? 'delete_video' : validateQuestion();
                 var options = {
                     researchToken: 'd15aa84c29634c852e612ddd066fe0fece837bc6',
                     appToken: '8a111f27-b9d4-438d-8559-fb38cc19af5b',
                     streamName: 'ce-demo1_',
                     apiSandbox: true,
                     debug: true,
-                    respondentCustomData: {user_video_behavior: 'delete_video'},
+                    respondentCustomData: {user_video_behavior: vb},
                     playerCentered: false,
                     recorderCentered: false,
                     playerHorizontallyCentered: true,
@@ -399,11 +407,21 @@
             Is the video a Guilty Pleasure for you or do you Love it?
         </p>
         <label class="block">please leave your mail. We will contact you only for feedback</label>
-        <div id="mail_alert" class="hide vrtbtntextalert">Please insert a valid mail before proceed</div>
+        <div id="mail_alert" class="hide vrtbtntextalert">Please insert a valid mail and select a video option before proceed</div>
 
         <div><input id="mail" name="mail" placeholder="please insert you mail" value="" class="vrtinput"/></div>
 
-        <b class="block">Your videos will be deleted after analysis</b>
+        <div id="video_saving_test">
+            <b class="block">Your videos will be deleted after analysis</b>
+        </div>
+        <div id="video_saving_demo">
+            <div id="video_saving_Wrapper" class="checkbox">
+                <div class="question"><b>Can we keep your video?</b></div>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="delete_video" class="user_video_behavior checkbox first">No, delete it</label><br>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="keep_available_no_humans" class="user_video_behavior checkbox first">Yes, but don't look it at (computers only)</label><br>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="keep_further_analysis" class="user_video_behavior checkbox first">Yes and you can look it at</label><br>
+            </div>
+        </div>
         <input id="proceed" name="proceed" value="Proceed" class="vrtbtn"/>
     </section>
     <section id="main" class="hide">
