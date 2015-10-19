@@ -128,7 +128,7 @@
                 });
 
                 $(vrt).on('vrtstep_play', function (evt, data) {
-                    $("#vrt object").css("position", "absolute").css("left", "-1000000px").css("opacity", "0").css("height", "1%");
+                    $("#vrt object#producer").css("position", "absolute").css("left", "-1000000px").css("opacity", "0").css("height", "1%");
                     $('#skip').show().addClass('disabled');
                     setTimeout(
                             function(){$('#skip').removeClass('disabled');},4000
@@ -180,8 +180,11 @@
                     alertMessage();
                     window.vrtFinished.end= true;
                     $('#vrt').animate({height: "1px"}, 1500 );
-                    $('#vrt').children().animate({height: "1px"}, 1500 );
-                    $('#vrt_wrap').css({'height' : '1px', 'min-height' : '1px'})
+                    $('#vrt').children().animate({height: "1px"}, 1500, 'swing', function(){
+                        $('#vrt_wrap').css({'min-height' : '1px'});
+                        $('#vrt_wrap').animate({height: "1px"}, 1500);
+                    } );
+
                     $("#producertext").hide();
                     window.turnOffWebcam();
                     $('iframe').remove();
@@ -356,7 +359,7 @@
             padding: 10px;
         }
         #message.vrtinput {
-            margin: 20px 0 0 0;
+            margin: 20px 0 20px 0;
             text-align: center;
         }
 
@@ -371,7 +374,7 @@
         }
 
         #alerts {
-            background-color: #FFCA00;
+            background-color: #fec700;
         }
 
         #logo {
