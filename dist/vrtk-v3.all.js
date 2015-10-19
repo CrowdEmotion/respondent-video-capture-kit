@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-15 17:1 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-19 13:38 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -17877,7 +17877,9 @@ jQuery.fn.vrtHCenterProd = function() {
             var w = el.width();
             var w_box = $(window).width();
             var h_box = $(window).height();
-            var w_total = (w_box - w) / 2;
+            var w_left = el.position();
+            w_left = w_left.left ? w_left.left : w_left;
+            var w_total = (w_box - w) / 2 - w_left;
             var h_total = h;
             var css = {
                 position: "relative",

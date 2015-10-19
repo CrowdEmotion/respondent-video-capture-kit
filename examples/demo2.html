@@ -95,8 +95,12 @@
                 };
                 var turnOffWebcam = function(){
                     if(window.vrtFinished.comment && window.vrtFinished.end){
-                        $(vrt).trigger('vrt_event_user_session_complete')
-                        window.vrt.producer.stream.stop();
+                        if( window.vrt  &&  window.vrt.producer &&  window.vrt.producer.stream) window.vrt.producer.stream.stop();
+                        if( window.vrt  &&  window.vrt.producer &&  window.vrt.producer.unpublish) window.vrt.producer.unpublish();
+                        setTimeout(function(){
+                            $(window.vrt).trigger('vrt_event_user_session_complete')
+                        }, 500);
+
                     }
                 };
                 window.turnOffWebcam = turnOffWebcam;
@@ -106,23 +110,29 @@
                     alertMessage();
                 });
 
-
+                $('#start').show().addClass('disabled');
                 // show start button
                 $(vrt).on('vrt_event_producer_camera_ok', function () {
                     console.log('!!!!!! vrt_event_producer_camera_ok');
                     alertMessage();
-                    $('#start').show();
+                    $('#start').removeClass('disabled');
                 });
                 // watch first video
                 $('#start').on('click', function () {
+                    if(!$('#start').hasClass('disabled')) {
                     alertMessage();
                     $('#start').hide().remove();
                     $(vrt).trigger('vrt_event_start_video_session');
+                    }
                     //if (vrt.continuosPlay !== true)$('#next').show();
                 });
 
                 $(vrt).on('vrtstep_play', function (evt, data) {
-                    $('#skip').show();
+                    $("#vrt object").css("position", "absolute").css("left", "-1000000px").css("opacity", "0").css("height", "1%");
+                    $('#skip').show().addClass('disabled');
+                    setTimeout(
+                            function(){$('#skip').removeClass('disabled');},4000
+                    );
                 });
 
                 $(vrt).on('vrt_event_stimuli_end', function (evt, data) {
@@ -149,26 +159,38 @@
                 });
 
                 $('#skip').on('click', function () {
+                    if(!$('#skip').hasClass('disabled')){
                     $('#skip').hide();
                     alertMessage();
                     $(vrt).trigger('vrt_event_user_next_video');
+                    };
                 });
+
+                var isfeedBackOpen = false;
+                var openFeedBack = function(){
+                    if(!isfeedBackOpen) {
+                        $('#feedbackarea').slideDown('slow', function () {
+                            isfeedBackOpen = true;
+                            $('#feedback').hide();
+                        }.bind(this));
+                    }
+                }
+
                 $(vrt).on('vrt_event_video_session_complete',function(){
                     alertMessage();
                     window.vrtFinished.end= true;
                     $('#vrt').animate({height: "1px"}, 1500 );
-                    $('#vrt *').animate({height: "1px"}, 1500 );
+                    $('#vrt').children().animate({height: "1px"}, 1500 );
+                    $("#producertext").hide();
                     window.turnOffWebcam();
                     $('iframe').remove();
                     $('#next').hide();
                     $('#end').show();
+                    openFeedBack();
                 });
 
                 $('#feedback').on('click', function () {
-
-                    $('#feedbackarea').slideDown('slow', function () {
-                        $('#feedback').hide();
-                    });
+                    openFeedBack();
                 });
 
                 $(vrt).on('vrt_event_respondent_created',
@@ -308,6 +330,11 @@
             text-align: center;
             cursor: pointer;
         }
+        .vrtbtn.disabled {
+            border: 1px rgba(157, 196, 35,0.3) solid;
+            background-color: rgba(157, 196, 35,0.3);
+            cursor: default;
+        }
         .vrtbtntext {
             margin: 20px 10px 20px 0;
             padding: 10px;
@@ -380,7 +407,10 @@
             text-align: center;
         }
 
-        #alerts_wrap, #buttons_wrap {
+        #buttons_wrap {
+            height: 40px;
+            display: block;
+            margin-bottom: 20px;
         }
 
         .ccenter {
@@ -396,6 +426,16 @@
         }
         .textline{
             margin: 20px 0;
+        }
+        #feedback_wrap{
+            margin-top: 20px;
+            min-height: 40px;
+        }
+        #feedback_wrap .vrtbtn{
+            margin-top: 0px;
+        }
+        #vrt_wrap{
+            min-height: 240px;
         }
 
     </style>
@@ -467,7 +507,7 @@
         <div id="vrt_wrap" class="block clearfix ccenter" style="">
             <div id="vrt" style=""></div>
         </div>
-        <div class="block clearfix">
+        <div id="feedback_wrap" class="block clearfix">
             <div id="feedback" class="vrtbtn">Write your feedback</div>
             <aside id="feedbackarea" class="hide">
                 <label id="label_message" for="message" class="block clearfix">Please, can you describe your experience? </label>

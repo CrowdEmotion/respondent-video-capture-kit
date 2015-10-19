@@ -1947,7 +1947,9 @@ jQuery.fn.vrtHCenterProd = function () {
             var w = el.width();
             var w_box = $(window).width();
             var h_box = $(window).height();
-            var w_total = (w_box - w) / 2; //400
+            var w_left = el.position();
+            w_left =  (w_left.left)? w_left.left: w_left;
+            var w_total = ((w_box - w) / 2) - w_left; //400
             var h_total = (h);
             var css = {"position": 'relative', "left": w_total + "px"};
         }else{
