@@ -181,6 +181,7 @@
                     window.vrtFinished.end= true;
                     $('#vrt').animate({height: "1px"}, 1500 );
                     $('#vrt').children().animate({height: "1px"}, 1500 );
+                    $('#vrt_wrap').css({'height' : '1px', 'min-height' : '1px'})
                     $("#producertext").hide();
                     window.turnOffWebcam();
                     $('iframe').remove();
