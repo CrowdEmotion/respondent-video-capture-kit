@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-19 13:38 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-20 11:50 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16718,7 +16718,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         var ar = vrt.bufferTS;
         if (ar instanceof Array && ar.length > 0) {
             for (var i = 0; i < ar.length; i++) {
-                setTimeout(vrt.addTS(ar[i]), 100);
+                setTimeout(vrt.addTS(ar[i]), i * 100 + 500);
             }
             vrt.bufferTS = [];
         }

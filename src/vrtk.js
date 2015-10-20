@@ -452,7 +452,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         var ar = vrt.bufferTS;
         if (ar instanceof Array && ar.length > 0) {
             for (var i = 0; i < ar.length; i++) {
-                setTimeout(vrt.addTS(ar[i]),100);
+                //console.log('ADD TS -> THIS IS BUFFERED');
+                setTimeout(vrt.addTS(ar[i]),(i*100+500));
             }
             vrt.bufferTS = [];
         }
@@ -666,6 +667,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.addTS = function(TS, cbOk, cbNo){
+        //console.log('ADD TS')
+        //console.log(TS)
         vrt.producer.addTimedMetadata(
             TS,
             function(){if(cbOk)cbOk()},
