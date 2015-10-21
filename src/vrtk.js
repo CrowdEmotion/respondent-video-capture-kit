@@ -748,7 +748,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             var n = d.getTime();
             var pre = this.createHashCode(''+this.producerStreamName);
             var rs = this.makeRandomString(8);
-            this.videoList[i].streamCode = pre +'_'+ i +'_' + n + '_' + rs;
+            var respoId =  (vrt.respondentId)? vrt.respondentId : '';
+            this.videoList[i].streamCode = respoId +'_'+pre +'_'+ i +'_' + n + '_' + rs;
             this.videoList[i].order = i;
         }
     };
