@@ -232,7 +232,7 @@ function VjsInterface() {
         this.player.on('loadeddata', vrt.player.loadeddata);
         this.player.on('loadedmetadata', vrt.player.loadedmetadata);
         this.player.on('loadstart',      function() {   vrt.log("EVT YSP loadstart")});
-        this.player.on('progress',       function() {   vrt.log("EVT YSP progress")});
+        this.player.on('progress',       function() {   /*vrt.log("EVT YSP progress")*/ });
         this.player.on('seeked',         function() {   vrt.log("EVT YSP seeked")});
         this.player.on('waiting', function () {
             $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('buffering','videojs')});
@@ -260,17 +260,17 @@ function VjsInterface() {
     };
 
     this.on_player_play = function (cb) {
-        vrt.log("EVT YSP  on_player_play");
+        vrt.llog("EVT YSP  on_player_play");
         //TODO CHECK THIS, double event
         // $(vrt).trigger('vrtstep_play',{caller:'on_player_play'});
     };
 
     this.on_player_firstplay = function (cb) {
-        vrt.log("EVT YSP on_player_firstplay");
+        vrt.llog("EVT YSP on_player_firstplay");
     };
 
     this.loadeddata = function (cb) {
-        vrt.log("EVT YSP loadeddata");
+        vrt.llog("EVT YSP loadeddata");
         if (!vrt.player.isloadeddata) {
             vrt.player.isloadeddata = true;
             $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
@@ -279,8 +279,8 @@ function VjsInterface() {
     };
 
     this.loadedalldata = function (cb) {
-        vrt.log("EVT YSP loadedalldata");
-        if (!vrt.player.isloadeddatas && this.techName != "Html5") {
+        //vrt.llog("EVT YSP loadedalldata");
+        if (!vrt.player.isloadeddata && this.techName != "Html5") {
             vrt.player.isloadeddata = true;
             $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
             $(vrt).trigger('vrtstep_play', {caller: 'loadedalldata'});
@@ -288,7 +288,7 @@ function VjsInterface() {
     };
 
     this.loadedmetadata = function (cb) {
-        vrt.log("EVT YSP loadedmetadata");
+        vrt.llog("EVT YSP loadedmetadata");
         /*
         if(this.isloadeddata==false) {
             $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('playing', 'videojs')});
@@ -299,7 +299,7 @@ function VjsInterface() {
     };
 
     this.on_player_error = function (e) {
-        vrt.log("EVT YSP loadedalldata " + e);
+        vrt.llog("EVT YSP loadedalldata " + e);
         $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('error','videojs')});
         $(window.vrt).trigger('vrt_event_error', {component:'player',error:'player error',type:'blocking'});
     };
@@ -312,7 +312,7 @@ function VjsInterface() {
 
     this.getCurrentTime = function () {
         return vrt.player.player.currentTime();
-    }
+    };
 
     this.loadPlayer = function (options) {
         vrt.logTime('loadPlayer');
@@ -366,7 +366,7 @@ function VjsInterface() {
     };
 
     this.preloadPlayer = function () {
-        this.log('preloading start');
+        vrt.log('preloading start');
 
         // BUG: in IE VIDEO either doesn't work or generates unwanted calls that logs out the user
         //TODO check if(vrt.videoList.length < 1 || (vrt.checkIeVersion(10) ||  (!vrt.checkSafariMinVer('Win', 6)))) return null;
@@ -711,13 +711,14 @@ window.onytplayerStateChange = function (newState) {
 
     // TODO sync recording when buffering
 
+    vrt.llog('vrtevent_player_ts: ' + vrt.player.statusMap(newState,'yt'));
     $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(newState,'yt')});
 
-    $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}])
+    $(vrt).trigger('vrtstep_playerStateChange', [{state: newState, time:vrt.logTime('YT')}]);
 
 
     if (newState == 3) {
-        $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange3'})
+        if(vrt.canAutoplay()) $(vrt).trigger('vrtstep_play', {caller:'onytplayerStateChange3'})
     }
 
     if (newState == 1) {

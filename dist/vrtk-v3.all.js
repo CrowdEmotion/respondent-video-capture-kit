@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-21 9:57 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-21 17:32 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -15996,9 +15996,7 @@ function VjsInterface() {
         this.player.on("loadstart", function() {
             vrt.log("EVT YSP loadstart");
         });
-        this.player.on("progress", function() {
-            vrt.log("EVT YSP progress");
-        });
+        this.player.on("progress", function() {});
         this.player.on("seeked", function() {
             vrt.log("EVT YSP seeked");
         });
@@ -16024,13 +16022,13 @@ function VjsInterface() {
         }
     };
     this.on_player_play = function(cb) {
-        vrt.log("EVT YSP  on_player_play");
+        vrt.llog("EVT YSP  on_player_play");
     };
     this.on_player_firstplay = function(cb) {
-        vrt.log("EVT YSP on_player_firstplay");
+        vrt.llog("EVT YSP on_player_firstplay");
     };
     this.loadeddata = function(cb) {
-        vrt.log("EVT YSP loadeddata");
+        vrt.llog("EVT YSP loadeddata");
         if (!vrt.player.isloadeddata) {
             vrt.player.isloadeddata = true;
             $(vrt).trigger("vrtevent_player_ts", {
@@ -16042,8 +16040,7 @@ function VjsInterface() {
         }
     };
     this.loadedalldata = function(cb) {
-        vrt.log("EVT YSP loadedalldata");
-        if (!vrt.player.isloadeddatas && this.techName != "Html5") {
+        if (!vrt.player.isloadeddata && this.techName != "Html5") {
             vrt.player.isloadeddata = true;
             $(vrt).trigger("vrtevent_player_ts", {
                 status: vrt.player.statusMap("playing", "videojs")
@@ -16054,10 +16051,10 @@ function VjsInterface() {
         }
     };
     this.loadedmetadata = function(cb) {
-        vrt.log("EVT YSP loadedmetadata");
+        vrt.llog("EVT YSP loadedmetadata");
     };
     this.on_player_error = function(e) {
-        vrt.log("EVT YSP loadedalldata " + e);
+        vrt.llog("EVT YSP loadedalldata " + e);
         $(vrt).trigger("vrtevent_player_ts", {
             status: vrt.player.statusMap("error", "videojs")
         });
@@ -16129,7 +16126,7 @@ function VjsInterface() {
         callback(success || this.enough_bandwidth);
     };
     this.preloadPlayer = function() {
-        this.log("preloading start");
+        vrt.log("preloading start");
         return this.setupPreLoadPlayer();
     };
     this.setupPreLoadPlayer = function(callback) {
@@ -16344,6 +16341,7 @@ window.onytplayerError = function(newState) {
 window.onytplayerStateChange = function(newState) {
     newState = newState.data;
     vrt.logTime("onytplayerStateChange " + newState);
+    vrt.llog("vrtevent_player_ts: " + vrt.player.statusMap(newState, "yt"));
     $(vrt).trigger("vrtevent_player_ts", {
         status: vrt.player.statusMap(newState, "yt")
     });
@@ -16352,7 +16350,7 @@ window.onytplayerStateChange = function(newState) {
         time: vrt.logTime("YT")
     } ]);
     if (newState == 3) {
-        $(vrt).trigger("vrtstep_play", {
+        if (vrt.canAutoplay()) $(vrt).trigger("vrtstep_play", {
             caller: "onytplayerStateChange3"
         });
     }
