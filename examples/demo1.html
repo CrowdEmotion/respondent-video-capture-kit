@@ -248,6 +248,20 @@
                     alert('the version of Adobe Flash on your computer is old');
                 });
 
+                $(vrt).on('vrtstep_play', function(){
+                    $('#icon_play').removeClass('hide').show();
+                });
+                $(vrt).on('vrtstep_stop', function(){
+                    $('#icon_play').hide();
+                });
+                $(vrt).on('vrt_event_recorder_publish', function(){
+                    $('#icon_rec').removeClass('hide').show();
+                });
+                $(vrt).on('vrt_event_recorder_unpublish', function(){
+                    $('#icon_rec').hide();
+                });
+
+
 
                 if (cb)cb();
 
@@ -445,6 +459,16 @@
         #vrt_wrap{
             min-height: 240px;
         }
+        #foot_icon{
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            height: 10px;
+        }
+        #foot_icon img{
+            float: right;
+        }
+
 
     </style>
 
@@ -529,9 +553,19 @@
         <div class="clearfix"></div>
     </section>
 
+
     <div id="notice"></div>
 
 </article>
+    </section>
 
+
+
+</article>
+
+        <footer id="foot_icon">
+            <img id="icon_rec" src="//cdn.crowdemotion.co.uk/images/icon_rec.png" align="right" class="hide" />
+            <img id="icon_play" src="//cdn.crowdemotion.co.uk/images/icon_play.png" align="right"  class="hide" />
+        </footer>
 </body>
 </html>

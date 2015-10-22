@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-21 17:32 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-22 17:31 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16793,13 +16793,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on("vrtstep_play", function(e, data) {
             vrt.log("EVT vrtstep_play caller " + data.caller);
-            vrt.llog("REC event");
             if (!vrt.isPlaying) {
+                vrt.llog("REC event");
+                vrt.llog("REC event " + vrt.isPlaying + " on " + vrt.streamName);
                 vrt.streamName = this.videoList[this.currentMedia].streamCode;
                 $(window.vrt).trigger("vrt_event_streamname", [ {
                     streamname: vrt.streamName
                 } ]);
-                vrt.llog("REC event before " + vrt.streamName);
+                vrt.llog("REC event streamname:  " + vrt.streamName);
                 try {
                     vrt.producer.remoteLogger.name = vrt.streamName;
                     vrt.producer.publish(vrt.streamName);
@@ -17380,6 +17381,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.player.video_stop(function() {
             vrt.logChrono(1, false, "player");
             vrt.player.video_end_fullscreen();
+            $(vrt).trigger("vrtstep_stop");
         });
         vrt.isPlaying = false;
         clearTimeout(vrt.stop_handle);
@@ -17505,6 +17507,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     status: vrt.player.statusMap(20)
                 });
                 vrt.logChrono(0, true, "PRODUCER RECORDING");
+                $(vrt).trigger("vrt_event_recorder_publish");
                 vrt.log("!!PRODUCER publish");
             });
             this.on("unpublish", function() {
@@ -17515,6 +17518,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.isRecording = false;
                 vrt.bufferTS = [];
                 clearTimeout(vrt.stop_polling_player_pos);
+                $(vrt).trigger("vrt_event_recorder_unpublish");
                 vrt.log("!!PRODUCER unpublish");
             });
             this.on("connect", function() {

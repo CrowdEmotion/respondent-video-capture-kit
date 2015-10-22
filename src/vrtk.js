@@ -544,30 +544,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on('vrtstep_play', function (e, data) {
             vrt.log('EVT vrtstep_play caller ' + data.caller);
-            vrt.llog('REC event');
+
             if (!vrt.isPlaying) {
+                vrt.llog('REC event');
+                vrt.llog("REC event "+vrt.isPlaying+" on "+vrt.streamName);
+
                 vrt.streamName = this.videoList[this.currentMedia].streamCode;
                 $(window.vrt).trigger('vrt_event_streamname', [{streamname:vrt.streamName}]);
-                vrt.llog("REC event before "+vrt.streamName);
+                vrt.llog("REC event streamname:  "+vrt.streamName);
                 try {
                     vrt.producer.remoteLogger.name = vrt.streamName;
                     vrt.producer.publish(vrt.streamName);
-                    // TODO insert option to save respondant first
-                    /*
-                    if(vrt.responseAtStart){
-                        vrt.ceclient.writeResponse(null,
-                            function(result){
-                                if(result){
-                                    vrt.responseList.push(result);
-                                    $(vrt).trigger('vrt_event_response_saved', [{data:result}])
-                                }else{
-                                    $(vrt).trigger('vrt_event_response_not_saved', [{data:result}])
-                                }
-
-                            }
-                        );
-                    }
-                    */
                 }catch(err){
                     vrt.llog('exception in producer.publish');
                     vrt.llog(err);
@@ -1332,6 +1319,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.player.video_stop(function(){
             vrt.logChrono(1, false, 'player');
             vrt.player.video_end_fullscreen();
+            $(vrt).trigger('vrtstep_stop');
         });
         vrt.isPlaying=false;
         clearTimeout(vrt.stop_handle);
@@ -1488,6 +1476,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.isRecording = true;
                 $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(20)});
                 vrt.logChrono(0, true, 'PRODUCER RECORDING');
+                $(vrt).trigger('vrt_event_recorder_publish');
                 vrt.log('!!PRODUCER publish');
             });
 
@@ -1497,6 +1486,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.isRecording = false;
                 vrt.bufferTS = [];
                 clearTimeout(vrt.stop_polling_player_pos);
+                $(vrt).trigger('vrt_event_recorder_unpublish');
                 vrt.log('!!PRODUCER unpublish');
             });
 
