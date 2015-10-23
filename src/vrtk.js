@@ -71,6 +71,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.timeRecStart = -1;
     this.timePlayerStart = -1;
     this.bufferTS = [];
+    this.bufferTSAll = [];
+    this.bufferTSAllPushed = [];
     this.stepCompleted = false;
     this.timedOverPlayToEnd;
     this.continuosPlay = false;
@@ -448,17 +450,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(vrt).trigger(type, data);
     };
 
-    this.saveBufferedTS = function (cb) {
-        var ar = vrt.bufferTS;
-        if (ar instanceof Array && ar.length > 0) {
-            for (var i = 0; i < ar.length; i++) {
-                //console.log('ADD TS -> THIS IS BUFFERED');
-                setTimeout(vrt.addTS(ar[i]),(i*100+500));
-            }
-            vrt.bufferTS = [];
-        }
-        if (cb)cb();
-    }
 
     this.vrtOnStartSequence = 0;
     this.vrtOn = function () {
@@ -639,9 +630,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         } else {
             vrt.bufferTS.push(dataTS);
         }
+
     };
 
     this.createTS = function(data){
+        //vrt.bufferTSAll.push(data);
         return {
             'time': Date.now(), //browser time absolute
             'player_ts': vrt.getTimeStampPlayerDiff(),
@@ -654,14 +647,25 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.addTS = function(TS, cbOk, cbNo){
-        //console.log('ADD TS')
-        //console.log(TS)
+        //vrt.bufferTSAllPushed.push(TS);
         vrt.producer.addTimedMetadata(
             TS,
-            function(){if(cbOk)cbOk()},
-            function(){if(cbNo)cbNo()}
+            function(){vrt.llog('added TS'); if(cbOk)cbOk()},
+            function(){vrt.llog('no added TS'); if(cbNo)cbNo()}
         );
     };
+
+    this.saveBufferedTS = function (cb) {
+        var ar = vrt.bufferTS;
+        if (ar instanceof Array && ar.length > 0) {
+            for (var i = 0; i < ar.length; i++) {
+                setTimeout(function(){window.vrt.addTS(ar[i])},((i*100)+500));
+            }
+        }
+        vrt.bufferTS = [];
+        if (cb)cb();
+    }
+
 
     this.openFrame = function(src, options){
 

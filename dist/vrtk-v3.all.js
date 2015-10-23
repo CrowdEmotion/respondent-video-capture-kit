@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-22 17:31 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-23 13:38 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16430,6 +16430,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.timeRecStart = -1;
     this.timePlayerStart = -1;
     this.bufferTS = [];
+    this.bufferTSAll = [];
+    this.bufferTSAllPushed = [];
     this.stepCompleted = false;
     this.timedOverPlayToEnd;
     this.continuosPlay = false;
@@ -16712,16 +16714,6 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.trigger = function(type, data) {
         $(vrt).trigger(type, data);
     };
-    this.saveBufferedTS = function(cb) {
-        var ar = vrt.bufferTS;
-        if (ar instanceof Array && ar.length > 0) {
-            for (var i = 0; i < ar.length; i++) {
-                setTimeout(vrt.addTS(ar[i]), i * 100 + 500);
-            }
-            vrt.bufferTS = [];
-        }
-        if (cb) cb();
-    };
     this.vrtOnStartSequence = 0;
     this.vrtOn = function() {
         $(window.vrt).on("vrt_event_error", function(e, data) {
@@ -16886,10 +16878,24 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
     this.addTS = function(TS, cbOk, cbNo) {
         vrt.producer.addTimedMetadata(TS, function() {
+            vrt.llog("added TS");
             if (cbOk) cbOk();
         }, function() {
+            vrt.llog("no added TS");
             if (cbNo) cbNo();
         });
+    };
+    this.saveBufferedTS = function(cb) {
+        var ar = vrt.bufferTS;
+        if (ar instanceof Array && ar.length > 0) {
+            for (var i = 0; i < ar.length; i++) {
+                setTimeout(function() {
+                    window.vrt.addTS(ar[i]);
+                }, i * 100 + 500);
+            }
+        }
+        vrt.bufferTS = [];
+        if (cb) cb();
     };
     this.openFrame = function(src, options) {
         $(vrt).trigger("vrt_event_frame_open", [ {
