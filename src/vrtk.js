@@ -620,17 +620,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.newTS = function(data){
         if(vrt.streamName=='' || vrt.streamName==null || vrt.streamName==undefined) return ;
-
-        var dataTS = vrt.createTS(data);
-        if (vrt.isRecording == true) {
-            vrt.saveBufferedTS(
-                function () {
-                    vrt.addTS(dataTS)
-                });
-        } else {
-            vrt.bufferTS.push(dataTS);
+        if(data && data.status) {
+            var dataTS = vrt.createTS(data);
+            if (vrt.isRecording == true) {
+                vrt.saveBufferedTS(
+                    function () {
+                        vrt.addTS(dataTS)
+                    });
+            } else {
+                vrt.bufferTS.push(dataTS);
+            }
         }
-
     };
 
     this.createTS = function(data){
@@ -658,11 +658,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.saveBufferedTS = function (cb) {
         var ar = vrt.bufferTS;
         if (ar instanceof Array && ar.length > 0) {
+            vrt.bufferTS = [];
             for (var i = 0; i < ar.length; i++) {
-                setTimeout(function(){window.vrt.addTS(ar[i])},((i*100)+500));
+                setTimeout(function(ar){
+                    //console.log('save ts timeout');
+                    //console.log(ar);
+                    window.vrt.addTS(ar);
+                },((i*100)+500), ar[i]);
             }
         }
-        vrt.bufferTS = [];
         if (cb)cb();
     }
 

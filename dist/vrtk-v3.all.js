@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-23 13:38 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-23 16:31 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16856,13 +16856,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
     this.newTS = function(data) {
         if (vrt.streamName == "" || vrt.streamName == null || vrt.streamName == undefined) return;
-        var dataTS = vrt.createTS(data);
-        if (vrt.isRecording == true) {
-            vrt.saveBufferedTS(function() {
-                vrt.addTS(dataTS);
-            });
-        } else {
-            vrt.bufferTS.push(dataTS);
+        if (data && data.status) {
+            var dataTS = vrt.createTS(data);
+            if (vrt.isRecording == true) {
+                vrt.saveBufferedTS(function() {
+                    vrt.addTS(dataTS);
+                });
+            } else {
+                vrt.bufferTS.push(dataTS);
+            }
         }
     };
     this.createTS = function(data) {
@@ -16888,13 +16890,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.saveBufferedTS = function(cb) {
         var ar = vrt.bufferTS;
         if (ar instanceof Array && ar.length > 0) {
+            vrt.bufferTS = [];
             for (var i = 0; i < ar.length; i++) {
-                setTimeout(function() {
-                    window.vrt.addTS(ar[i]);
-                }, i * 100 + 500);
+                setTimeout(function(ar) {
+                    window.vrt.addTS(ar);
+                }, i * 100 + 500, ar[i]);
             }
         }
-        vrt.bufferTS = [];
         if (cb) cb();
     };
     this.openFrame = function(src, options) {
