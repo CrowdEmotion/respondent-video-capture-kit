@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-23 16:31 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-25 14:42 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16437,6 +16437,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.continuosPlay = false;
     this.click_start = false;
     this.isRecording = false;
+    this.isRecordingPadding = false;
     this.isPlaying = false;
     this.currentMedia = -1;
     this.mediaCount = 0;
@@ -16600,6 +16601,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 this.browser.old = true;
             }
         }
+        this.sendTSEvent = null;
     };
     this.init = function() {
         this.log(">>STEP: vrt init");
@@ -16858,27 +16860,34 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (vrt.streamName == "" || vrt.streamName == null || vrt.streamName == undefined) return;
         if (data && data.status) {
             var dataTS = vrt.createTS(data);
-            if (vrt.isRecording == true) {
+            if (vrt.isRecordingPadding == true) {
                 vrt.saveBufferedTS(function() {
                     vrt.addTS(dataTS);
                 });
             } else {
                 vrt.bufferTS.push(dataTS);
             }
+        } else if (vrt.bufferTS.length > 0) {
+            if (vrt.isRecordingPadding == true) {
+                vrt.saveBufferedTS();
+            }
         }
     };
     this.createTS = function(data) {
+        vrt.bufferTSAll.push(data);
+        var time_rec = vrt.producer.streamTimeBase > 0 ? vrt.producer.getStreamTime() : 0;
         return {
             time: Date.now(),
             player_ts: vrt.getTimeStampPlayerDiff(),
             rec_ts: vrt.getTimeStampRecDiff(),
-            time_recorder: vrt.producer.getStreamTime(),
+            time_recorder: time_rec,
             status: data.status,
             content_id: this.media_id,
             player_position: vrt.player.getCurrentTime()
         };
     };
     this.addTS = function(TS, cbOk, cbNo) {
+        if (!TS) return;
         vrt.producer.addTimedMetadata(TS, function() {
             vrt.llog("added TS");
             if (cbOk) cbOk();
@@ -16890,12 +16899,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.saveBufferedTS = function(cb) {
         var ar = vrt.bufferTS;
         if (ar instanceof Array && ar.length > 0) {
-            vrt.bufferTS = [];
             for (var i = 0; i < ar.length; i++) {
                 setTimeout(function(ar) {
                     window.vrt.addTS(ar);
-                }, i * 100 + 500, ar[i]);
+                }, 500, ar[i]);
             }
+            vrt.bufferTS = [];
         }
         if (cb) cb();
     };
@@ -17511,6 +17520,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
             this.on("publish", function() {
                 vrt.isRecording = true;
+                vrt.sendTSEvent = setInterval(function() {
+                    vrt.newTS();
+                }, 1e3);
+                setTimeout(function() {
+                    vrt.isRecordingPadding = true;
+                    vrt.llog("vrt.isRecordingPadding:" + vrt.isRecordingPadding);
+                }, 500);
                 $(vrt).trigger("vrtevent_player_ts", {
                     status: vrt.player.statusMap(20)
                 });
@@ -17524,6 +17540,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 });
                 vrt.logChrono(0, false, "PRODUCER RECORDING");
                 vrt.isRecording = false;
+                vrt.isRecordingPadding = false;
+                clearInterval(vrt.sendTSEvent);
                 vrt.bufferTS = [];
                 clearTimeout(vrt.stop_polling_player_pos);
                 $(vrt).trigger("vrt_event_recorder_unpublish");
@@ -17548,6 +17566,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.on("save-metadata", function(url) {});
             this.on("error", function(reason) {
                 vrt.isRecording = false;
+                vrt.isRecordingPadding = false;
+                clearInterval(vrt.sendTSEvent);
                 vrt.log("!!PRODUCER error " + reason);
                 vrt.logTime("webpr error");
                 vrt.log(">>===WEBP ERROR: " + reason);
@@ -17559,6 +17579,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             });
             this.on("disconnect", function() {
                 vrt.isRecording = false;
+                vrt.isRecordingPadding = false;
+                clearInterval(vrt.sendTSEvent);
                 vrt.log("!!PRODUCER disconnect");
                 vrt.logTime("webpr disconnect");
                 vrt.log(">>STEP producer disconnected");
