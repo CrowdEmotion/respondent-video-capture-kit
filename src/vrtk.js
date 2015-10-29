@@ -122,6 +122,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.recordingAudio = false;
     this.browser = {isChromeMobile: false, old: false};
     this.platform = null;
+    this.producerVideo = null;
 
 
     this.reloadFlash = null;
@@ -587,7 +588,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
 
         $(window.vrt).on('vrt_event_user_session_complete', function () {
-            window.vrt.closeSession();
+            setTimeout(function(){
+                window.vrt.closeSession();
+            },1000);
         });
         $(window.vrt).on('vrt_event_logchrono', function (e,data) {
             vrt.log('EVT vrt_event_logchrono');
@@ -980,6 +983,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.closeSession = function() {
         if (this.videoFullscreen) this.videoEndFullscreen();
         this.playerDispose();
+        this.producerVideo.pause();
         this.producer.previewStop();
         this.producer.disconnect();
         $('#'+this.producer.id).hide();
@@ -1466,6 +1470,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log("===WEBP Camera is now available");
                 vrt.popOverCe('pop_click_allow','destroy');
                 vrt.popOverCe('pop_center');
+                vrt.producerVideo = document.getElementById('producer_video');
                 $(window.vrt).trigger('producer_init_camera_ok');
             };
 
