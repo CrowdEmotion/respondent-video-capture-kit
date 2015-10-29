@@ -383,7 +383,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             "              Sorry, there is a problem accessing your camera. " +
             "              Please, check your browser dialogs in order to allow camera access and then click " +
             "             <input id='retrybtn' type='button' value='Try again'></div> " +
-            "           <div id='producer'><video></video></div>                                                                   " +
+            "           <div id='producer'><video id='producer_video'></video></div>                                                                   " +
             "           <div class='vrtClearfix'></div>                                                                " +
             "       </div>                                                                                          " +
             ((this.options.htmlRecorderPost) ? this.options.htmlRecorderPost : '') +
