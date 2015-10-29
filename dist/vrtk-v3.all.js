@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-29 14:37 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-10-29 17:39 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16495,6 +16495,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         old: false
     };
     this.platform = null;
+    this.producerVideo = null;
     this.reloadFlash = null;
     this.initMediaList = function(type, list) {
         if (!list) return;
@@ -16843,7 +16844,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             window.vrt.skip_video();
         });
         $(window.vrt).on("vrt_event_user_session_complete", function() {
-            window.vrt.closeSession();
+            setTimeout(function() {
+                window.vrt.closeSession();
+            }, 1e3);
         });
         $(window.vrt).on("vrt_event_logchrono", function(e, data) {
             vrt.log("EVT vrt_event_logchrono");
@@ -17153,6 +17156,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.closeSession = function() {
         if (this.videoFullscreen) this.videoEndFullscreen();
         this.playerDispose();
+        this.producerVideo.pause();
         this.producer.previewStop();
         this.producer.disconnect();
         $("#" + this.producer.id).hide();
@@ -17511,6 +17515,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log("===WEBP Camera is now available");
                 vrt.popOverCe("pop_click_allow", "destroy");
                 vrt.popOverCe("pop_center");
+                vrt.producerVideo = document.getElementById("producer_video");
                 $(window.vrt).trigger("producer_init_camera_ok");
             };
             this.on("camera-muted", function() {
