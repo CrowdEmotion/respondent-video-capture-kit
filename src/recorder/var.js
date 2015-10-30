@@ -3700,14 +3700,9 @@ var WebProducer =
 	    this.hub.contents.once('save', function(url, streamName) {
 	      return self.fire('save', url, streamName);
 	    });
-	    this.hub.contents.once('save-metadata', function(url, streamName) {
+	    return this.hub.contents.once('save-metadata', function(url, streamName) {
 	      return self.fire('save-metadata', url, streamName);
 	    });
-	    return setTimeout(((function(_this) {
-	      return function() {
-	        return _this.previewStart();
-	      };
-	    })(this)), 500);
 	  };
 
 	  HTML5Producer.prototype.unpublishCheckUnexpected = function() {
