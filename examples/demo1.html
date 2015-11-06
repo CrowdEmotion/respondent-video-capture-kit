@@ -232,6 +232,10 @@
                     alert('Your browser is too old.')
                 });
 
+                $(vrt).on('vrt_event_no_requirement', function () {
+                    alert('This application in not compatible with iPad/iPhone/iPod');
+                });
+
                 vrt.init();
 
                 $(vrt).on('vrt_event_producer_ready', function () {

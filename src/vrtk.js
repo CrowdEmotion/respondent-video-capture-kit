@@ -120,7 +120,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchOutUrl = null;
     this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
-    this.browser = {isChromeMobile: false, old: false};
+    this.browser = {isChromeMobile: false, old: false, requirement: true};
     this.platform = null;
     this.producerVideo = null;
 
@@ -256,7 +256,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                this.browser.old = true;
             }
         }
-        this.sendTSEvent = null;
+        if(this.platform.product=='iPhone' || this.platform.product=='iPad' || this.platform.product=='iPod'){
+            this.browser.requirement = false;
+        }
+
+            this.sendTSEvent = null;
 
     };
 
@@ -279,6 +283,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if(vrt.browser.old){
             $(vrt).trigger('vrt_event_browser_old');
             $(vrt).trigger('vrt_event_error', {component:'browser',error:'the browser is old',type:'blocking'});
+        }
+        if(!vrt.browser.requirement){
+            $(vrt).trigger('vrt_event_no_requirement');
+            $(vrt).trigger('vrt_event_error', {component:'browser',error:'Using and iOS incompatible platform',type:'blocking'});
         }
 
         //todo insert resizingWindovs

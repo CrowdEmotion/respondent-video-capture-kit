@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-10-30 10:10 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-11-6 10:7 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16487,7 +16487,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.recordingAudio = false;
     this.browser = {
         isChromeMobile: false,
-        old: false
+        old: false,
+        requirement: true
     };
     this.platform = null;
     this.producerVideo = null;
@@ -16609,6 +16610,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 this.browser.old = true;
             }
         }
+        if (this.platform.product == "iPhone" || this.platform.product == "iPad" || this.platform.product == "iPod") {
+            this.browser.requirement = false;
+        }
         this.sendTSEvent = null;
     };
     this.init = function() {
@@ -16626,6 +16630,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $(vrt).trigger("vrt_event_error", {
                 component: "browser",
                 error: "the browser is old",
+                type: "blocking"
+            });
+        }
+        if (!vrt.browser.requirement) {
+            $(vrt).trigger("vrt_event_no_requirement");
+            $(vrt).trigger("vrt_event_error", {
+                component: "browser",
+                error: "Using and iOS incompatible platform",
                 type: "blocking"
             });
         }
