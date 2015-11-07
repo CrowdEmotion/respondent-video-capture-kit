@@ -1297,7 +1297,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.checkChromeMobileVersion = function(version)
     {
-        return (navigator.userAgent).indexOf('Android')!==-1 && (navigator.userAgent).indexOf('Chrome')!==-1 && (navigator.userAgent).indexOf('Mobile')!==-1;
+        return (navigator.userAgent).indexOf('Android')!==-1  && (navigator.userAgent).indexOf('Chrome')!==-1;
     };
 
     this.youtubeParser = function(url) {
