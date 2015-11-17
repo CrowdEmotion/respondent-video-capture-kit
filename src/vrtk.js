@@ -232,6 +232,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.norclick = this.checkOpt(options,'norclick',false);
         this.options.referrer = (document.referrer)? document.referrer : '';
         this.options.locationHref = (document.location.href)? document.location.href : '';
+        this.options.autoplay = this.checkOpt(options,'autoplay',true);
         this.options.swfobjectLocation = options.swfobjectLocation? options.swfobjectLocation : '//cdn.crowdemotion.co.uk/playcorder/swfobject.js';
 
         if (this.newInit) {
@@ -674,8 +675,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         //vrt.llog(TS);
         vrt.producer.addTimedMetadata(
             TS,
-            function(){vrt.llog('added TS'); if(cbOk)cbOk()},
-            function(){vrt.llog('no added TS'); if(cbNo)cbNo()}
+            function(){
+                //vrt.llog('added TS');
+                if(cbOk)cbOk()},
+            function(){
+                //vrt.llog('no added TS');
+                if(cbNo)cbNo()}
         );
     };
 
@@ -1787,6 +1792,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         function(res){
                             vrt.respondentId = res.id;
                             $(vrt).trigger('vrt_event_respondent_created');
+                            vrt.llog('respondent num: ' + vrt.respondentId);
                             if(vrt.options.respondentCustomData){
                                 vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
                             }
@@ -1939,7 +1945,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.canAutoplay = function(){
-        return !vrt.browser.isChromeMobile;
+        return (vrt.options.autoplay && !vrt.browser.isChromeMobile ) ;
     };
 
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,  options);

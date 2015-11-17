@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-11-6 10:7 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-11-17 15:15 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -15883,6 +15883,15 @@ function PlayerInterface() {
             if (status == "paused") {
                 r = 13;
             }
+            if (status == "seeked") {
+                r = 15;
+            }
+            if (status == "play") {
+                r = 32;
+            }
+            if (status == "fullscreen_change") {
+                r = 33;
+            }
         }
         return r;
     }, this.blockRClick = function(id) {
@@ -15900,9 +15909,12 @@ function PlayerInterface() {
         var object = $("#" + id + " object");
         if (object) {}
     }, this.on_player_fullscreenchange = function(ev) {
+        vrt.player._player_is_fullscreen = !vrt.player._player_is_fullscreen;
+        $(vrt).trigger("vrtevent_player_ts", {
+            status: vrt.player.statusMap("fullscreen_change", "videojs")
+        });
         vrt.logTime("on_player_fullscreenchange");
         vrt.log("player [VJSnew]: on_player_fullscreenchange");
-        vrt.player._player_is_fullscreen = !vrt.player._player_is_fullscreen;
     };
 }
 
@@ -15990,13 +16002,7 @@ function VjsInterface() {
                 status: vrt.player.statusMap("paused", "videojs")
             });
         });
-        this.player.on("ended", function() {
-            vrt.log("EVT YSP ended");
-            $(vrt).trigger("vrtevent_player_ts", {
-                status: vrt.player.statusMap("ended", "videojs")
-            });
-            vrt.player.on_player_end();
-        });
+        this.player.on("ended", vrt.player.on_player_end);
         this.player.on("loadedalldata", vrt.player.loadedalldata);
         this.player.on("loadeddata", vrt.player.loadeddata);
         this.player.on("loadedmetadata", vrt.player.loadedmetadata);
@@ -16006,12 +16012,15 @@ function VjsInterface() {
         this.player.on("progress", function() {});
         this.player.on("seeked", function() {
             vrt.log("EVT YSP seeked");
+            $(vrt).trigger("vrtevent_player_ts", {
+                status: vrt.player.statusMap("seeked", "videojs")
+            });
         });
         this.player.on("waiting", function() {
+            vrt.log("EVT ysp waiting");
             $(vrt).trigger("vrtevent_player_ts", {
                 status: vrt.player.statusMap("buffering", "videojs")
             });
-            vrt.log("EVT ysp waiting");
         });
         if (vrt.options.recorderCentered && vrt.options.recorderCentered === true) {
             $("#videoDiv").vrtCenter();
@@ -16023,13 +16032,20 @@ function VjsInterface() {
         vrt.player_is_ready();
     };
     this.on_player_end = function(cb) {
+        vrt.log("EVT YSP ended");
         $(vrt).trigger("vrt_event_stimuli_end");
+        $(vrt).trigger("vrtevent_player_ts", {
+            status: vrt.player.statusMap("ended", "videojs")
+        });
         if (!vrt.timedOverPlayToEnd) {
             vrt.skip_video();
         }
     };
     this.on_player_play = function(cb) {
         vrt.llog("EVT YSP  on_player_play");
+        $(vrt).trigger("vrtevent_player_ts", {
+            status: vrt.player.statusMap("play", "videojs")
+        });
     };
     this.on_player_firstplay = function(cb) {
         vrt.llog("EVT YSP on_player_firstplay");
@@ -16154,7 +16170,7 @@ function YtInterface() {
         vrt.logTime("YtInterface video_play");
         if (this.player) {
             this.log("player [YT]: play" + vrt.media_path);
-            this.player.loadVideoById(vrt.media_path, 0, "small");
+            if (vrt.canAutoplay()) this.player.loadVideoById(vrt.media_path, 0, "small"); else this.player.cueVideoById(vrt.media_path, 0, "small");
             if (cb) cb();
         } else {}
     };
@@ -16259,8 +16275,8 @@ function YtInterface() {
             var firstScriptTag = document.getElementsByTagName("script")[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
             window.onYouTubeIframeAPIReady = function() {
-                vrt.logTime("onYouTubePlayerReady");
-                vrt.log("player [YT]: onYouTubePlayerReady");
+                vrt.logTime("NEW onYouTubePlayerReady");
+                vrt.log("NEW player [YT]: onYouTubePlayerReady");
                 var ytoptions = {
                     height: p_h,
                     width: p_w,
@@ -16328,8 +16344,8 @@ window.vjsInterface = vjsInterface;
 window.ytInterface = ytInterface;
 
 window.onYouTubePlayerReady = function() {
-    vrt.logTime("onYouTubePlayerReady");
-    vrt.log("player [YT]: onYouTubePlayerReady");
+    vrt.logTime("OLD onYouTubePlayerReady");
+    vrt.log("OLD player [YT]: onYouTubePlayerReady");
     vrt.player.player = document.getElementById("ytPlayer");
     vrt.player.player.addEventListener("onStateChange", "onytplayerStateChange");
     vrt.player.player.addEventListener("onError", "onytplayerError");
@@ -16347,7 +16363,7 @@ window.onytplayerError = function(newState) {
 
 window.onytplayerStateChange = function(newState) {
     newState = newState.data;
-    vrt.logTime("onytplayerStateChange " + newState);
+    vrt.llog("onytplayerStateChange " + newState);
     vrt.llog("vrtevent_player_ts: " + vrt.player.statusMap(newState, "yt"));
     $(vrt).trigger("vrtevent_player_ts", {
         status: vrt.player.statusMap(newState, "yt")
@@ -16588,6 +16604,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.options.norclick = this.checkOpt(options, "norclick", false);
         this.options.referrer = document.referrer ? document.referrer : "";
         this.options.locationHref = document.location.href ? document.location.href : "";
+        this.options.autoplay = this.checkOpt(options, "autoplay", true);
         this.options.swfobjectLocation = options.swfobjectLocation ? options.swfobjectLocation : "//cdn.crowdemotion.co.uk/playcorder/swfobject.js";
         if (this.newInit) {
             this.responseAtStart = options.responseAtStart = true;
@@ -16911,10 +16928,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.addTS = function(TS, cbOk, cbNo) {
         if (!TS) return;
         vrt.producer.addTimedMetadata(TS, function() {
-            vrt.llog("added TS");
             if (cbOk) cbOk();
         }, function() {
-            vrt.llog("no added TS");
             if (cbNo) cbNo();
         });
     };
@@ -17377,7 +17392,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         return navigator.userAgent.toLowerCase().indexOf("msie ") + version != -1 || navigator.userAgent.toLowerCase().indexOf("trident 6") != -1;
     };
     this.checkChromeMobileVersion = function(version) {
-        return navigator.userAgent.indexOf("Android") !== -1 && navigator.userAgent.indexOf("Chrome") !== -1 && navigator.userAgent.indexOf("Mobile") !== -1;
+        return navigator.userAgent.indexOf("Android") !== -1 && navigator.userAgent.indexOf("Chrome") !== -1;
     };
     this.youtubeParser = function(url) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
@@ -17761,6 +17776,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     vrt.ceclient.writeRespondent(respoData, function(res) {
                         vrt.respondentId = res.id;
                         $(vrt).trigger("vrt_event_respondent_created");
+                        vrt.llog("respondent num: " + vrt.respondentId);
                         if (vrt.options.respondentCustomData) {
                             vrt.ceclient.writeRespondentCustomData(vrt.respondentId, vrt.options.respondentCustomData);
                         }
@@ -17883,7 +17899,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         return false;
     };
     this.canAutoplay = function() {
-        return !vrt.browser.isChromeMobile;
+        return vrt.options.autoplay && !vrt.browser.isChromeMobile;
     };
     this.initialized(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword, options);
 }

@@ -55,12 +55,15 @@ function PlayerInterface() {
     12                   case 0:  'ended';              ended
     13                   case 2:  'paused';             paused
     14                   case 3:  'buffering';          buffering
-    15                   case 5:  'video cued'          ---
+    15                   case 5:  'video cued'          seeked
     16                   various                        ---
     17                   idle                           ---
     19                   ---                            error
     20   publish         ---                            ---
     21   unpublish       ---                            ---
+    32                                                  play // todo playback by user
+    33                                                  fullscreen_change
+    34
     */
     this.statusMap = function (status, type) {
         var r = -1;
@@ -79,7 +82,10 @@ function PlayerInterface() {
             if(status=='error'){ r = 19; }
             if(status=='ended'){ r = 12; }
             if(status=='paused'){ r = 13; }
-            }
+            if(status=='seeked'){ r = 15; }
+            if(status=='play'){ r = 32; }
+            if(status=='fullscreen_change'){ r = 33; }
+        }
         //console.log('statusMap: ' + status + ' to ' + r);
         return r;
     },
@@ -106,9 +112,11 @@ function PlayerInterface() {
 
     },
     this.on_player_fullscreenchange = function (ev) {
+        vrt.player._player_is_fullscreen = !vrt.player._player_is_fullscreen;
+        $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('fullscreen_change', 'videojs')});
         vrt.logTime('on_player_fullscreenchange');
         vrt.log("player [VJSnew]: on_player_fullscreenchange");
-        vrt.player._player_is_fullscreen = !vrt.player._player_is_fullscreen;
+
     }
 }
 
@@ -223,21 +231,20 @@ function VjsInterface() {
             vrt.log('EVT YSP pause');
             $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('paused','videojs')});
         });
-        this.player.on('ended', function () {
-            vrt.log('EVT YSP ended');
-            $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('ended','videojs')});
-            vrt.player.on_player_end();
-        });
+        this.player.on('ended', vrt.player.on_player_end);
         this.player.on('loadedalldata', vrt.player.loadedalldata);
         this.player.on('loadeddata', vrt.player.loadeddata);
         this.player.on('loadedmetadata', vrt.player.loadedmetadata);
         this.player.on('loadstart',      function() {   vrt.log("EVT YSP loadstart")});
         this.player.on('progress',       function() {   /*vrt.log("EVT YSP progress")*/ });
-        this.player.on('seeked',         function() {   vrt.log("EVT YSP seeked")});
+        this.player.on('seeked',         function() {
+            vrt.log("EVT YSP seeked");
+            $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('seeked','videojs'), });
+        });
         this.player.on('waiting', function () {
+            vrt.log("EVT ysp waiting");
             $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('buffering','videojs')});
-            vrt.log("EVT ysp waiting")
-                });
+        });
 
         if(vrt.options.recorderCentered && vrt.options.recorderCentered===true)  {
             $('#videoDiv').vrtCenter();
@@ -253,7 +260,9 @@ function VjsInterface() {
     };
 
     this.on_player_end = function (cb) {
+        vrt.log('EVT YSP ended');
         $(vrt).trigger('vrt_event_stimuli_end');
+        $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap('ended','videojs')});
         if (!vrt.timedOverPlayToEnd) {
             vrt.skip_video();
         }
@@ -263,10 +272,12 @@ function VjsInterface() {
         vrt.llog("EVT YSP  on_player_play");
         //TODO CHECK THIS, double event
         // $(vrt).trigger('vrtstep_play',{caller:'on_player_play'});
+        $(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('play', 'videojs')});
     };
 
     this.on_player_firstplay = function (cb) {
         vrt.llog("EVT YSP on_player_firstplay");
+        //$(vrt).trigger('vrtevent_player_ts', {status: vrt.player.statusMap('firstplay', 'videojs')});
     };
 
     this.loadeddata = function (cb) {
@@ -471,8 +482,10 @@ function YtInterface() {
             }
            */
 
-            //if(vrt.canAutoplay())
+            if(vrt.canAutoplay())
                 this.player.loadVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
+            else
+                this.player.cueVideoById(vrt.media_path, 0, 'small'); // TODO: dynamic (was 'medium')
             if (cb) cb();
         }else{
 
@@ -608,8 +621,8 @@ function YtInterface() {
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
             window.onYouTubeIframeAPIReady = function () {
-                vrt.logTime('onYouTubePlayerReady');
-                vrt.log("player [YT]: onYouTubePlayerReady");
+                vrt.logTime('NEW onYouTubePlayerReady');
+                vrt.log("NEW player [YT]: onYouTubePlayerReady");
 
                 var ytoptions = {
                     height: p_h,
@@ -687,9 +700,9 @@ window.vjsInterface = vjsInterface;
 window.ytInterface = ytInterface;
 
 
-window.onYouTubePlayerReady =function() {
-    vrt.logTime('onYouTubePlayerReady');
-    vrt.log("player [YT]: onYouTubePlayerReady");
+window.onYouTubePlayerReady =function() { //todo doubled of onYouTubeIframeAPIReady
+    vrt.logTime('OLD onYouTubePlayerReady');
+    vrt.log("OLD player [YT]: onYouTubePlayerReady");
 
     vrt.player.player = document.getElementById("ytPlayer");
     vrt.player.player.addEventListener("onStateChange", "onytplayerStateChange");
@@ -707,7 +720,7 @@ window.onytplayerError = function (newState) {
 
 window.onytplayerStateChange = function (newState) {
     newState = newState.data; //todo check
-    vrt.logTime('onytplayerStateChange ' + newState);
+    vrt.llog('onytplayerStateChange ' + newState);
 
     // TODO sync recording when buffering
 

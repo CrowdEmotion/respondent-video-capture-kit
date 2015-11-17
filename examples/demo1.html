@@ -95,8 +95,8 @@
                 };
                 var turnOffWebcam = function(){
                     if(window.vrtFinished.comment && window.vrtFinished.end){
-                        if( window.vrt  &&  window.vrt.producer &&  window.vrt.producer.stream) window.vrt.producer.stream.stop();
-                        if( window.vrt  &&  window.vrt.producer &&  window.vrt.producer.unpublish) window.vrt.producer.unpublish();
+                        //if (window.vrt && window.vrt.producer && window.vrt.producer.stream) window.vrt.producer.stream.stop();
+                        //if (window.vrt && window.vrt.producer && window.vrt.producer.unpublish) window.vrt.producer.unpublish();
                         setTimeout(function(){
                             $(window.vrt).trigger('vrt_event_user_session_complete')
                         }, 500);
