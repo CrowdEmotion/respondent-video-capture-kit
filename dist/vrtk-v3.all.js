@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-11-20 11:5 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-11-20 15:24 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16528,7 +16528,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (typeof type == "object") {
             var data = type;
             list = data.list || {};
-            streamUrl = data.streamUrl || "mediabox-v2.crowdemotion.co.uk";
+            streamUrl = data.streamUrl || "mediabox.crowdemotion.co.uk";
             streamName = data.streamName || null;
             apiDomain = data.apiDomain || "https://api.crowdemotion.co.uk";
             apiUser = data.apiUser || null;
