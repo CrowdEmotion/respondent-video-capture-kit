@@ -509,7 +509,7 @@
         <label class="block">We will <b>not</b> contact you except if we need your feedback to fix bugs.</label>
         <div id="mail_alert" class="hide vrtbtntextalert">Please insert a valid mail and select a video option before proceed</div>
 
-        <div><input id="mail" name="mail" placeholder="your@email.com (optional)" value="" class="vrtinput"/></div>
+        <div><input id="mail" name="mail" placeholder="your@email.com (optional)" value="" class="vrtinput" autocomplete="off" /></div>
 
         <div id="video_saving_test">
             <b class="block">Your videos will be deleted after analysis</b>
@@ -517,9 +517,9 @@
         <div id="video_saving_demo">
             <div id="video_saving_Wrapper" class="checkbox">
                 <div class="question"><b>Can we keep your video?</b></div>
-                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="delete_video" class="user_video_behavior checkbox first">No, delete it</label><br>
-                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="keep_available_no_humans" class="user_video_behavior checkbox first">Yes, but don't look it at (computers only)</label><br>
-                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="keep_further_analysis" class="user_video_behavior checkbox first">Yes and you can look it at</label><br>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="delete_video" class="user_video_behavior checkbox first"  autocomplete="off" >No, delete it</label><br>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="keep_available_no_humans" class="user_video_behavior checkbox first"  autocomplete="off" >Yes, but don't look it at (computers only)</label><br>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="keep_further_analysis" class="user_video_behavior checkbox first"  autocomplete="off" >Yes and you can look it at</label><br>
             </div>
         </div>
         <input id="proceed" name="proceed" value="Proceed" class="vrtbtn"/>
