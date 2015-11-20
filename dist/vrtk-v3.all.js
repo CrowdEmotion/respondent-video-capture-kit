@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-11-17 15:15 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-11-20 11:5 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16504,7 +16504,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.browser = {
         isChromeMobile: false,
         old: false,
-        requirement: true
+        requirement: true,
+        isAndroid: false
     };
     this.platform = null;
     this.producerVideo = null;
@@ -16610,6 +16611,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.responseAtStart = options.responseAtStart = true;
         }
         this.browser.isChromeMobile = this.checkChromeMobileVersion();
+        this.browser.isAndroid = this.checkIsAndroid();
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
         this.initMediaList(type, list);
@@ -17393,6 +17395,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
     this.checkChromeMobileVersion = function(version) {
         return navigator.userAgent.indexOf("Android") !== -1 && navigator.userAgent.indexOf("Chrome") !== -1;
+    };
+    this.checkIsAndroid = function(version) {
+        return navigator.userAgent.indexOf("Android") !== -1;
     };
     this.youtubeParser = function(url) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
