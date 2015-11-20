@@ -120,7 +120,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.researchOutUrl = null;
     this.researchOutUrlOriginal = null;
     this.recordingAudio = false;
-    this.browser = {isChromeMobile: false, old: false, requirement: true};
+    this.browser = {isChromeMobile: false, old: false, requirement: true, isAndroid: false};
     this.platform = null;
     this.producerVideo = null;
 
@@ -239,6 +239,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
           this.responseAtStart = options.responseAtStart = true;
         }
         this.browser.isChromeMobile = this.checkChromeMobileVersion();
+        this.browser.isAndroid= this.checkIsAndroid();
 
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
@@ -1303,6 +1304,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.checkChromeMobileVersion = function(version)
     {
         return (navigator.userAgent).indexOf('Android')!==-1  && (navigator.userAgent).indexOf('Chrome')!==-1;
+    };
+    this.checkIsAndroid = function(version)
+    {
+        return (navigator.userAgent).indexOf('Android')!==-1 ;
     };
 
     this.youtubeParser = function(url) {
