@@ -264,7 +264,10 @@
                 $(vrt).on('vrt_event_recorder_unpublish', function(){
                     $('#icon_rec').hide();
                 });
-
+                $(vrt).on('vrt_event_respondent_created',
+                function(){
+                    $('#respid').html(vrt.respondentId);
+                });
 
 
                 if (cb)cb();
@@ -509,7 +512,7 @@
         <label class="block">We will <b>not</b> contact you except if we need your feedback to fix bugs.</label>
         <div id="mail_alert" class="hide vrtbtntextalert">Please insert a valid mail and select a video option before proceed</div>
 
-        <div><input id="mail" name="mail" placeholder="your@email.com (optional)" value="" class="vrtinput" autocomplete="off" /></div>
+        <div><input id="mail" name="mail" placeholder="your@email.com (optional)" value="" class="vrtinput" autocomplete="on" /></div>
 
         <div id="video_saving_test">
             <b class="block">Your videos will be deleted after analysis</b>
@@ -570,6 +573,7 @@
         <footer id="foot_icon">
             <img id="icon_rec" src="//cdn.crowdemotion.co.uk/images/icon_rec.png" align="right" class="hide" />
             <img id="icon_play" src="//cdn.crowdemotion.co.uk/images/icon_play.png" align="right"  class="hide" />
+            <div id="respid"  class="" ></div>
         </footer>
 </body>
 </html>
