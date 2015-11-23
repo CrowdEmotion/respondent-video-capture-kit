@@ -59,17 +59,15 @@
                 $('#feedbackarea').html('<div class="textline">Thank for your for feedback</div>');
             });
 
+            var rt = gup('r') || gup('rkey'), at = gup('a') || gup('appkey');
 
-        });
-        $(document).ready(function () {
-
+            if(!rt || ! at){
+                alert('Link not valid');
+            }
 
             var createVrt = function (cb) {
 
-                var rt = gup('r'), at = gup('a');
-                if(!rt || ! at){
-                    alert('Link not valid');
-                }
+
                 var vb = window.vrtIsTest ? 'delete_video' : validateQuestion();
                 var options = {
                     researchToken: rt,
