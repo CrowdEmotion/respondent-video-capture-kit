@@ -84,6 +84,11 @@ var WebProducer =
 	    }
 	    major = platform.version.split('.')[0];
 	    major = parseInt(major);
+	    if (platform.name === "Node.js") {
+	      if (major >= 4) {
+	        return 'html5';
+	      }
+	    }
 	    if ((ref = platform.name) === "Chrome" || ref === "Chrome Mobile") {
 	      if (major >= 39) {
 	        return 'html5';
@@ -3619,7 +3624,7 @@ var WebProducer =
 	    payload = {
 	      'request': 'configure',
 	      'video-bitrate-max': this.videoBitrate,
-	      'video-keyframe-interval': this.videoKeyframeInterval
+	      'video-keyframe-interval': this.videoKeyframeIntervalOverride || this.videoKeyframeInterval
 	    };
 	    this.remoteLoggerLog('janusPluginCall', 'configure', payload);
 	    return this.plugin.send({
@@ -3669,9 +3674,28 @@ var WebProducer =
 	    this.remoteLoggerLog('janusPluginCall', 'publish');
 	    self = this;
 	    this.recordingStart(streamName, this.stream);
-	    return this.once('publish', function() {
+	    this.once('publish', function() {
 	      return self.publishDone();
 	    });
+	    this.persuadeEarlyKeyframe();
+	    return once('publish', function() {
+	      return setTimeout((function() {
+	        return self.persuadeEarlyKeyframeStop();
+	      }), 1000);
+	    });
+	  };
+
+	  HTML5Producer.prototype.persuadeEarlyKeyframe = function() {
+	    var self;
+	    this.videoKeyframeIntervalOverride = 500;
+	    self = this;
+	    return setTimeout((function() {
+	      return self.persuadeEarlyKeyframeStop();
+	    }), 5000);
+	  };
+
+	  HTML5Producer.prototype.persuadeEarlyKeyframeStop = function() {
+	    return this.videoKeyframeIntervalOverride = false;
 	  };
 
 	  HTML5Producer.prototype.publishDone = function() {
@@ -13555,6 +13579,9 @@ var WebProducer =
 	    this.portHttp = 80;
 	    url = window.location.href;
 	    this.protocol = url.split(':')[0];
+	    if (this.protocol === 'file') {
+	      this.protocol = 'https';
+	    }
 	    if (this.protocol === 'https') {
 	      this.portHttp = 443;
 	    }
@@ -13626,6 +13653,7 @@ var WebProducer =
 	    this.elementMediaRemote = null;
 	    this.iceServers = null;
 	    this.videoKeyframeInterval = 5000;
+	    this.videoKeyframeIntervalOverride = false;
 	    this.videoBitrate = 512000;
 	  }
 
