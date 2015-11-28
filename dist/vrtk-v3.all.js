@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2015-11-20 15:24 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2015-11-28 12:0 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -45,6 +45,11 @@
             }
             major = platform.version.split(".")[0];
             major = parseInt(major);
+            if (platform.name === "Node.js") {
+                if (major >= 4) {
+                    return "html5";
+                }
+            }
             if ((ref = platform.name) === "Chrome" || ref === "Chrome Mobile") {
                 if (major >= 39) {
                     return "html5";
@@ -2167,7 +2172,7 @@
             payload = {
                 request: "configure",
                 "video-bitrate-max": this.videoBitrate,
-                "video-keyframe-interval": this.videoKeyframeInterval
+                "video-keyframe-interval": this.videoKeyframeIntervalOverride || this.videoKeyframeInterval
             };
             this.remoteLoggerLog("janusPluginCall", "configure", payload);
             return this.plugin.send({
@@ -2213,9 +2218,26 @@
             this.remoteLoggerLog("janusPluginCall", "publish");
             self = this;
             this.recordingStart(streamName, this.stream);
-            return this.once("publish", function() {
+            this.once("publish", function() {
                 return self.publishDone();
             });
+            this.persuadeEarlyKeyframe();
+            return once("publish", function() {
+                return setTimeout(function() {
+                    return self.persuadeEarlyKeyframeStop();
+                }, 1e3);
+            });
+        };
+        HTML5Producer.prototype.persuadeEarlyKeyframe = function() {
+            var self;
+            this.videoKeyframeIntervalOverride = 500;
+            self = this;
+            return setTimeout(function() {
+                return self.persuadeEarlyKeyframeStop();
+            }, 5e3);
+        };
+        HTML5Producer.prototype.persuadeEarlyKeyframeStop = function() {
+            return this.videoKeyframeIntervalOverride = false;
         };
         HTML5Producer.prototype.publishDone = function() {
             this.hub.streams.publish(this.streamName);
@@ -8116,6 +8138,9 @@
             this.portHttp = 80;
             url = window.location.href;
             this.protocol = url.split(":")[0];
+            if (this.protocol === "file") {
+                this.protocol = "https";
+            }
             if (this.protocol === "https") {
                 this.portHttp = 443;
             }
@@ -8171,6 +8196,7 @@
             this.elementMediaRemote = null;
             this.iceServers = null;
             this.videoKeyframeInterval = 5e3;
+            this.videoKeyframeIntervalOverride = false;
             this.videoBitrate = 512e3;
         }
         JanusRecorder.prototype.log = function(message) {

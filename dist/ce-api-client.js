@@ -1,4 +1,4 @@
-/* Javascript client crowdemotion.co.uk 2015-11-20 15:24 */ var CryptoJS = CryptoJS || function(i, p) {
+/* Javascript client crowdemotion.co.uk 2015-11-28 12:0 */ var CryptoJS = CryptoJS || function(i, p) {
     var f = {}, q = f.lib = {}, j = q.Base = function() {
         function a() {}
         return {
