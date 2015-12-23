@@ -3678,7 +3678,7 @@ var WebProducer =
 	      return self.publishDone();
 	    });
 	    this.persuadeEarlyKeyframe();
-	    return once('publish', function() {
+	    return this.once('publish', function() {
 	      return setTimeout((function() {
 	        return self.persuadeEarlyKeyframeStop();
 	      }), 1000);
