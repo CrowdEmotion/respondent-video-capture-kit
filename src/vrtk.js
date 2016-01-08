@@ -997,7 +997,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.closeSession = function() {
         if (this.videoFullscreen) this.videoEndFullscreen();
         this.playerDispose();
-        this.producerVideo.pause();
+        if(this.producerVideo && this.producerVideo.pause) this.producerVideo.pause();
         //TODO fix this.producer.previewStop();
         // this.producer.disconnect();
         $('#'+this.producer.id).hide();

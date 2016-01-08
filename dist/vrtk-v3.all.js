@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-1-7 13:25 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-1-8 21:10 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -17206,7 +17206,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.closeSession = function() {
         if (this.videoFullscreen) this.videoEndFullscreen();
         this.playerDispose();
-        this.producerVideo.pause();
+        if (this.producerVideo && this.producerVideo.pause) this.producerVideo.pause();
         $("#" + this.producer.id).hide();
         this.log("close_session");
     };
