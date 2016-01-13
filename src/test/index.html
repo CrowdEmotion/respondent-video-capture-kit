@@ -8,9 +8,14 @@
         .hide {
             display: none
         }
-
         .clearfix {
             clear: both
+        }
+        #introzone{
+            border-bottom: 1px solid #0b97c4;
+        }
+        h4{
+            font-family: 'Lato', sans-serif;
         }
     </style>
     <!-- VIDEO  RESPONDENT TEST PAGE - HEAD - START  -->
@@ -42,124 +47,42 @@
         }
         $(document).ready(function () {
 
-            var vrt = new Vrt(
-                    'youtube'
-                    , [
-                        {
-                            'path': 'https://www.youtube.com/watch?v=IFACrIx5SZ0',
-                            'length': 10,
-                            'name': 'Attenborough: Amazing DIY Orangutans - BBC Earth'
-                        }
-                        , {
-                            'path': 'https://www.youtube.com/watch?v=ndMKTnSRsKM',
-                            'length': 10,
-                            'name': 'Attenborough: Saying Boo to a Sloth! - BBC Earth'
-                        }
-                    ]
-                    , 'mediastream_ulr'
-                    , 'mediastream_name'
-                    , 'api_url'
-                    , 'api_user'
-                    , 'api_pw'
-                    , {
-                        debug: true,
-                        debugChrono: true,
-                        debugChronoHtml: false,
-                        debugEvt: true,
-                        debugVImportant: true,
-                        randomOrder: true,
-                        playerCentered: false,
-                        recorderCenter: false,
-                        swfPath: '../../dist/'
-                        /*, playerCentered:true, playerWidth: 400, playerHeight: 300 */
-                    }
-            );
+            var rkey = gup('r')? gup('r') : 'd15aa84c29634c852e612ddd066fe0fece837bc6';
+            var akey = gup('a')? gup('a') : '8a111f27-b9d4-438d-8559-fb38cc19af5b';
+            var apiSandbox = gup('apisandbox')? gup('apisandbox') : true;
+            var options = {
+                researchToken: rkey,
+                appToken: akey,
+                streamName: 'ce-test_',
+                apiSandbox: apiSandbox,
+                debug: true,
+                respondentCustomData: {user_video_behavior: 'delete_video'},
+                playerCentered: false,
+                recorderCentered: false,
+                playerHorizontallyCentered: true,
+                recorderHorizontallyCentered: true,
+                fullscreen: false,
+                randomOrder: false,
+                savePlatform: true,
+                recordingAudio: false //temporary fix
+            };
 
-            // show start button
-            /*
-            $(vrt).on('vrt_event_producer_camera_ok', function () {
-                alertMessage();
-                $('#start').show();
-            });
-            // watch first video
-            $('#start').on('click', function () {
-                alertMessage();
-                $('#start').hide();
-                $(vrt).trigger('vrt_event_start_video_session');
-            });
-            // watch next video
-            $(vrt).on('vrt_event_video_step_completed', function (evt, data) {
+            window.vrt = new Vrt(options);
 
-                alertMessage();
-                //$('#next').show();
-                if (data.responseId) {
-                    alertMessage('Facevideo uploaded with response id: ' + data.responseId);
-                }
-                vrt.openFrame('https://docs.google.com/forms/d/1afP8KJKFIF3AMfAAjKqaLtLoFIdr5S3rSMRn2FCVyek/viewform',
-                        {
-                            btnCssClass: 'button-choose pure-button',
-                            btnPosition: 'top',
-                            btnText: 'Next',
-                            btnStyle: 'position: static; margin-bottom: 1em;'
-                        }
-                );
-            });
-            $(vrt).on('vrt_event_frame_close', function (evt, data) {
-                alertMessage();
-                $(vrt).trigger('vrt_event_user_next_video');
-                //$('#next').show();
+            vrtOnEvent();
+
+            $(vrt).on('vrt_init_ok',function() {
+                testList().done(function () {
+                    testStart();
+                });
             });
 
-            //end session
-            $(vrt).on('vrt_event_video_session_complete', function () {
-                alertMessage();
-                $('#next').hide();
-                $('#end').show();
-            });
-            $('#end').on('click', function () {
-                alertMessage();
-                $('#end').hide();
-                $(vrt).trigger('vrt_event_user_session_complete');
-            });
-
-            //alerts
-            //no api login
-            $(vrt).on('vrt_event_api_login_fail', function () {
-                alertMessage('Error: API login fail');
-            });
-            //no camera
-            $(vrt).on('vrt_event_producer_no_camera_found', function () {
-                alertMessage('Error: No webcam found');
-            });
-            //camera blocked
-            $(vrt).on('vrt_event_producer_camera_blocked', function () {
-                alertMessage('Error: Webcam blocked by user');
-            });
-            //wating user permission for webcam
-            $(vrt).on('vrt_event_producer_camera_muted', function () {
-                alertMessage('Please click on the "Allow" button in the Adobe Flash Player security request');
-            });
-            //no Flash
-            $(vrt).on('vrt_event_flash_no', function () {
-                alertMessage('Error: no Adobe Flash founded');
-            });
-            //old Flash version
-            $(vrt).on('vrt_event_flash_old', function () {
-                alertMessage('Error: the version of Adobe Flash is old');
-            });
-*/
             vrt.init();
+
+
         });
     </script>
     <!-- EXAMPLE OF IMPLEMENTATION END -->
-
-    <!-- TESTS START -->
-    <script type="text/javascript" src="mocha.js"></script>
-    <script type="text/javascript" src="chai.js"></script>
-    <script type="chai-as-promised"></script>
-    <script type="text/javascript" src="sinon.js"></script>
-    <script type="text/javascript" src="tests.js"></script>
-    <!-- TESTS END -->
 
 </head>
 <body>
@@ -167,10 +90,10 @@
 <!-- Playcorder START -->
 <div id="introzone" class="">
 
+    <h4>Memo Embed</h4>
     <div id="vrt" style=""></div>
 
     <div id="alerts"></div>
-
 
     <div id="buttons">
         <button id="start" class="hide button-choose pure-button">Start Session</button>
@@ -182,9 +105,10 @@
 <!-- Playcorder END -->
 
 <!-- TESTS START -->
+<h4>Test results</h4>
 <div id="mocha"></div>
-
 <!-- TESTS END -->
+
 </body>
 </html>
 
