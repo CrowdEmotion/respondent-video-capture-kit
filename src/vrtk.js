@@ -291,39 +291,30 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $(vrt).trigger('vrt_event_error', {component:'browser',error:'Using and iOS incompatible platform',type:'blocking'});
         }
 
-        //todo insert resizingWindovs
-        if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {
-        }else{
-
-            if (WebProducer.typeAutoDetect() == 'html5') {
-            this.playerVersion = false; //swfobject.getFlashPlayerVersion();
-            this.results.flash.version = false;
-            $(window.vrt).trigger('vrt_event_recorder_html5');
-
-                this.loadProducer(vrt.swfPath);
-        }else{
-
-                var head = document.getElementsByTagName('head')[0];
-                var script = document.createElement('script');
-                script.type = 'text/javascript';
-                script.onreadystatechange= function () {
-                    if (this.readyState == 'complete') vrt.loadFlashElements().bind(vrt);
-                };
-                script.onload = vrt.loadFlashElements;
-                script.src = this.options.swfobjectLocation;
-                head.appendChild(script);
-
-            }
-        };
-
-
-
         this.ceclient = new CEClient();
+        this.apiClientSetup(function() {
+                $(window.vrt).trigger("api_init_ok");
+                if (console.log) console.log("apiClientSetup api login success");
 
-        this.apiClientSetup(
-            function () {
-                $(window.vrt).trigger('api_init_ok');
-                if (console.log)console.log('apiClientSetup api login success');
+                if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
+                    if (WebProducer.typeAutoDetect() == "html5" && JSON.parse(vrt.customData).forceFlash !== true) {
+                        vrt.playerVersion = false;
+                        vrt.results.flash.version = false;
+                        $(window.vrt).trigger("vrt_event_recorder_html5");
+                        vrt.loadProducer(vrt.swfPath);
+                    } else {
+                        var head = document.getElementsByTagName("head")[0];
+                        var script = document.createElement("script");
+                        script.type = "text/javascript";
+                        script.onreadystatechange = function() {
+                            if (this.readyState == "complete") vrt.loadFlashElements().bind(vrt);
+                        };
+                        script.onload = vrt.loadFlashElements;
+                        script.src = vrt.options.swfobjectLocation;
+                        head.appendChild(script);
+                    }
+                }
+
             },
             function () {
                 $(window.vrt).trigger('vrt_event_api_login_fail');
@@ -1383,7 +1374,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log("===WEBP Webpr_init");
         vrt.logTime('webProducerInit');
         vrt.log('!!PRODUCER webProducerInit');
-        this.Producer= WebProducer.webProducerClassGet();
+        this.Producer = WebProducer.webProducerClassGet(JSON.parse(vrt.customData).forceFlash ? "flash" : false);
         this.producer = new this.Producer({ // Producer[ FlashProducer | HTML5Producer ]
             id: this.producerID, // the html object id
             width: this.producerWidth, // these are sizes of the player on the page

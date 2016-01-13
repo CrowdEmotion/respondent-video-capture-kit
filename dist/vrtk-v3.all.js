@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-1-8 21:10 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-1-13 10:5 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16686,28 +16686,28 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 type: "blocking"
             });
         }
-        if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
-            if (WebProducer.typeAutoDetect() == "html5") {
-                this.playerVersion = false;
-                this.results.flash.version = false;
-                $(window.vrt).trigger("vrt_event_recorder_html5");
-                this.loadProducer(vrt.swfPath);
-            } else {
-                var head = document.getElementsByTagName("head")[0];
-                var script = document.createElement("script");
-                script.type = "text/javascript";
-                script.onreadystatechange = function() {
-                    if (this.readyState == "complete") vrt.loadFlashElements().bind(vrt);
-                };
-                script.onload = vrt.loadFlashElements;
-                script.src = this.options.swfobjectLocation;
-                head.appendChild(script);
-            }
-        }
         this.ceclient = new CEClient();
         this.apiClientSetup(function() {
             $(window.vrt).trigger("api_init_ok");
             if (console.log) console.log("apiClientSetup api login success");
+            if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
+                if (WebProducer.typeAutoDetect() == "html5" && JSON.parse(vrt.customData).forceFlash !== true) {
+                    vrt.playerVersion = false;
+                    vrt.results.flash.version = false;
+                    $(window.vrt).trigger("vrt_event_recorder_html5");
+                    vrt.loadProducer(vrt.swfPath);
+                } else {
+                    var head = document.getElementsByTagName("head")[0];
+                    var script = document.createElement("script");
+                    script.type = "text/javascript";
+                    script.onreadystatechange = function() {
+                        if (this.readyState == "complete") vrt.loadFlashElements().bind(vrt);
+                    };
+                    script.onload = vrt.loadFlashElements;
+                    script.src = vrt.options.swfobjectLocation;
+                    head.appendChild(script);
+                }
+            }
         }, function() {
             $(window.vrt).trigger("vrt_event_api_login_fail");
             if (console.log) console.log("apiClientSetup api login error");
@@ -17483,7 +17483,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log("===WEBP Webpr_init");
         vrt.logTime("webProducerInit");
         vrt.log("!!PRODUCER webProducerInit");
-        this.Producer = WebProducer.webProducerClassGet();
+        this.Producer = WebProducer.webProducerClassGet(JSON.parse(vrt.customData).forceFlash ? "flash" : false);
         this.producer = new this.Producer({
             id: this.producerID,
             width: this.producerWidth,
