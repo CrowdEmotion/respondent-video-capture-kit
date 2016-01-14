@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-1-13 10:5 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-1-14 15:22 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16691,7 +16691,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $(window.vrt).trigger("api_init_ok");
             if (console.log) console.log("apiClientSetup api login success");
             if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
-                if (WebProducer.typeAutoDetect() == "html5" && JSON.parse(vrt.customData).forceFlash !== true) {
+                var isff = false;
+                if (vrt.researchData && vrt.researchData.forceFlash) {
+                    isff = vrt.researchData.forceFlash ? "flash" : false;
+                }
+                if (WebProducer.typeAutoDetect() == "html5" && isff !== true) {
                     vrt.playerVersion = false;
                     vrt.results.flash.version = false;
                     $(window.vrt).trigger("vrt_event_recorder_html5");
@@ -17483,7 +17487,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.log("===WEBP Webpr_init");
         vrt.logTime("webProducerInit");
         vrt.log("!!PRODUCER webProducerInit");
-        this.Producer = WebProducer.webProducerClassGet(JSON.parse(vrt.customData).forceFlash ? "flash" : false);
+        var isff = false;
+        if (vrt.researchData && vrt.researchData.forceFlash) {
+            isff = vrt.researchData.forceFlash ? "flash" : false;
+        }
+        this.Producer = WebProducer.webProducerClassGet(isff);
         this.producer = new this.Producer({
             id: this.producerID,
             width: this.producerWidth,
@@ -17830,6 +17838,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.researchTitle = research.title;
                         vrt.researchDesc = research.description;
                         vrt.customData = research.customData;
+                        vrt.researchData = JSON.parse(vrt.customData);
                         vrt.researchComplete = research.complete;
                         vrt.researchArchived = research.archived ? research.archived : false;
                         vrt.researchReady = research.ready;
