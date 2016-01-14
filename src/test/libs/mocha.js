@@ -2,7 +2,7 @@
   (function (process){
     module.exports = process.env.COV
         ? require('./lib-cov/mocha')
-        : require('./libs/mocha');
+        : require('./lib/mocha');
 
   }).call(this,require('_process'))
 },{"./lib-cov/mocha":undefined,"./lib/mocha":14,"_process":52}],2:[function(require,module,exports){
@@ -8542,7 +8542,7 @@
   process.umask = function() { return 0; };
 
 },{}],53:[function(require,module,exports){
-  module.exports = require("./libs/_stream_duplex.js")
+  module.exports = require("./lib/_stream_duplex.js")
 
 },{"./lib/_stream_duplex.js":54}],54:[function(require,module,exports){
   (function (process){
@@ -10443,22 +10443,22 @@
     }
   }).call(this,{"isBuffer":require("../../../../insert-module-globals/node_modules/is-buffer/index.js")})
 },{"../../../../insert-module-globals/node_modules/is-buffer/index.js":49}],60:[function(require,module,exports){
-  module.exports = require("./libs/_stream_passthrough.js")
+  module.exports = require("./lib/_stream_passthrough.js")
 
 },{"./lib/_stream_passthrough.js":55}],61:[function(require,module,exports){
-  exports = module.exports = require('./libs/_stream_readable.js');
+  exports = module.exports = require('./lib/_stream_readable.js');
   exports.Stream = require('stream');
   exports.Readable = exports;
-  exports.Writable = require('./libs/_stream_writable.js');
-  exports.Duplex = require('./libs/_stream_duplex.js');
-  exports.Transform = require('./libs/_stream_transform.js');
-  exports.PassThrough = require('./libs/_stream_passthrough.js');
+  exports.Writable = require('./lib/_stream_writable.js');
+  exports.Duplex = require('./lib/_stream_duplex.js');
+  exports.Transform = require('./lib/_stream_transform.js');
+  exports.PassThrough = require('./lib/_stream_passthrough.js');
 
 },{"./lib/_stream_duplex.js":54,"./lib/_stream_passthrough.js":55,"./lib/_stream_readable.js":56,"./lib/_stream_transform.js":57,"./lib/_stream_writable.js":58,"stream":64}],62:[function(require,module,exports){
-  module.exports = require("./libs/_stream_transform.js")
+  module.exports = require("./lib/_stream_transform.js")
 
 },{"./lib/_stream_transform.js":57}],63:[function(require,module,exports){
-  module.exports = require("./libs/_stream_writable.js")
+  module.exports = require("./lib/_stream_writable.js")
 
 },{"./lib/_stream_writable.js":58}],64:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.

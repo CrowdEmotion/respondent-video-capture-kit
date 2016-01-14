@@ -1,3 +1,9 @@
+clog = function (msg) {
+    if (window.console && console.log) {
+        console.log('=>EVENT: '+msg);
+        $('#events').append('<br/>'+msg);
+    }
+};
 /*
  TODO test list
  publish
@@ -19,6 +25,7 @@
 
  vrt_event_preview_loaded: all objects are loaded
  vrt_event_producer_camera_ok: the user camera is ok
+ producer_init_camera_ok  the user camera is ok (real=
  vrt_event_api_login_fail: login to api is failed
  vrt_event_producer_camera_muted: webcam is waiting for user permission
  vrt_event_producer_camera_blocked: user block webcam
@@ -56,70 +63,93 @@ sequences
 window.vrtTest = {
     time:{a:null,b:null,c:null,d:null},
     path:null,
+    rid: null,
     haveWebcam:null,
     webcamAllowed:null,
     maxTimeDiffAllowed:300,
     responseID:null,
-    rid:null,
-    type:'html5',
-    videoext: 'webm',
+    type:null,
+    videoext: null,
     isMobile: false,
-    isDesktop: false
+    isDesktop: false,
+    connected: null
 };
 
 var mobilecheck = function() {
     return vrt.isAndroid || !vrt.requirement || vrt.isChromeMobile
 };
 
-var setTypeFlah = function(){
-    window.vrtTest.type='flash';
-    window.vrtTest.videoext='mp4';
+var setType = function(type){
+    if(window.vrtTest.type!=null) return;
+    if(!type || type=='html5'){
+        window.vrtTest.type='html5';
+        window.vrtTest.videoext='webm';
+    }else{
+        window.vrtTest.type='flash';
+        window.vrtTest.videoext='mp4';
+    }
+    $(vrtTest).trigger('vrttest_event_settype')
 };
 
 var vrtOnEvent = function(){
 
     $(vrt).on('vrt_event_recorder_html5', function () {
-        window.vrtTest.type='html5';
-        window.vrtTest.videoext='webm';
+        clog('vrt_event_recorder_html5');
+        setType('html5')
     });
     /* flash yes */
     $(vrt).on('vrt_event_flash_old', function () {
-        setTypeFlah();
+        clog('vrt_event_flash_old');
+        setType('flash');
     });
     $(vrt).on('vrt_event_flash_no', function () {
-        setTypeFlah();
+        clog('vrt_event_flash_no');
+        setType('flash');
     });
     $(vrt).on('vrt_event_flash_is_present', function () {
-        setTypeFlah();
+        clog('vrt_event_flash_is_present');
+        setType('flash');
     });
     $(vrt).on('vrt_event_flash_version_ok', function () {
-        setTypeFlah();
+        clog('vrt_event_flash_version_ok');
+        setType('flash');
     });
     /* flash yes end */
     $(vrt).on('producer_init_camera_ok', function () {
+        clog('producer_init_camera_ok');
         window.vrtTest.haveWebcam=true;
         window.vrtTest.webcamAllowed=true;
     });
     $(vrt).on('vrt_event_producer_camera_found', function () {
+        clog('vrt_event_producer_camera_found');
         window.vrtTest.haveWebcam=true;
     });
     $(vrt).on('vrt_event_producer_no_camera_found', function () {
+        clog('vrt_event_producer_no_camera_found');
         window.vrtTest.haveWebcam=false;
     });
     $(vrt).on('vrt_event_streamname', function(e, data){
+        clog('vrt_event_streamname');
         window.vrtTest.path=data.streamname;
     });
     $(vrt).on('producer_init_ok', function () {
-
+        clog('producer_init_ok');
     });
     $(vrt).on('vrt_event_producer_camera_ok', function () {
+        clog('vrt_event_producer_camera_ok');
         window.vrtTest.webcamAllowed=true;
     });
     $(vrt).on('vrt_event_producer_camera_muted', function () {
+        clog('vrt_event_producer_camera_muted');
         window.vrtTest.webcamAllowed=false;
     });
     $(vrt).on('vrt_event_producer_camera_blocked', function () {
+        clog('vrt_event_producer_camera_blocked');
         window.vrtTest.webcamAllowed=false;
+    });
+    $(vrt).on('vrtstep_connect', function () {
+        clog('vrtstep_connect');
+        window.vrtTest.connected=true;
     });
 
 };
