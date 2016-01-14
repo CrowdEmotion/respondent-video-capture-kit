@@ -6,59 +6,42 @@
  *
  * Copyright (c) 2010-2013 Christian Johansen
  */
-"use strict";
+var sinon = (function () { // eslint-disable-line no-unused-vars
+    "use strict";
 
-var match = require("./sinon/match");
+    var sinonModule;
+    var isNode = typeof module !== "undefined" && module.exports && typeof require === "function";
+    var isAMD = typeof define === "function" && typeof define.amd === "object" && define.amd;
 
-module.exports = exports = require("./sinon/util/core");
+    function loadDependencies(require, exports, module) {
+        sinonModule = module.exports = require("./sinon/util/core");
+        require("./sinon/extend");
+        require("./sinon/walk");
+        require("./sinon/typeOf");
+        require("./sinon/times_in_words");
+        require("./sinon/spy");
+        require("./sinon/call");
+        require("./sinon/behavior");
+        require("./sinon/stub");
+        require("./sinon/mock");
+        require("./sinon/collection");
+        require("./sinon/assert");
+        require("./sinon/sandbox");
+        require("./sinon/test");
+        require("./sinon/test_case");
+        require("./sinon/match");
+        require("./sinon/format");
+        require("./sinon/log_error");
+    }
 
-exports.assert = require("./sinon/assert");
-exports.collection = require("./sinon/collection");
-exports.extend = require("./sinon/extend");
-exports.match = match;
-exports.spy = require("./sinon/spy");
-exports.spyCall = require("./sinon/call");
-exports.stub = require("./sinon/stub");
-exports.mock = require("./sinon/mock");
-exports.expectation = require("./sinon/mock-expectation");
-exports.createStubInstance = require("./sinon/stub").createStubInstance;
-exports.typeOf = require("./sinon/typeOf");
+    if (isAMD) {
+        define(loadDependencies);
+    } else if (isNode) {
+        loadDependencies(require, module.exports, module);
+        sinonModule = module.exports;
+    } else {
+        sinonModule = {};
+    }
 
-exports.log = function () {};
-exports.logError = require("./sinon/log_error");
-
-var event = require("./sinon/util/event");
-exports.Event = event.Event;
-exports.CustomEvent = event.CustomEvent;
-exports.ProgressEvent = event.ProgressEvent;
-exports.EventTarget = event.EventTarget;
-
-var fakeTimers = require("./sinon/util/fake_timers");
-exports.useFakeTimers = fakeTimers.useFakeTimers;
-exports.clock = fakeTimers.clock;
-exports.timers = fakeTimers.timers;
-
-var fakeXdr = require("./sinon/util/fake_xdomain_request");
-exports.xdr = fakeXdr.xdr;
-exports.FakeXDomainRequest = fakeXdr.FakeXDomainRequest;
-exports.useFakeXDomainRequest = fakeXdr.useFakeXDomainRequest;
-
-var fakeXhr = require("./sinon/util/fake_xml_http_request");
-exports.xhr = fakeXhr.xhr;
-exports.FakeXMLHttpRequest = fakeXhr.FakeXMLHttpRequest;
-exports.useFakeXMLHttpRequest = fakeXhr.useFakeXMLHttpRequest;
-
-exports.fakeServer = require("./sinon/util/fake_server");
-exports.fakeServerWithClock = require("./sinon/util/fake_server_with_clock");
-
-/*
- * allow deepEqual to check equality of matchers through
- * dependency injection. Otherwise we get a circular
- * dependency
- */
-exports.deepEqual = exports.deepEqual.use(match);
-
-// Modifying exports of another modules is not the right
-// way to handle exports in CommonJS but this is a minimal
-// change to how sinon was built before.
-require("./sinon/test_case");
+    return sinonModule;
+}());

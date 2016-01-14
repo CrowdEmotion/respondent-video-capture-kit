@@ -1,7 +1,8 @@
 clog = function (msg) {
     if (window.console && console.log) {
+        var d = performance.now();
         console.log('=>EVENT: '+msg);
-        $('#events').append('<br/>'+msg);
+        $('#events').append('<br/>'+ d + ': '+msg);
     }
 };
 /*
@@ -72,7 +73,9 @@ window.vrtTest = {
     videoext: null,
     isMobile: false,
     isDesktop: false,
-    connected: null
+    connected: null,
+    hasPlay: false,
+    hasRec: false
 };
 
 var mobilecheck = function() {
@@ -151,8 +154,29 @@ var vrtOnEvent = function(){
         clog('vrtstep_connect');
         window.vrtTest.connected=true;
     });
+    $(vrt).on('vrt_event_recorder_publish', function () {
+        clog('vrt_event_recorder_publish');
+        vrtTest.hasRec = true;
+        isPlayAndPublish();
+    });
+    $(vrt).on('vrt_event_recorder_unpublish', function () {
+        clog('vrt_event_recorder_unpublish');
+    });
+    $(vrt).on('vrtevent_player_ts', function (evt, data) {
+        clog('vrtevent_player_ts_'+data.status);
+        if(data.status==11){
+            $(vrtTest).trigger('vrttest_player_play')
+            vrtTest.hasPlay = true;
+            isPlayAndPublish();
+        }
+    });
 
 };
+function isPlayAndPublish(){
+    if(vrtTest.hasPlay && vrtTest.hasRec){
+        $(vrtTest).trigger('vrttest_playandpublish')
+    }
+}
 function isVideoListComplete(videoList) {
     if (videoList instanceof Array) {
         if (videoList.length <= 0) {
