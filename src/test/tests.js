@@ -29,14 +29,16 @@ var testList = function () {
         $(window.vrtTest).on('vrttest_event_settype', function () {
             if (window.vrtTest.type == 'flash') {
                 describe('Flash object', function () {
-                    it('should have Flash', function () {
+                    it('should have Flash', function (done) {
+                        this.done = done;
                         if (vrt.results.flash.present == true) {
                             done();
                         } else {
                             done('Flash not present');
                         }
                     });
-                    it('Flash version should be 11.1.0 or better', function () {
+                    it('Flash version should be 11.1.0 or better', function (done) {
+                        this.done = done;
                         if (vrt.results.flash.present && vrt.results.flash.version == true) {
                             done();
                         } else {
@@ -45,7 +47,7 @@ var testList = function () {
                     });
                 });
             } else if (window.vrtTest.type == 'html5') {
-                it.skip("No Flash need ", function () {
+                it.skip("No Flash needed ", function () {
                 });
             }
         });
@@ -53,8 +55,10 @@ var testList = function () {
 
 
     describe("Load API data", function () {
-        describe('API login', function () {
-            it('should login', function (done) {
+            this.timeout(5000);
+
+            it('API login', function (done) {
+                this.done = done;
                 $(window.vrt).on('api_init_ok', function () {
                     done();
                     vrtTest.rid = vrt.respondentId;
@@ -67,13 +71,15 @@ var testList = function () {
             it("should video stimuli list have one or more videos", function () {
                 expect(isVideoListComplete(vrt.videoList)).to.be.equal(true);
             });
-        });
     });
 
     describe('Recorder setup', function () {
 
         it("should have a webcam", function (done) {
             this.done = done;
+            if(vrtTest.haveWebcam===true){
+                done()
+            }
             $(window.vrt).on('vrt_event_producer_camera_found', function () {
                 done()
             });
