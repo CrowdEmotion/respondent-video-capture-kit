@@ -5,6 +5,13 @@ clog = function (msg) {
         $('#events').append('<br/>'+ d + ': '+msg);
     }
 };
+tlog = function (msg) {
+    if (window.console && console.log) {
+        var d = performance.now();
+        console.log('=> '+msg);
+        $('#events').append('<br/>'+ d + ': '+msg);
+    }
+};
 /*
  TODO test list
  publish
@@ -75,7 +82,10 @@ window.vrtTest = {
     isDesktop: false,
     connected: null,
     hasPlay: false,
-    hasRec: false
+    hasRec: false,
+    respondentId:null,
+    responseId:[],
+    tempdata: null
 };
 
 var mobilecheck = function() {
@@ -162,6 +172,11 @@ var vrtOnEvent = function(){
     $(vrt).on('vrt_event_recorder_unpublish', function () {
         clog('vrt_event_recorder_unpublish');
     });
+    $(vrt).on('vrt_event_respondent_created', function () {
+        clog('vrt_event_respondent_created');
+        tlog(vrt.respondentId);
+        vrtTest.respondentId = vrt.respondentId;
+    });
     $(vrt).on('vrtevent_player_ts', function (evt, data) {
         clog('vrtevent_player_ts_'+data.status);
         if(data.status==11){
@@ -170,6 +185,15 @@ var vrtOnEvent = function(){
             isPlayAndPublish();
         }
     });
+    $(vrt).on('vrt_event_video_step_completed', function (evt, data) {
+        clog('vrt_event_video_step_completed');
+        if(data.responseId){
+            tlog(data.responseId);
+            vrtTest.responseId.push(data.responseId);
+            tlog(window.vrt.options.customData);
+        }
+    });
+
 
 };
 function isPlayAndPublish(){

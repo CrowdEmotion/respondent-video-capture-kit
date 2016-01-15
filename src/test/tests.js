@@ -11,17 +11,22 @@ var assert = chai.assert,
 var testList = function () {
 
     describe("Setup", function () {
+        it("connection protocol is https or run in localhost", function () {
+            if(document.location.hostname=="localhost"){
+                expect(document.location.hostname).to.be.equal('localhost');
+            }else{
+                expect(document.location.protocol).to.be.equal('https:');
+            }
 
-        describe("Settings and base elements", function () {
-            it("a div tag with 'vrt' id exist", function () {
-                expect(document.getElementById('vrt')).to.be.not.equal(null);
-            });
-            it("a js VRT object exist", function () {
-                expect(window.vrt instanceof Vrt).to.be.equal(true);
-            });
-            it("is not running on iOS (ipad, iphone, ipod)", function () {
-                expect(window.vrt.browser.requirement).to.be.equal(true);
-            });
+        });
+        it("a div tag with 'vrt' id exist", function () {
+            expect(document.getElementById('vrt')).to.be.not.equal(null);
+        });
+        it("a js VRT object exist", function () {
+            expect(window.vrt instanceof Vrt).to.be.equal(true);
+        });
+        it("is not running on iOS (ipad, iphone, ipod)", function () {
+            expect(window.vrt.browser.requirement).to.be.equal(true);
         });
     });
 
@@ -168,6 +173,30 @@ var testList = function () {
             });
         });
 
+
+
+
+        it("video has a response id and video has custom data saved", function (done) {
+            this.done = done;
+            $(window.vrt).on('vrt_event_video_step_completed', function (e, data) {
+                var r= false, c = false;
+                if (data.responseId) {
+                    r = true;
+                }
+                if (!((window.vrt.options.customData!==false) != data.insertedCustomData)) { //have the same value
+                    c = true
+                }
+                if(r&&c){
+                    done()
+                }else if(!r && !c){
+                    done('no response id and custom data saved')
+                }else if(!r){
+                    done('no response id')
+                }else if(!c){
+                    done('no custom data saved')
+                }
+            });
+        });
         it("time between D and C should be less than " + vrtTest.maxTimeDiffAllowed + "ms", function (done) {
             this.done = done;
             setTimeout(function () {
@@ -178,15 +207,15 @@ var testList = function () {
 
     });
 
-    describe('End session', function () {
-        this.timeout(5000);
+    describe("User end session", function () {
         it("user session end", function (done) {
+            this.done = done;
             $(window.vrt).on('vrt_event_user_session_complete', function (e, data) {
                 done();
             });
             setTimeout(function () {
                 $(vrt).trigger('vrt_event_user_session_complete');
-            }, 3000);
+            }, 1000);
         });
     });
 
