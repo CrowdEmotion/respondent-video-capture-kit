@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-1-14 15:22 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-1-17 20:0 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -17838,7 +17838,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.researchTitle = research.title;
                         vrt.researchDesc = research.description;
                         vrt.customData = research.customData;
-                        vrt.researchData = JSON.parse(vrt.customData);
+                        vrt.researchData = vrt.customData ? JSON.parse(vrt.customData) : {};
                         vrt.researchComplete = research.complete;
                         vrt.researchArchived = research.archived ? research.archived : false;
                         vrt.researchReady = research.ready;
