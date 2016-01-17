@@ -1817,7 +1817,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.researchTitle = research.title;
                         vrt.researchDesc = research.description;
                         vrt.customData = research.customData;
-                        vrt.researchData = JSON.parse(vrt.customData);
+                        vrt.researchData = vrt.customData ? JSON.parse(vrt.customData) : {};
                         vrt.researchComplete = research.complete;
                         vrt.researchArchived = research.archived? research.archived:false;
                         vrt.researchReady = research.ready;
