@@ -122,7 +122,8 @@ var testList = function () {
 
 
         it("player play (A) and mediabox recording (B) in less than  " + vrtTest.maxTimeDiffAllowed + "ms", function (done) {
-            this.done = done;
+            this.done = done
+            this.timeout(5000);
             $(vrt).on('vrt_event_video_session_proceedToShow', function (e, data) {
                 $(vrtTest).on('vrttest_player_play', function (e, data) {
                     vrtTest.time.a = performance.now();
@@ -134,15 +135,18 @@ var testList = function () {
                 });
             });
             $(vrtTest).on('vrttest_playandpublish', function (e, data) {
+                tlog('vrtTest.time.a:'+vrtTest.time.a);
+                tlog('vrtTest.time.b:'+vrtTest.time.b);
+                if(handleIsPlayAndPublish) clearTimeout(handleIsPlayAndPublish);
                 if(vrtTest.time.a && vrtTest.time.b){
                     expect(vrtTest.time.b - vrtTest.time.a).to.be.lessThan(vrtTest.maxTimeDiffAllowed).and.greaterThan(-vrtTest.maxTimeDiffAllowed);
                     done();
-                }else if(vrtTest.time.a && !vrtTest.time.b){
-                    done('played event not started');
                 }else if(!vrtTest.time.a && vrtTest.time.b){
-                    done('publish event not started');
+                    done('play event not happened');
+                }else if(vrtTest.time.a && !vrtTest.time.b){
+                    done('publish event not happend');
                 }else if(!vrtTest.time.a && !vrtTest.time.b){
-                    done('play and publish not happen');
+                    done('play and publish not happened');
                 }
             });
             $(vrt).trigger('vrt_event_start_video_session');

@@ -166,8 +166,6 @@ var vrtOnEvent = function(){
     });
     $(vrt).on('vrt_event_recorder_publish', function () {
         clog('vrt_event_recorder_publish');
-        vrtTest.hasRec = true;
-        isPlayAndPublish();
     });
     $(vrt).on('vrt_event_recorder_unpublish', function () {
         clog('vrt_event_recorder_unpublish');
@@ -181,8 +179,6 @@ var vrtOnEvent = function(){
         clog('vrtevent_player_ts_'+data.status);
         if(data.status==11){
             $(vrtTest).trigger('vrttest_player_play')
-            vrtTest.hasPlay = true;
-            isPlayAndPublish();
         }
     });
     $(vrt).on('vrt_event_video_step_completed', function (evt, data) {
@@ -197,14 +193,22 @@ var vrtOnEvent = function(){
 
 };
 var isPlayAndPublishDone = false;
+var handleIsPlayAndPublish = null;
 function isPlayAndPublish(){
-    tlog('vrtTest.time.a:'+vrtTest.time.a);
-    tlog('vrtTest.time.b:'+vrtTest.time.b);
     if(vrtTest.time.a && vrtTest.time.b && !isPlayAndPublishDone){
         isPlayAndPublishDone = true;
         tlog('vrttest_playandpublish');
         $(vrtTest).trigger('vrttest_playandpublish')
     }
+    handleIsPlayAndPublish = setTimeout(function(){
+        if(!isPlayAndPublishDone){
+            vrtTest.time.a? '' : vrtTest.time.a= 0;
+            vrtTest.time.b? '' :vrtTest.time.b= 0;
+            isPlayAndPublishDone = true;
+            tlog('vrttest_playandpublish');
+            $(vrtTest).trigger('vrttest_playandpublish')
+        }
+    },(vrtTest.maxTimeDiffAllowed*2));
 }
 
 function isVideoListComplete(videoList) {
