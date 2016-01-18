@@ -196,11 +196,17 @@ var vrtOnEvent = function(){
 
 
 };
+var isPlayAndPublishDone = false;
 function isPlayAndPublish(){
-    if(vrtTest.hasPlay && vrtTest.hasRec){
+    tlog('vrtTest.time.a:'+vrtTest.time.a);
+    tlog('vrtTest.time.b:'+vrtTest.time.b);
+    if(vrtTest.time.a && vrtTest.time.b && !isPlayAndPublishDone){
+        isPlayAndPublishDone = true;
+        tlog('vrttest_playandpublish');
         $(vrtTest).trigger('vrttest_playandpublish')
     }
 }
+
 function isVideoListComplete(videoList) {
     if (videoList instanceof Array) {
         if (videoList.length <= 0) {

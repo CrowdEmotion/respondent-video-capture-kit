@@ -58,7 +58,6 @@ var testList = function () {
         });
     });
 
-
     describe("Load API data", function () {
             this.timeout(5000);
 
@@ -122,35 +121,34 @@ var testList = function () {
     describe("Video begin ", function () {
 
 
-        it("player play (A) and mediabox recording (B)", function (done) {
+        it("player play (A) and mediabox recording (B) in less than  " + vrtTest.maxTimeDiffAllowed + "ms", function (done) {
+            this.done = done;
             $(vrt).on('vrt_event_video_session_proceedToShow', function (e, data) {
                 $(vrtTest).on('vrttest_player_play', function (e, data) {
                     vrtTest.time.a = performance.now();
-                    if (vrtTest.time.a > 0 && vrtTest.time.b > 0) {
-                        done()
-                    }
-                    ;
+                    isPlayAndPublish()
                 });
                 $(vrt).on('vrt_event_recorder_publish', function (e, data) {
                     vrtTest.time.b = performance.now();
-                    if (vrtTest.time.a > 0 && vrtTest.time.b > 0) {
-                        done()
-                    }
-                    ;
+                    isPlayAndPublish()
                 });
+            });
+            $(vrtTest).on('vrttest_playandpublish', function (e, data) {
+                if(vrtTest.time.a && vrtTest.time.b){
+                    expect(vrtTest.time.b - vrtTest.time.a).to.be.lessThan(vrtTest.maxTimeDiffAllowed).and.greaterThan(-vrtTest.maxTimeDiffAllowed);
+                    done();
+                }else if(vrtTest.time.a && !vrtTest.time.b){
+                    done('played event not started');
+                }else if(!vrtTest.time.a && vrtTest.time.b){
+                    done('publish event not started');
+                }else if(!vrtTest.time.a && !vrtTest.time.b){
+                    done('play and publish not happen');
+                }
             });
             $(vrt).trigger('vrt_event_start_video_session');
         });
-        this.timeout(5000);
-        it("time between A and B should be less than " + vrtTest.maxTimeDiffAllowed + "ms", function (done) {
-            this.done = done;
-            setTimeout(function () {
-                expect(vrtTest.time.b - vrtTest.time.a).to.be.lessThan(vrtTest.maxTimeDiffAllowed).and.greaterThan(-vrtTest.maxTimeDiffAllowed);
-                done();
-            }, 2500);
-
-        });
     });
+
 
     describe("Video End ", function () {
         this.timeout(120000);
@@ -219,7 +217,11 @@ var testList = function () {
         });
     });
 
-    describe("Results", function () {
+    describe("List of tests TO DO", function () {
+        it.skip("Do test for one o more video", function () {});
+    });
+
+    describe("Results TO DO ", function () {
         describe('Files check', function () {
             it.skip("should exist Timestamps file and have some data", function () {
                 var isFile = getFile(window.vrtTest.path, 'json');
