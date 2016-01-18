@@ -85,7 +85,12 @@ window.vrtTest = {
     hasRec: false,
     respondentId:null,
     responseId:[],
-    tempdata: null
+    tempdata: null,
+    videoToTest: 0,
+    isPlayAndPublishDone: false,
+    handleIsPlayAndPublish: null,
+    isStopAndUnpublishDone: false,
+    handleIsStopAndUnpublish: null
 };
 
 var mobilecheck = function() {
@@ -192,24 +197,38 @@ var vrtOnEvent = function(){
 
 
 };
-var isPlayAndPublishDone = false;
-var handleIsPlayAndPublish = null;
 function isPlayAndPublish(){
-    if(vrtTest.time.a && vrtTest.time.b && !isPlayAndPublishDone){
-        isPlayAndPublishDone = true;
+    if(vrtTest.time.a && vrtTest.time.b && !window.isPlayAndPublishDone){
+        window.isPlayAndPublishDone = true;
         tlog('vrttest_playandpublish');
         $(vrtTest).trigger('vrttest_playandpublish')
     }
-    handleIsPlayAndPublish = setTimeout(function(){
-        if(!isPlayAndPublishDone){
+    window.handleIsPlayAndPublish = setTimeout(function(){
+        if(!window.isPlayAndPublishDone){
             vrtTest.time.a? '' : vrtTest.time.a= 0;
-            vrtTest.time.b? '' :vrtTest.time.b= 0;
-            isPlayAndPublishDone = true;
+            vrtTest.time.b? '' : vrtTest.time.b= 0;
+            window.isPlayAndPublishDone = true;
             tlog('vrttest_playandpublish');
             $(vrtTest).trigger('vrttest_playandpublish')
         }
     },(vrtTest.maxTimeDiffAllowed*2));
-}
+};
+function isStopAndUnpublish(){
+    if(vrtTest.time.c && vrtTest.time.d && !window.isStopAndUnpublishDone){
+        window.isStopAndUnpublishDone = true;
+        tlog('vrttest_stopandunpublish');
+        $(vrtTest).trigger('vrttest_stopandunpublish')
+    }
+    window.handleIsStopAndUnpublish = setTimeout(function(){
+        if(!window.isStopAndUnpublishDone){
+            vrtTest.time.c? '' : vrtTest.time.c= 0;
+            vrtTest.time.d? '' : vrtTest.time.d= 0;
+            window.isStopAndUnpublishDone = true;
+            tlog('vrttest_stopandunpublish');
+            $(vrtTest).trigger('vrttest_stopandunpublish')
+        }
+    },(vrtTest.maxTimeDiffAllowed*2));
+};
 
 function isVideoListComplete(videoList) {
     if (videoList instanceof Array) {

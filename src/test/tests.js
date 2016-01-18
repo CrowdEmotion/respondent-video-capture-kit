@@ -119,8 +119,6 @@ var testList = function () {
 
 
     describe("Video begin ", function () {
-
-
         it("player play (A) and mediabox recording (B) in less than  " + vrtTest.maxTimeDiffAllowed + "ms", function (done) {
             this.done = done
             this.timeout(5000);
@@ -137,16 +135,16 @@ var testList = function () {
             $(vrtTest).on('vrttest_playandpublish', function (e, data) {
                 tlog('vrtTest.time.a:'+vrtTest.time.a);
                 tlog('vrtTest.time.b:'+vrtTest.time.b);
-                if(handleIsPlayAndPublish) clearTimeout(handleIsPlayAndPublish);
+                if(window.handleIsPlayAndPublish) clearTimeout(window.handleIsPlayAndPublish);
                 if(vrtTest.time.a && vrtTest.time.b){
                     expect(vrtTest.time.b - vrtTest.time.a).to.be.lessThan(vrtTest.maxTimeDiffAllowed).and.greaterThan(-vrtTest.maxTimeDiffAllowed);
                     done();
                 }else if(!vrtTest.time.a && vrtTest.time.b){
-                    done('play event not happened');
+                    done('play event did not happen');
                 }else if(vrtTest.time.a && !vrtTest.time.b){
-                    done('publish event not happend');
+                    done('publish event did not happen');
                 }else if(!vrtTest.time.a && !vrtTest.time.b){
-                    done('play and publish not happened');
+                    done('play and publish did not happen');
                 }
             });
             $(vrt).trigger('vrt_event_start_video_session');
@@ -157,26 +155,32 @@ var testList = function () {
     describe("Video End ", function () {
         this.timeout(120000);
 
-        it("player stop (C) and recorder stop recording (D)", function (done) {
+        it("player stop (C) and recorder stop recording (D)  in less than  " + vrtTest.maxTimeDiffAllowed + "ms", function (done) {
             this.done = done;
             $(window.vrt).on('vrt_event_player_end', function (e, data) {
                 vrtTest.time.c = performance.now();
-                if (vrtTest.time.c > 0 && vrtTest.time.d > 0) {
-                    done()
-                }
-                ;
+                isStopAndUnpublish();
             });
             $(window.vrt).on('vrt_event_recorder_unpublish', function (e, data) {
                 vrtTest.time.d = performance.now();
-                if (vrtTest.time.c > 0 && vrtTest.time.d > 0) {
-                    done()
+                isStopAndUnpublish();
+            });
+            $(vrtTest).on('vrttest_stopandunpublish', function (e, data) {
+                tlog('vrtTest.time.c:'+vrtTest.time.c);
+                tlog('vrtTest.time.d:'+vrtTest.time.d);
+                if(window.handleIsStopAndUnpublish) clearTimeout(window.handleIsStopAndUnpublish);
+                if(vrtTest.time.c && vrtTest.time.d){
+                    expect(vrtTest.time.d - vrtTest.time.c).to.be.lessThan(vrtTest.maxTimeDiffAllowed).and.greaterThan(-vrtTest.maxTimeDiffAllowed);
+                    done();
+                }else if(!vrtTest.time.c && vrtTest.time.d){
+                    done('stop event did not happen');
+                }else if(vrtTest.time.c && !vrtTest.time.d){
+                    done('unpublish event did not happen');
+                }else if(!vrtTest.time.c && !vrtTest.time.d){
+                    done('stop and unpublish did not happen');
                 }
-                ;
             });
         });
-
-
-
 
         it("video has a response id and video has custom data saved", function (done) {
             this.done = done;
@@ -198,13 +202,6 @@ var testList = function () {
                     done('no custom data saved')
                 }
             });
-        });
-        it("time between D and C should be less than " + vrtTest.maxTimeDiffAllowed + "ms", function (done) {
-            this.done = done;
-            setTimeout(function () {
-                expect(vrtTest.time.d - vrtTest.time.c).to.be.lessThan(vrtTest.maxTimeDiffAllowed).and.greaterThan(-vrtTest.maxTimeDiffAllowed);
-                done();
-            }, 2500);
         });
 
     });
