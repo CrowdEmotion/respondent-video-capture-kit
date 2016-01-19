@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-1-17 20:0 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-1-19 14:17 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16691,10 +16691,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             $(window.vrt).trigger("api_init_ok");
             if (console.log) console.log("apiClientSetup api login success");
             if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
-                var isff = false;
-                if (vrt.researchData && vrt.researchData.forceFlash) {
-                    isff = vrt.researchData.forceFlash ? "flash" : false;
-                }
+                var isff = vrt.researchData.forceFlash;
                 if (WebProducer.typeAutoDetect() == "html5" && isff !== true) {
                     vrt.playerVersion = false;
                     vrt.results.flash.version = false;

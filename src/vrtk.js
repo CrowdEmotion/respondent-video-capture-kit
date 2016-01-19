@@ -297,11 +297,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 if (console.log) console.log("apiClientSetup api login success");
 
                 if (vrt.options.apiClientOnly && vrt.options.apiClientOnly === true) {} else {
-                    var isff =  false;
-                    if(vrt.researchData && vrt.researchData.forceFlash){
-                        isff = vrt.researchData.forceFlash ? "flash" : false;
-                    }
-                    if (WebProducer.typeAutoDetect() == "html5" && isff !== true) {
+
+                    var isff =  vrt.researchData.forceFlash;
+                    if (WebProducer.typeAutoDetect() == "html5" && isff!==true) {
                         vrt.playerVersion = false;
                         vrt.results.flash.version = false;
                         $(window.vrt).trigger("vrt_event_recorder_html5");
