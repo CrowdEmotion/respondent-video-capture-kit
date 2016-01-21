@@ -1,16 +1,22 @@
-clog = function (msg) {
+ll = function(msg, prepend, append){
     if (window.console && console.log) {
         var d = performance.now();
-        console.log('=>EVENT: '+msg);
-        $('#events').append('<br/>'+ d + ': '+msg);
+        prepend? '': prepend = '';
+        console.log('=>'+prepend+': '+msg);
+        $('#events').append('<div class="msgwrap"><div class="time">'+d.toFixed(2)+'</div><div class="type">'+prepend+'</div><div class="msg"> '+msg+'</div></div>');
     }
 };
+clog = function (msg) {
+    ll(msg, 'EVENT');
+};
+dlog = function (msg) {
+    ll(msg, 'DESCRIBE');
+};
+ilog = function (msg) {
+    ll(msg, 'IT');
+};
 tlog = function (msg) {
-    if (window.console && console.log) {
-        var d = performance.now();
-        console.log('=> '+msg);
-        $('#events').append('<br/>'+ d + ': '+msg);
-    }
+    ll(msg, '');
 };
 /*
  TODO test list
@@ -90,7 +96,9 @@ window.vrtTest = {
     isPlayAndPublishDone: false,
     handleIsPlayAndPublish: null,
     isStopAndUnpublishDone: false,
-    handleIsStopAndUnpublish: null
+    handleIsStopAndUnpublish: null,
+    currentMediaIndex: 0,
+    stimuliNumber: null
 };
 
 var mobilecheck = function() {
@@ -194,42 +202,55 @@ var vrtOnEvent = function(){
             tlog(window.vrt.options.customData);
         }
     });
+    $(vrt).on('vrt_event_video_session_proceedToShow', function () {
+        clog('vrt_event_video_session_proceedToShow');
+    });
+    $(vrt).on('vrt_event_start_video_session', function () {
+        clog('vrt_event_start_video_session');
+    });
 
 
 };
 function isPlayAndPublish(){
-    if(vrtTest.time.a && vrtTest.time.b && !window.isPlayAndPublishDone){
-        window.isPlayAndPublishDone = true;
+    if(vrtTest.time.a && vrtTest.time.b && !vrtTest.isPlayAndPublishDone){
+        vrtTest.isPlayAndPublishDone = true;
         tlog('vrttest_playandpublish');
         $(vrtTest).trigger('vrttest_playandpublish')
     }
-    window.handleIsPlayAndPublish = setTimeout(function(){
-        if(!window.isPlayAndPublishDone){
-            vrtTest.time.a? '' : vrtTest.time.a= 0;
-            vrtTest.time.b? '' : vrtTest.time.b= 0;
-            window.isPlayAndPublishDone = true;
+    vrtTest.handleIsPlayAndPublish = setTimeout(function(){
+        if(!vrtTest.isPlayAndPublishDone){
+            vrtTest.isPlayAndPublishDone = true;
             tlog('vrttest_playandpublish');
             $(vrtTest).trigger('vrttest_playandpublish')
         }
     },(vrtTest.maxTimeDiffAllowed*2));
 };
 function isStopAndUnpublish(){
-    if(vrtTest.time.c && vrtTest.time.d && !window.isStopAndUnpublishDone){
-        window.isStopAndUnpublishDone = true;
+    if(vrtTest.time.c && vrtTest.time.d && !vrtTest.isStopAndUnpublishDone){
+        vrtTest.isStopAndUnpublishDone = true;
         tlog('vrttest_stopandunpublish');
         $(vrtTest).trigger('vrttest_stopandunpublish')
     }
-    window.handleIsStopAndUnpublish = setTimeout(function(){
-        if(!window.isStopAndUnpublishDone){
-            vrtTest.time.c? '' : vrtTest.time.c= 0;
-            vrtTest.time.d? '' : vrtTest.time.d= 0;
-            window.isStopAndUnpublishDone = true;
+    vrtTest.handleIsStopAndUnpublish = setTimeout(function(){
+        if(!vrtTest.isStopAndUnpublishDone){
+            vrtTest.isStopAndUnpublishDone = true;
             tlog('vrttest_stopandunpublish');
             $(vrtTest).trigger('vrttest_stopandunpublish')
         }
     },(vrtTest.maxTimeDiffAllowed*2));
 };
-
+function cleanUpStart() {
+    vrtTest.time.a = 0;
+    vrtTest.time.b = 0;
+    vrtTest.isPlayAndPublishDone = false;
+    if (vrtTest.handleIsPlayAndPublish) clearTimeout(vrtTest.handleIsPlayAndPublish);
+}
+function cleanUpEnd(){
+    vrtTest.time.c = 0;
+    vrtTest.time.d = 0;
+    vrtTest.isStopAndUnpublishDone = false;
+    if(vrtTest.handleIsStopAndUnpublish) clearTimeout(vrtTest.handleIsStopAndUnpublish);
+}
 function isVideoListComplete(videoList) {
     if (videoList instanceof Array) {
         if (videoList.length <= 0) {
@@ -294,4 +315,5 @@ this.gup = function( name, url ) {
     var results = regex.exec( url );
     return results == null ? null : results[1];
 };
+
 window.gup = gup;

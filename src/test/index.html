@@ -19,6 +19,15 @@
         h4{
             font-family: 'Lato', sans-serif;
         }
+        #events div {
+            margin-left: 15px;
+            font-size: 12px;
+            font-weight: normal;
+            font-family:  'Helvetica Neue', Helvetica, Arial, sans-serif
+        }
+        #events .type, #events .time, #events .msg{
+            display: inline;
+        }
     </style>
     <script type="text/javascript" charset="utf-8"  src="./func.js"></script>
     <!-- TESTS START -->
@@ -56,9 +65,9 @@
 
             //var rkey = gup('r')? gup('r') : 'd15aa84c29634c852e612ddd066fe0fece837bc6';
             //var akey = gup('a')? gup('a') : '8a111f27-b9d4-438d-8559-fb38cc19af5b';
-            var rkey = gup('r')? gup('r') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
-            var akey = gup('a')? gup('a') : '7a94ee21-9e11-41fd-906d-069000fade82';
-            var apiSandbox = gup('apisandbox')? gup('apisandbox') : true;
+            var rkey = gup('rkey') ? gup('rkey') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
+            var akey = gup('appkey') ? gup('rkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
+            var apiSandbox = gup('apisandbox') ? gup('apisandbox') : true;
             var options = {
                 // apiDomain: "http://localhost:1337",
                 researchToken: rkey,
@@ -76,18 +85,31 @@
                 savePlatform: true,
                 recordingAudio: false //temporary fix
             };
+            var ceInit ={
+                debug: true,
+                domain: "https://api.crowdemotion.co.uk",
+                engineType: "kanako",
+                http: true,
+                processVideo: undefined,
+                sandbox: true,
+            };
+            apiLoadData(ceInit,rkey,akey, function(res){
+                    vrtTest.stimuliNumber = res.length;
+                    window.vrt = new Vrt(options);
 
-            window.vrt = new Vrt(options);
+                    vrtOnEvent();
 
-            vrtOnEvent();
+                    $(vrt).on('vrt_init_ok',function() {
+                        testList().done(function () {
+                            testStart();
+                        });
+                    });
 
-            $(vrt).on('vrt_init_ok',function() {
-                testList().done(function () {
-                    testStart();
-                });
+                    vrt.init();
             });
 
-            vrt.init();
+
+
 
 
         });
@@ -125,7 +147,7 @@
 <!-- TESTS END -->
 
 <!-- TESTS START -->
-<h4>Events</h4>
+<h4>Console</h4>
 <div id="events"></div>
 <!-- TESTS END -->
 
