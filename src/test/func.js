@@ -1,7 +1,7 @@
 ll = function(msg, prepend, append){
     if (window.console && console.log) {
         var d = performance.now();
-        prepend? '': prepend = '';
+        prepend ? '': prepend = '';
         console.log('=>'+prepend+': '+msg);
         $('#events').append('<div class="msgwrap"><div class="time">'+d.toFixed(2)+'</div><div class="type">'+prepend+'</div><div class="msg"> '+msg+'</div></div>');
     }
@@ -182,6 +182,9 @@ var vrtOnEvent = function(){
     });
     $(vrt).on('vrt_event_recorder_unpublish', function () {
         clog('vrt_event_recorder_unpublish');
+    });
+    $(vrt).on('vrt_event_stimuli_end', function () {
+        clog('vrt_event_stimuli_end');
     });
     $(vrt).on('vrt_event_respondent_created', function () {
         clog('vrt_event_respondent_created');
