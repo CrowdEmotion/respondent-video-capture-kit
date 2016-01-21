@@ -159,14 +159,6 @@ var testList = function () {
                     cleanUpStart();
                     $(vrt).on('vrt_event_video_session_proceedToShow', function (e, data) {
 
-                        $(vrtTest).on('vrttest_player_play', function (e, data) {
-                            vrtTest.time.a = performance.now().toFixed(0);
-                            isPlayAndPublish()
-                        });
-                        $(vrt).on('vrt_event_recorder_publish', function (e, data) {
-                            vrtTest.time.b = performance.now().toFixed(0);
-                            isPlayAndPublish()
-                        });
                     });
                     $(vrtTest).on('vrttest_playandpublish', function (e, data) {
                         tlog('vrtTest.time.a:' + vrtTest.time.a);
@@ -204,14 +196,7 @@ var testList = function () {
                     ilog(this.test.title);
                     this.done = done;
                     cleanUpEnd();
-                    $(window.vrt).on('vrt_event_stimuli_end', function (e, data) {
-                        vrtTest.time.c = performance.now().toFixed(0);
-                        isStopAndUnpublish();
-                    });
-                    $(window.vrt).on('vrt_event_recorder_unpublish', function (e, data) {
-                        vrtTest.time.d = performance.now().toFixed(0);
-                        isStopAndUnpublish();
-                    });
+
                     $(vrtTest).on('vrttest_stopandunpublish', function (e, data) {
                         tlog('vrtTest.time.c:' + vrtTest.time.c);
                         tlog('vrtTest.time.d:' + vrtTest.time.d);

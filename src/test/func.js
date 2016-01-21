@@ -98,7 +98,8 @@ window.vrtTest = {
     isStopAndUnpublishDone: false,
     handleIsStopAndUnpublish: null,
     currentMediaIndex: 0,
-    stimuliNumber: null
+    stimuliNumber: null,
+    proceedToShow: false
 };
 
 var mobilecheck = function() {
@@ -177,15 +178,6 @@ var vrtOnEvent = function(){
         clog('vrtstep_connect');
         window.vrtTest.connected=true;
     });
-    $(vrt).on('vrt_event_recorder_publish', function () {
-        clog('vrt_event_recorder_publish');
-    });
-    $(vrt).on('vrt_event_recorder_unpublish', function () {
-        clog('vrt_event_recorder_unpublish');
-    });
-    $(vrt).on('vrt_event_stimuli_end', function () {
-        clog('vrt_event_stimuli_end');
-    });
     $(vrt).on('vrt_event_respondent_created', function () {
         clog('vrt_event_respondent_created');
         tlog(vrt.respondentId);
@@ -211,8 +203,29 @@ var vrtOnEvent = function(){
     $(vrt).on('vrt_event_start_video_session', function () {
         clog('vrt_event_start_video_session');
     });
-
-
+    $(vrt).on('vrt_event_user_next_video', function () {
+        clog('vrt_event_user_next_video');
+    });
+    $(vrtTest).on('vrttest_player_play', function (e, data) {
+        clog('vrttest_player_play');
+        vrtTest.time.a = performance.now().toFixed(0);
+        isPlayAndPublish()
+    });
+    $(vrt).on('vrt_event_recorder_publish', function (e, data) {
+        clog('vrt_event_recorder_publish');
+        vrtTest.time.b = performance.now().toFixed(0);
+        isPlayAndPublish()
+    });
+    $(window.vrt).on('vrt_event_stimuli_end', function (e, data) {
+        clog('vrt_event_stimuli_end');
+        vrtTest.time.c = performance.now().toFixed(0);
+        isStopAndUnpublish();
+    });
+    $(window.vrt).on('vrt_event_recorder_unpublish', function (e, data) {
+        clog('vrt_event_recorder_unpublish');
+        vrtTest.time.d = performance.now().toFixed(0);
+        isStopAndUnpublish();
+    });
 };
 function isPlayAndPublish(){
     if(vrtTest.time.a && vrtTest.time.b && !vrtTest.isPlayAndPublishDone){
@@ -223,7 +236,7 @@ function isPlayAndPublish(){
     vrtTest.handleIsPlayAndPublish = setTimeout(function(){
         if(!vrtTest.isPlayAndPublishDone){
             vrtTest.isPlayAndPublishDone = true;
-            tlog('vrttest_playandpublish');
+            tlog('vrttest_playandpublish TO');
             $(vrtTest).trigger('vrttest_playandpublish')
         }
     },(vrtTest.maxTimeDiffAllowed*2));
@@ -237,7 +250,7 @@ function isStopAndUnpublish(){
     vrtTest.handleIsStopAndUnpublish = setTimeout(function(){
         if(!vrtTest.isStopAndUnpublishDone){
             vrtTest.isStopAndUnpublishDone = true;
-            tlog('vrttest_stopandunpublish');
+            tlog('vrttest_stopandunpublish TO');
             $(vrtTest).trigger('vrttest_stopandunpublish')
         }
     },(vrtTest.maxTimeDiffAllowed*2));
@@ -247,6 +260,7 @@ function cleanUpStart() {
     vrtTest.time.b = 0;
     vrtTest.isPlayAndPublishDone = false;
     if (vrtTest.handleIsPlayAndPublish) clearTimeout(vrtTest.handleIsPlayAndPublish);
+    vrtTest.proceedToShow = false;
 }
 function cleanUpEnd(){
     vrtTest.time.c = 0;
