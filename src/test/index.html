@@ -61,18 +61,7 @@
             if (console.log)console.log(msg);
         }
         $(document).ready(function () {
-            /*
-             *  suggest url
-             *  1 YT video              :
-             *  2 SHORT YT (def)        : ?appkey=7a94ee21-9e11-41fd-906d-069000fade82&rkey=0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d&testing=true
-             *  2 YT videos             : ?appkey=7a94ee21-9e11-41fd-906d-069000fade82&rkey=d15aa84c29634c852e612ddd066fe0fece837bc6&testing=true
-             *  1 custom video          :
-             *  2 SHORT custom          : ?appkey=7a94ee21-9e11-41fd-906d-069000fade82&rkey=a4340b5433b0edcdee6ab7ffb9cf41f5ef01584e&testing=true
-             *  2 custom videos         : ?appkey=7a94ee21-9e11-41fd-906d-069000fade82&rkey=7674cb8779c471c401d5e11efc7fcffbf6f16eb8&testing=true
-             */
 
-            //var rkey = gup('r')? gup('r') : 'd15aa84c29634c852e612ddd066fe0fece837bc6';
-            //var akey = gup('a')? gup('a') : '8a111f27-b9d4-438d-8559-fb38cc19af5b';
             var rkey = gup('rkey') ? gup('rkey') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
             var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
             var apiSandbox = gup('apisandbox') ? gup('apisandbox') : true;
