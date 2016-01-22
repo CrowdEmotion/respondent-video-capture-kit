@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-1-19 14:17 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-1-22 9:41 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -2182,9 +2182,11 @@
         HTML5Producer.prototype.pluginMessageSlowLink = function(message) {
             var elapsed;
             elapsed = Date.now() - this.slowLinkLast;
+            this.fire("slow_link_raw");
             if (elapsed < 3e3) {
                 return;
             }
+            this.fire("slow_link");
             this.slowLinkLast = Date.now();
             this.remoteLoggerLog("event", "slow_link");
             this.videoBitrate = Math.floor(this.videoBitrate);
@@ -2367,10 +2369,11 @@
             return this.bufferTime;
         };
         HTML5Producer.prototype.setStreamBandwidth = function(bandwidth) {
-            return this.bandwidth = bandwidth;
+            this.videoBitrate = bandwidth;
+            return this.pluginReconfigure();
         };
         HTML5Producer.prototype.getStreamBandwidth = function(bandwidth) {
-            return this.bandwidth;
+            return this.videoBitrate;
         };
         HTML5Producer.prototype.getStats = function() {
             return {
