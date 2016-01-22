@@ -161,6 +161,7 @@ var testList = function () {
 
                     });
                     $(vrtTest).on('vrttest_playandpublish', function (e, data) {
+                        $(vrtTest).off('vrttest_playandpublish');
                         tlog('vrtTest.time.a:' + vrtTest.time.a);
                         tlog('vrtTest.time.b:' + vrtTest.time.b);
                         if (vrtTest.handleIsPlayAndPublish) clearTimeout(vrtTest.handleIsPlayAndPublish);
@@ -198,6 +199,7 @@ var testList = function () {
                     cleanUpEnd();
 
                     $(vrtTest).on('vrttest_stopandunpublish', function (e, data) {
+                        $(vrtTest).off('vrttest_stopandunpublish');
                         tlog('vrtTest.time.c:' + vrtTest.time.c);
                         tlog('vrtTest.time.d:' + vrtTest.time.d);
                         if (vrtTest.handleIsStopAndUnpublish) clearTimeout(vrtTest.handleIsStopAndUnpublish);
