@@ -257,17 +257,59 @@ var testList = function () {
         it("user session end", function (done) {
             ilog(this.test.title);
             this.done = done;
+            this.timeout(6000);
             $(window.vrt).on('vrt_event_user_session_complete', function (e, data) {
                 done();
             });
             setTimeout(function () {
                 $(vrt).trigger('vrt_event_user_session_complete');
-            }, 1000);
+            }, 5000);
         });
     });
 
+    describe("TO DO ", function () {
+        dlog(this.title);
+        it.skip("check project options", function () {
+            ilog(this.test.title);
+        });
+        it.skip("check project status (open,close,archivied)", function () {
+            ilog(this.test.title);
+        });
+        it.skip("measure diff between play and stop - compare with video length", function () {
+            ilog(this.test.title);
+        });
+        it.skip("measure diff between publish and unpublish - compare with video length", function () {
+            ilog(this.test.title);
+        });
+
+    });
     describe("Results TO DO ", function () {
         dlog(this.title);
+        describe('Files check', function () {
+            dlog(this.title);
+            it.skip("should exist Timestamps file and have some data", function () {
+                ilog(this.test.title);
+                var isFile = getFile(window.vrtTest.path, 'json');
+                expect(isFile).to.be.equal(true);
+            });
+            it.skip("should exist facevideo file and have some data", function () {
+                ilog(this.test.title);
+                ilog(this.test.title);
+                var isFile = getFile(window.vrtTest.path, window.vrtTest.videoext);
+                expect(isFile).to.be.equal(true);
+            });
+            it.skip("should exist the logs file ", function () {
+                ilog(this.test.title);
+            });
+            it.skip("should have Respondent meta data", function () {
+                ilog(this.test.title);
+            });
+            it.skip("should have Response meta data", function () {
+                ilog(this.test.title);
+            });
+            //API NOT READY it.skip("should the API getting the facevideos file ", function () {});
+            //API NOT READY it.skip("should the API getting the timestamp file", function () {});
+        });
         describe('Files check', function () {
             dlog(this.title);
             it.skip("should exist Timestamps file and have some data", function () {

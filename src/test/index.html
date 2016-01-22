@@ -88,10 +88,11 @@
                 engineType: "kanako",
                 http: true,
                 processVideo: undefined,
-                sandbox: true,
+                sandbox: true
             };
             apiLoadData(ceInit,rkey,akey, function(res){
                     vrtTest.stimuliNumber = res.length;
+                    vrtTest.stimuli = res;
                     window.vrt = new Vrt(options);
 
                     vrtOnEvent();

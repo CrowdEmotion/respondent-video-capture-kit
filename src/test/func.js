@@ -99,7 +99,22 @@ window.vrtTest = {
     handleIsStopAndUnpublish: null,
     currentMediaIndex: 0,
     stimuliNumber: null,
-    proceedToShow: false
+    stimuli: null,
+    proceedToShow: false,
+    results:{
+        db: {
+            respondent:null,
+            responses:[],
+            respondentMetadata:{},
+            responsesMetadata:{},
+            facevideos:[]
+        },
+        files: {
+            logs:[],
+            facevideos:[],
+            timedmetadatas:[]
+        }
+    }
 };
 
 var mobilecheck = function() {
