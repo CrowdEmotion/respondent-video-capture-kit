@@ -75,7 +75,9 @@ sequences
 
  */
 window.vrtTest = {
-    time:{a:null,b:null,c:null,d:null},
+    time:{
+        a:null,b:null,c:null,d:null,playback:null,recorder:null
+    },
     path:null,
     rid: null,
     haveWebcam:null,
@@ -349,3 +351,20 @@ this.gup = function( name, url ) {
 };
 
 window.gup = gup;
+
+var testStart = function () {
+    mocha.run();
+};
+
+var apiLoadData = function (ceInit, rkey, akey, cb) {
+    var d = $.Deferred();
+    var ceClient = new CEClient(ceInit);
+    ceClient.setToken(akey);
+    ceClient.loadResearch(rkey, function (res) {
+        ceClient.loadMediaList(res.id,
+            function (res, err) {
+                ceClient.logout();
+                cb(res, err);
+            });
+    });
+};

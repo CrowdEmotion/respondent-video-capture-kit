@@ -64,24 +64,9 @@
 
             var rkey = gup('rkey') ? gup('rkey') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
             var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
+            var rid = gup('rid') ? gup('rid') : null;
+            var responseid = gup('response') ? gup('response') : null;
             var apiSandbox = gup('apisandbox') ? gup('apisandbox') : true;
-            var options = {
-                // apiDomain: "http://localhost:1337",
-                researchToken: rkey,
-                appToken: akey,
-                streamName: 'ce-test_',
-                apiSandbox: apiSandbox,
-                debug: true,
-                respondentCustomData: {user_video_behavior: 'delete_video'},
-                playerCentered: false,
-                recorderCentered: false,
-                playerHorizontallyCentered: true,
-                recorderHorizontallyCentered: true,
-                fullscreen: false,
-                randomOrder: false,
-                savePlatform: true,
-                recordingAudio: false //temporary fix
-            };
             var ceInit ={
                 debug: true,
                 domain: "https://api.crowdemotion.co.uk",

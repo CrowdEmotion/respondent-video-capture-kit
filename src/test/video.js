@@ -239,6 +239,28 @@ var testList = function () {
                         }
                     });
                 });
+
+                it("video playback and video stimuli length should be similiar ", function () {
+                    ilog(this.test.title);
+                    if (vrtTest.time.a && vrtTest.time.c) {
+                        vrtTest.time.playback =  vrtTest.time.c - vrtTest.time.a;
+                        expect(vrtTest.stimuli[vrt.currentMedia].lengthMS - vrtTest.time.playback).to.be.lessThan((vrtTest.maxTimeDiffAllowed*2)).and.greaterThan(- (vrtTest.maxTimeDiffAllowed*2));
+                    }
+                });
+                it("video recording and video stimuli length should be similiar", function () {
+                    ilog(this.test.title);
+                    if (vrtTest.time.b && vrtTest.time.d) {
+                        vrtTest.time.recorder =  vrtTest.time.d - vrtTest.time.b;
+                        expect(vrtTest.stimuli[vrt.currentMedia].lengthMS - vrtTest.time.recorder).to.be.lessThan((vrtTest.maxTimeDiffAllowed*2)).and.greaterThan(- (vrtTest.maxTimeDiffAllowed*2));
+                    }
+                });
+                it("video playback and video recording length should be similiar", function () {
+                    ilog(this.test.title);
+                    if (vrtTest.time.playback && vrtTest.time.recorder) {
+                        expect(vrtTest.time.playback - vrtTest.time.recorder).to.be.lessThan((vrtTest.maxTimeDiffAllowed*2)).and.greaterThan(- (vrtTest.maxTimeDiffAllowed*2));
+                    }
+                });
+
             });
         };
 
@@ -275,66 +297,8 @@ var testList = function () {
         it.skip("check project status (open,close,archivied)", function () {
             ilog(this.test.title);
         });
-        it.skip("measure diff between play and stop - compare with video length", function () {
-            ilog(this.test.title);
-        });
-        it.skip("measure diff between publish and unpublish - compare with video length", function () {
-            ilog(this.test.title);
-        });
 
-    });
-    describe("Results TO DO ", function () {
-        dlog(this.title);
-        describe('Files check', function () {
-            dlog(this.title);
-            it.skip("should exist Timestamps file and have some data", function () {
-                ilog(this.test.title);
-                var isFile = getFile(window.vrtTest.path, 'json');
-                expect(isFile).to.be.equal(true);
-            });
-            it.skip("should exist facevideo file and have some data", function () {
-                ilog(this.test.title);
-                ilog(this.test.title);
-                var isFile = getFile(window.vrtTest.path, window.vrtTest.videoext);
-                expect(isFile).to.be.equal(true);
-            });
-            it.skip("should exist the logs file ", function () {
-                ilog(this.test.title);
-            });
-            it.skip("should have Respondent meta data", function () {
-                ilog(this.test.title);
-            });
-            it.skip("should have Response meta data", function () {
-                ilog(this.test.title);
-            });
-            //API NOT READY it.skip("should the API getting the facevideos file ", function () {});
-            //API NOT READY it.skip("should the API getting the timestamp file", function () {});
-        });
-        describe('Files check', function () {
-            dlog(this.title);
-            it.skip("should exist Timestamps file and have some data", function () {
-                ilog(this.test.title);
-                var isFile = getFile(window.vrtTest.path, 'json');
-                expect(isFile).to.be.equal(true);
-            });
-            it.skip("should exist facevideo file and have some data", function () {
-                ilog(this.test.title);
-                ilog(this.test.title);
-                var isFile = getFile(window.vrtTest.path, window.vrtTest.videoext);
-                expect(isFile).to.be.equal(true);
-            });
-            it.skip("should exist the logs file ", function () {
-                ilog(this.test.title);
-            });
-            it.skip("should have Respondent meta data", function () {
-                ilog(this.test.title);
-            });
-            it.skip("should have Response meta data", function () {
-                ilog(this.test.title);
-            });
-            //API NOT READY it.skip("should the API getting the facevideos file ", function () {});
-            //API NOT READY it.skip("should the API getting the timestamp file", function () {});
-        });
+
     });
 
     var d = $.Deferred();
@@ -342,19 +306,4 @@ var testList = function () {
     return d;
 }
 
-var testStart = function () {
-    mocha.run();
-};
 
-var apiLoadData = function (ceInit, rkey, akey, cb) {
-    var d = $.Deferred();
-    var ceClient = new CEClient(ceInit);
-    ceClient.setToken(akey);
-    ceClient.loadResearch(rkey, function (res) {
-        ceClient.loadMediaList(res.id,
-            function (res, err) {
-                ceClient.logout();
-                cb(res, err);
-            });
-    });
-};
