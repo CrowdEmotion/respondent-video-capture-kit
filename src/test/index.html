@@ -29,112 +29,18 @@
             display: inline;
         }
     </style>
-    <script type="text/javascript" charset="utf-8"  src="./func.js"></script>
-    <!-- TESTS START -->
-
-    <!-- TESTS END -->
-    <!-- VIDEO  RESPONDENT TEST PAGE - HEAD - START  -->
-    <!-- Configuration file -->
-    <!-- Mandatory files -->
-    <script type="text/javascript" charset="utf-8" src="./libs/jquery-1.9.1.js"></script>
-
-    <!-- Recorder files -->
-    <script type="text/javascript" charset="utf-8" src="../libs/swfobject.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../recorder/var.js"></script>
-
-    <!-- Client files -->
-    <script type="text/javascript" charset="utf-8" src="../APIClient/sha256.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../APIClient/enc-base64-min.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../APIClient/store.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../APIClient/CEClient.js"></script>
-
-    <!-- Video js files -->
-    <script type="text/javascript" charset="utf-8" src="../libs/video-js-4-7/video.dev.js"></script>
-    <link type="text/css" href="../libs/video-js-4-7/video-js.min.css" rel="stylesheet">
-
-
-    <script type="text/javascript" charset="utf-8"  src="../vrtk_player.js"></script>
-    <script type="text/javascript" charset="utf-8"  src="../vrtk.js"></script>
-
-    <script type="text/javascript" charset="utf-8">
-        function alertMessage(msg) {
-            if (console.log)console.log(msg);
-        }
-        $(document).ready(function () {
-
-            var rkey = gup('rkey') ? gup('rkey') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
-            var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
-            var apiSandbox = gup('apisandbox') ? gup('apisandbox') : true;
-            var options = {
-                // apiDomain: "http://localhost:1337",
-                researchToken: rkey,
-                appToken: akey,
-                streamName: 'ce-test_',
-                apiSandbox: apiSandbox,
-                debug: true,
-                respondentCustomData: {user_video_behavior: 'delete_video'},
-                playerCentered: false,
-                recorderCentered: false,
-                playerHorizontallyCentered: true,
-                recorderHorizontallyCentered: true,
-                fullscreen: false,
-                randomOrder: false,
-                savePlatform: true,
-                recordingAudio: false //temporary fix
-            };
-            var ceInit ={
-                debug: true,
-                domain: "https://api.crowdemotion.co.uk",
-                engineType: "kanako",
-                http: true,
-                processVideo: undefined,
-                sandbox: true
-            };
-            apiLoadData(ceInit,rkey,akey, function(res){
-                    vrtTest.stimuliNumber = res.length;
-                    vrtTest.stimuli = res;
-                    window.vrt = new Vrt(options);
-
-                    vrtOnEvent();
-
-                    $(vrt).on('vrt_init_ok',function() {
-                        testList().done(function () {
-                            testStart();
-                        });
-                    });
-
-                    vrt.init();
-            });
-
-
-
-
-
-        });
-    </script>
-    <!-- EXAMPLE OF IMPLEMENTATION END -->
-
-    <script type="text/javascript" src="./libs/mocha.js"></script>
-    <script type="text/javascript" src="./libs/chai.js"></script>
-    <script type="chai-as-promised"></script>
-    <script type="text/javascript" src="./libs/sinon.js"></script>
-    <script type="text/javascript" src="tests.js"></script>
 </head>
 <body>
 
 <!-- Playcorder START -->
 <div id="introzone" class="">
 
-    <h4>Memo Embed</h4>
-    <div id="vrt" style=""></div>
+    <h2>Tests</h2>
+    <div><a href="video.html">Video test</a></div>
+    <div><a href="results.html">(WIP) Results test</a></div>
+    <div><a href="">(WIP) Video and results test</a></div>
 
-    <div id="alerts"></div>
 
-    <div id="buttons">
-        <button id="start" class="hide button-choose pure-button">Start Session</button>
-        <button id="next" class="hide button-choose pure-button">Next video</button>
-        <button id="end" class="hide button-choose pure-button">End</button>
-    </div>
 
 </div>
 <!-- Playcorder END -->
