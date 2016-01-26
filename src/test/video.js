@@ -268,7 +268,6 @@ var testList = function () {
 
 
         var n = 0;
-
         while (n < vrtTest.stimuliNumber) {
             n++;
             viewVideoTest.bind(window.testSuite)();

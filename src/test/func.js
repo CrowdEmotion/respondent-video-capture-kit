@@ -314,7 +314,13 @@ function alertMessage(msg){
     if(console.log)console.log('TEST MSG');
     if(console.log)console.log(msg);
 };
-
+function fvToMetadata(remotelocation){
+    return remotelocation.substr(0, remotelocation.lastIndexOf(".")) + ".json";;
+};
+function fvTolog(filename){
+    filename = filename.substr(0, filename.lastIndexOf(".")) + ".log";
+    return 'https://mediabox.crowdemotion.co.uk/logs/remote/'+filename;
+}
 function getFile(name,type){
     //http://mediabox.crowdemotion.co.uk:8082/contents/test_0__1535005240.json
     var ret =   fileExists("http://"+vrt.producerStreamUrl+":8082/contents/"+name+'.'+type);
@@ -341,7 +347,8 @@ function fileExists(url) {
         console.log('======fileExists======');
         console.log(req);
 
-        return req;//req.status==200;
+        return req.status;
+        //return req;//req.status==200;
     } else {
         return false;
     }
@@ -409,18 +416,17 @@ var apiLoadDataResults = function (ceInit, rkey, akey, respondentid , cb) {
                         else
                             vrtTest.results.db.responsesMetadata.push(res);
                     });
+                cc.readFacevideoInfo(res[i].id,
+                    function (res, err) {
+                        vrtTest.results.db.facevideos.push(res);
+                        if(res.remoteLocation){
+                            vrtTest.results.files.facevideos.push(res.remoteLocation);
+                            vrtTest.results.files.timedmetadatas.push(fvToMetadata(res.remoteLocation));
+                            vrtTest.results.files.logs.push(fvTolog(res.filename));
+                        }
+                    });
                 i++;
             };
-            //todo
-            /*
-            ceClient.loadFacevideo(res.id,
-                function (res, err) {
-                    save.facevideos = res;
-                    //TODO load log
-                    //TODO load facevideos
-                    //TODO load timemedata
-                });
-                */
         });
 
     cc.readRespondentCustomData(respondentid,

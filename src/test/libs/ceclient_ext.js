@@ -45,11 +45,6 @@ CEClient.prototype =  {
             if (cb) cb(res);
         })
     },
-    readFacevideos: function (responseid, data, cb) {
-        javaRest.respondent.readRespondentCustomData(responsendentId, data, function (res) {
-            if (cb) cb(res);
-        })
-    },
     searchResponseIN: function (key, value, cb) {
         var url = 'response';
         var data = '?where={"' + key + '":"' + value + '"}'; // this.props.url
