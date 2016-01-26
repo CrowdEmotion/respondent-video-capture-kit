@@ -64,10 +64,10 @@
 
             var rkey = gup('rkey') ? gup('rkey') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
             var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
-            var rid = gup('rid') ? gup('rid') : null;
+            var respondentid = gup('respondentid') ? gup('respondentid') : 42953;
             var responseid = gup('response') ? gup('response') : null;
             var apiSandbox = gup('apisandbox') ? gup('apisandbox') : true;
-            var ceInit ={
+            var ceInitOpts ={
                 debug: true,
                 domain: "https://api.crowdemotion.co.uk",
                 engineType: "kanako",
@@ -75,54 +75,29 @@
                 processVideo: undefined,
                 sandbox: true
             };
-            apiLoadData(ceInit,rkey,akey, function(res){
-                vrtTest.stimuliNumber = res.length;
-                vrtTest.stimuli = res;
-                window.vrt = new Vrt(options);
 
-                vrtOnEvent();
-
-                $(vrt).on('vrt_init_ok',function() {
-                    testList().done(function () {
+            if(!responseid && !respondentid){
+                tlog('At least one respondent id or response id mut be present')
+            }else{
+                apiLoadDataResults(ceInitOpts,rkey,akey, respondentid, function(res){
+                    testListResult().done(function () {
                         testStart();
                     });
                 });
-
-                vrt.init();
-            });
-
-
-
-
+            };
 
         });
     </script>
     <!-- EXAMPLE OF IMPLEMENTATION END -->
 
+    <script type="text/javascript" src="./libs/ceclient_ext.js"></script>
     <script type="text/javascript" src="./libs/mocha.js"></script>
     <script type="text/javascript" src="./libs/chai.js"></script>
     <script type="chai-as-promised"></script>
     <script type="text/javascript" src="./libs/sinon.js"></script>
-    <script type="text/javascript" src="video.js"></script>
+    <script type="text/javascript" src="results.js"></script>
 </head>
 <body>
-
-<!-- Playcorder START -->
-<div id="introzone" class="">
-
-    <h4>Memo Embed</h4>
-    <div id="vrt" style=""></div>
-
-    <div id="alerts"></div>
-
-    <div id="buttons">
-        <button id="start" class="hide button-choose pure-button">Start Session</button>
-        <button id="next" class="hide button-choose pure-button">Next video</button>
-        <button id="end" class="hide button-choose pure-button">End</button>
-    </div>
-
-</div>
-<!-- Playcorder END -->
 
 <!-- TESTS START -->
 <h4>Test results</h4>

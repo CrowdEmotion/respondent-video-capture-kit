@@ -256,9 +256,11 @@ var testList = function () {
                 });
                 it("video playback and video recording length should be similiar", function () {
                     ilog(this.test.title);
+                    //vrtTest.results.stimuli.push({time:vrtTest.time});
                     if (vrtTest.time.playback && vrtTest.time.recorder) {
                         expect(vrtTest.time.playback - vrtTest.time.recorder).to.be.lessThan((vrtTest.maxTimeDiffAllowed*2)).and.greaterThan(- (vrtTest.maxTimeDiffAllowed*2));
                     }
+
                 });
 
             });

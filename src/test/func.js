@@ -1,3 +1,8 @@
+cl = function(msg){
+    if (window.console && console.log) {
+        console.log(msg);
+    }
+};
 ll = function(msg, prepend, append){
     if (window.console && console.log) {
         var d = performance.now();
@@ -105,17 +110,21 @@ window.vrtTest = {
     proceedToShow: false,
     results:{
         db: {
+            research: null,
             respondent:null,
+            stimuli:[],
             responses:[],
             respondentMetadata:{},
-            responsesMetadata:{},
-            facevideos:[]
+            responsesMetadata:[],
+            facevideos:[],
+            timeseries: []
         },
         files: {
             logs:[],
             facevideos:[],
             timedmetadatas:[]
-        }
+        },
+        stimuli:[]
     }
 };
 
@@ -356,8 +365,8 @@ var testStart = function () {
     mocha.run();
 };
 
-var apiLoadData = function (ceInit, rkey, akey, cb) {
-    var d = $.Deferred();
+var apiLoadDataVideo = function (ceInit, rkey, akey, cb) {
+
     var ceClient = new CEClient(ceInit);
     ceClient.setToken(akey);
     ceClient.loadResearch(rkey, function (res) {
@@ -367,4 +376,77 @@ var apiLoadData = function (ceInit, rkey, akey, cb) {
                 cb(res, err);
             });
     });
+};
+var apiLoadDataResults = function (ceInit, rkey, akey, respondentid , cb) {
+
+
+    var cc = new CEClient(ceInit);
+    cc.setToken(akey);
+
+    cc.readRespondent(respondentid,
+        function (res) {
+                if(res && res.status)
+                    vrtTest.results.db.respondent = {};
+                else
+                    vrtTest.results.db.respondent = res;
+        }
+    );
+
+    cc.searchResponseIN('respondent_id',respondentid,
+        function (res, err) {
+            vrtTest.results.db.responses = res;
+            if(res && res.status)
+                vrtTest.results.db.responses = [];
+            else
+                vrtTest.results.db.responses = res;
+
+            var i = 0;
+            while(res[i]){
+                cc.readResponseCustomData(res[i].id,
+                    function (res, err) {
+                        if (res && res.status)
+                            vrtTest.results.db.responsesMetadata.push([]);
+                        else
+                            vrtTest.results.db.responsesMetadata.push(res);
+                    });
+                i++;
+            };
+            //todo
+            /*
+            ceClient.loadFacevideo(res.id,
+                function (res, err) {
+                    save.facevideos = res;
+                    //TODO load log
+                    //TODO load facevideos
+                    //TODO load timemedata
+                });
+                */
+        });
+
+    cc.readRespondentCustomData(respondentid,
+        function (res, err) {
+            if(err)
+                vrtTest.results.db.respondentMetadata = null
+            else
+                vrtTest.results.db.respondentMetadata = res;
+        });
+
+
+
+    cc.loadResearch(rkey, function (res) {
+        vrtTest.results.db.research = res;
+        cc.loadMediaList(res.id,
+            function (res, err) {
+                vrtTest.results.db.stimuli = res;
+            });
+
+    });
+
+    //TODO fix this
+    setTimeout(function(){
+        cc.logout();
+        if(cb)cb()
+    }.bind(this),2000);
+
+
 };
