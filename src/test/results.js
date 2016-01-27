@@ -66,6 +66,7 @@ var testListResult = function () {
             });
             it("should exist the logs file ", function (done) {
                 ilog(this.test.title);
+                jsl(vrtTest.results);
                 expect(fileExists(vrtTest.results.files.logs[index])).to.be.equal(200);
                 done()
             });

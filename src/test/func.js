@@ -11,6 +11,10 @@ ll = function(msg, prepend, append){
         $('#events').append('<div class="msgwrap"><div class="time">'+d.toFixed(2)+'</div><div class="type">'+prepend+'</div><div class="msg"> '+msg+'</div></div>');
     }
 };
+jsl = function(obj){
+    var p = JSON.stringify(obj, null, 4);
+    $('#results').append('<pre>'+p+'</pre>');
+};
 clog = function (msg) {
     ll(msg, 'EVENT');
 };
