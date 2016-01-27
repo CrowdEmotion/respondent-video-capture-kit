@@ -256,6 +256,7 @@ var vrtOnEvent = function(){
 function isPlayAndPublish(){
     if(vrtTest.time.a && vrtTest.time.b && !vrtTest.isPlayAndPublishDone){
         vrtTest.isPlayAndPublishDone = true;
+        if (vrtTest.handleIsPlayAndPublish) clearTimeout(vrtTest.handleIsPlayAndPublish);
         tlog('vrttest_playandpublish');
         $(vrtTest).trigger('vrttest_playandpublish')
     }
@@ -270,6 +271,7 @@ function isPlayAndPublish(){
 function isStopAndUnpublish(){
     if(vrtTest.time.c && vrtTest.time.d && !vrtTest.isStopAndUnpublishDone){
         vrtTest.isStopAndUnpublishDone = true;
+        if (vrtTest.handleIsStopAndUnpublish) clearTimeout(vrtTest.handleIsStopAndUnpublish);
         tlog('vrttest_stopandunpublish');
         $(vrtTest).trigger('vrttest_stopandunpublish')
     }

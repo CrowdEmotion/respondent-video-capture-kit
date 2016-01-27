@@ -157,9 +157,6 @@ var testList = function () {
                     this.done = done;
                     this.timeout(5000);
                     cleanUpStart();
-                    $(vrt).on('vrt_event_video_session_proceedToShow', function (e, data) {
-
-                    });
                     $(vrtTest).on('vrttest_playandpublish', function (e, data) {
                         $(vrtTest).off('vrttest_playandpublish');
                         tlog('vrtTest.time.a:' + vrtTest.time.a);
@@ -200,20 +197,25 @@ var testList = function () {
 
                     $(vrtTest).on('vrttest_stopandunpublish', function (e, data) {
                         $(vrtTest).off('vrttest_stopandunpublish');
-                        tlog('vrtTest.time.c:' + vrtTest.time.c);
-                        tlog('vrtTest.time.d:' + vrtTest.time.d);
-                        if (vrtTest.handleIsStopAndUnpublish) clearTimeout(vrtTest.handleIsStopAndUnpublish);
-                        if (vrtTest.time.c && vrtTest.time.d) {
-                            expect(vrtTest.time.d - vrtTest.time.c).to.be.lessThan(vrtTest.maxTimeDiffAllowed).and.greaterThan(-vrtTest.maxTimeDiffAllowed);
-                            done();
-                        } else if (!vrtTest.time.c && vrtTest.time.d) {
-                            done('stop event did not happen');
-                        } else if (vrtTest.time.c && !vrtTest.time.d) {
-                            done('unpublish event did not happen');
-                        } else if (!vrtTest.time.c && !vrtTest.time.d) {
-                            done('stop and unpublish did not happen');
-                        }
-                    });
+                        this.done = done;
+                        setTimeout(
+                            function(){
+                                tlog('vrtTest.time.c:' + vrtTest.time.c);
+                                tlog('vrtTest.time.d:' + vrtTest.time.d);
+                                if (vrtTest.handleIsStopAndUnpublish) clearTimeout(vrtTest.handleIsStopAndUnpublish);
+                                if (vrtTest.time.c && vrtTest.time.d) {
+                                    expect(vrtTest.time.d - vrtTest.time.c).to.be.lessThan(vrtTest.maxTimeDiffAllowed).and.greaterThan(-vrtTest.maxTimeDiffAllowed);
+                                    done();
+                                } else if (!vrtTest.time.c && vrtTest.time.d) {
+                                    done('stop event did not happen');
+                                } else if (vrtTest.time.c && !vrtTest.time.d) {
+                                    done('unpublish event did not happen');
+                                } else if (!vrtTest.time.c && !vrtTest.time.d) {
+                                    done('stop and unpublish did not happen');
+                                }
+                            }.bind(this)
+                        ,1000)
+                    }.bind(this));
                 });
 
                 it("video has a response id and video has custom data saved", function (done) {

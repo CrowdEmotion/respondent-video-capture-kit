@@ -991,8 +991,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         if (this.videoFullscreen) this.videoEndFullscreen();
         this.playerDispose();
         if(this.producerVideo && this.producerVideo.pause) this.producerVideo.pause();
-        this.producer.previewStop();
-        this.producer.disconnect();
+        if(this.producer && this.producer.previewStop) this.producer.previewStop();
+        if(this.producer && this.producer.disconnect) this.producer.disconnect();
         $('#'+this.producer.id).hide();
         this.log('close_session');
     };

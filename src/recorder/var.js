@@ -52,7 +52,7 @@ var WebProducer =
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var FlashProducer, HTML5Producer, api, e, message, platform;
+	var FlashProducer, HTML5Producer, api, e, error, message, platform;
 
 	platform = __webpack_require__(2);
 
@@ -62,8 +62,8 @@ var WebProducer =
 
 	try {
 	  HTML5Producer = __webpack_require__(5);
-	} catch (_error) {
-	  e = _error;
+	} catch (error) {
+	  e = error;
 	  if (console && console.error) {
 	    message = "Can't use HTML5Producer -> " + e.message;
 	    console.error(message, e);
@@ -104,6 +104,7 @@ var WebProducer =
 	    return 'flash';
 	  },
 	  webProducerClassGet: function(type) {
+	    var error1;
 	    type = type || api.typeAutoDetect();
 	    if (console && console.log) {
 	      console.log('WebProducer type', type);
@@ -112,8 +113,8 @@ var WebProducer =
 	      if (type === 'html5') {
 	        return HTML5Producer;
 	      }
-	    } catch (_error) {
-	      e = _error;
+	    } catch (error1) {
+	      e = error1;
 	    }
 	    return FlashProducer;
 	  }
@@ -3466,7 +3467,7 @@ var WebProducer =
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
-	Adapter = __webpack_require__(8);
+	Adapter = __webpack_require__(6);
 
 	$ = __webpack_require__(7);
 
@@ -3474,7 +3475,7 @@ var WebProducer =
 
 	mixins = FlashProducer.mixins;
 
-	Hub = __webpack_require__(6);
+	Hub = __webpack_require__(8);
 
 	Urls = __webpack_require__(9);
 
@@ -3591,10 +3592,10 @@ var WebProducer =
 	  HTML5Producer.prototype.previewStop = function() {
 	    var tracks;
 	    if (this.stream) {
-	      if (stream.stop) {
+	      if (this.stream.stop) {
 	        return this.stream.stop();
 	      } else {
-	        tracks = stream.getTracks();
+	        tracks = this.stream.getTracks();
 	        return tracks.forEach(function(track) {
 	          return track.stop();
 	        });
@@ -3748,11 +3749,11 @@ var WebProducer =
 	  };
 
 	  HTML5Producer.prototype.log = function(message) {
-	    var e;
+	    var e, error;
 	    try {
 	      this.remoteLoggerLog('log', 'trace', Array.prototype.slice.call(arguments));
-	    } catch (_error) {
-	      e = _error;
+	    } catch (error) {
+	      e = error;
 	    }
 	    if (!this.trace) {
 	      return;
@@ -3891,201 +3892,254 @@ var WebProducer =
 
 /***/ },
 /* 6 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var $, EventEmitterMixin, Hub, HubContents, HubJobs, HubStreams;
+	/*
+	 *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
+	 *
+	 *  Use of this source code is governed by a BSD-style license
+	 *  that can be found in the LICENSE file in the root of the source
+	 *  tree.
+	 */
 
-	$ = __webpack_require__(7);
+	/* More information about these options at jshint.com/docs/options */
+	/* global mozRTCIceCandidate, mozRTCPeerConnection,
+	mozRTCSessionDescription, webkitRTCPeerConnection */
+	/* exported trace,requestUserMedia */
 
-	EventEmitterMixin = __webpack_require__(4).mixins.EventEmitterMixin;
+	'use strict';
 
-	HubContents = (function() {
-	  HubContents.extend = function(source) {
-	    var prop;
-	    for (prop in source) {
-	      this.prototype[prop] = source[prop];
-	    }
-	  };
+	var RTCPeerConnection = null;
+	var getUserMedia = null;
+	var attachMediaStream = null;
+	var reattachMediaStream = null;
+	var webrtcDetectedBrowser = null;
+	var webrtcDetectedVersion = null;
 
-	  function HubContents() {
-	    this.constructor.extend(EventEmitterMixin);
-	    this.url = null;
+	function trace(text) {
+	  // This function is used for logging.
+	  if (text[text.length - 1] === '\n') {
+	    text = text.substring(0, text.length - 1);
 	  }
+	  if (window.performance) {
+	    var now = (window.performance.now() / 1000).toFixed(3);
+	    console.log(now + ': ' + text);
+	  } else {
+	    console.log(text);
+	  }
+	}
 
-	  HubContents.prototype.urlSet = function(url) {
-	    this.url = url;
-	    return this.urlStatic = url.replace('/api', '');
+	function maybeFixConfiguration(pcConfig) {
+	  if (!pcConfig) {
+	    return;
+	  }
+	  for (var i = 0; i < pcConfig.iceServers.length; i++) {
+	    if (pcConfig.iceServers[i].hasOwnProperty('urls')) {
+	      pcConfig.iceServers[i].url = pcConfig.iceServers[i].urls;
+	      delete pcConfig.iceServers[i].urls;
+	    }
+	  }
+	}
+
+	if (navigator.mozGetUserMedia) {
+	  console.log('This appears to be Firefox');
+
+	  webrtcDetectedBrowser = 'firefox';
+
+	  webrtcDetectedVersion =
+	    parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+
+	  // The RTCPeerConnection object.
+	  RTCPeerConnection = function(pcConfig, pcConstraints) {
+	    // .urls is not supported in FF yet.
+	    maybeFixConfiguration(pcConfig);
+	    return new mozRTCPeerConnection(pcConfig, pcConstraints);
 	  };
 
-	  HubContents.prototype.checkReady = function(name, kind) {
-	    var destinationUrl, fileName, metadataFileName, metadataUrl, self;
-	    self = this;
-	    kind = kind || 'mp4';
-	    fileName = [name, kind].join('.');
-	    destinationUrl = this.urlStatic + '/' + fileName;
-	    metadataFileName = [name, 'json'].join('.');
-	    metadataUrl = this.urlStatic + '/' + metadataFileName;
-	    return this._checkReadyPoll(name, function() {
-	      self.fire('save', destinationUrl, name);
-	      return self.fire('save-metadata', metadataUrl, name);
-	    });
+	  // The RTCSessionDescription object.
+	  window.RTCSessionDescription = mozRTCSessionDescription;
+
+	  // The RTCIceCandidate object.
+	  window.RTCIceCandidate = mozRTCIceCandidate;
+
+	  // getUserMedia shim (only difference is the prefix).
+	  // Code from Adam Barth.
+	  getUserMedia = navigator.mozGetUserMedia.bind(navigator);
+	  navigator.getUserMedia = getUserMedia;
+
+	  // Shim for MediaStreamTrack.getSources.
+	  MediaStreamTrack.getSources = function(successCb) {
+	    setTimeout(function() {
+	      var infos = [
+	        { kind: 'audio', id: 'default', label:'', facing:'' },
+	        { kind: 'video', id: 'default', label:'', facing:'' }
+	      ];
+	      successCb(infos);
+	    }, 0);
 	  };
 
-	  HubContents.prototype._checkReadyPoll = function(name, cb) {
-	    var poll, url;
-	    url = this.url + '/' + name + '/ready';
-	    poll = function() {
-	      var d;
-	      d = $.ajax({
-	        url: url,
-	        dataType: 'jsonp'
-	      });
-	      d.done(function(result) {
-	        if (result.error) {
-	          return setTimeout(poll, 1000);
+	  // Creates ICE server from the URL for FF.
+	  window.createIceServer = function(url, username, password) {
+	    var iceServer = null;
+	    var urlParts = url.split(':');
+	    if (urlParts[0].indexOf('stun') === 0) {
+	      // Create ICE server with STUN URL.
+	      iceServer = {
+	        'url': url
+	      };
+	    } else if (urlParts[0].indexOf('turn') === 0) {
+	      if (webrtcDetectedVersion < 27) {
+	        // Create iceServer with turn url.
+	        // Ignore the transport parameter from TURN url for FF version <=27.
+	        var turnUrlParts = url.split('?');
+	        // Return null for createIceServer if transport=tcp.
+	        if (turnUrlParts.length === 1 ||
+	          turnUrlParts[1].indexOf('transport=udp') === 0) {
+	          iceServer = {
+	            'url': turnUrlParts[0],
+	            'credential': password,
+	            'username': username
+	          };
 	        }
-	        return cb(result);
-	      });
-	      return d.fail(function() {
-	        return setTimeout(poll, 1000);
-	      });
-	    };
-	    return poll();
-	  };
-
-	  return HubContents;
-
-	})();
-
-	HubJobs = (function() {
-	  HubJobs.extend = function(source) {
-	    var prop;
-	    for (prop in source) {
-	      this.prototype[prop] = source[prop];
-	    }
-	  };
-
-	  function HubJobs() {
-	    this.constructor.extend(EventEmitterMixin);
-	    this.url = null;
-	  }
-
-	  HubJobs.prototype.urlSet = function(url) {
-	    return this.url = url;
-	  };
-
-	  HubJobs.prototype.enableRealtimeAnalysis = function(engine, success, error) {
-	    var data, dfr, dfr_done, dfr_error, url;
-	    url = this.url + '/submit/jsonp';
-	    data = {
-	      streamName: this.streamName,
-	      engine: engine || 'kanako_live'
-	    };
-	    dfr = new $.Deferred();
-	    dfr_error = function(err) {
-	      dfr.reject(err);
-	    };
-	    dfr_done = function(result, b, c) {
-	      if (result.error) {
-	        return dfr_error(result.error, b, c);
+	      } else {
+	        // FF 27 and above supports transport parameters in TURN url,
+	        // So passing in the full url to create iceServer.
+	        iceServer = {
+	          'url': url,
+	          'credential': password,
+	          'username': username
+	        };
 	      }
-	      dfr.resolve(result, b, c);
-	    };
-	    $.ajax({
-	      url: url,
-	      dataType: 'jsonp',
-	      contentType: 'application/json',
-	      data: data,
-	      type: 'get'
-	    }).fail(dfr_error).fail(error).done(dfr_done).done(success);
-	    return dfr;
+	    }
+	    return iceServer;
 	  };
 
-	  return HubJobs;
+	  window.createIceServers = function(urls, username, password) {
+	    var iceServers = [];
+	    // Use .url for FireFox.
+	    for (var i = 0; i < urls.length; i++) {
+	      var iceServer =
+	        window.createIceServer(urls[i], username, password);
+	      if (iceServer !== null) {
+	        iceServers.push(iceServer);
+	      }
+	    }
+	    return iceServers;
+	  };
 
-	})();
+	  // Attach a media stream to an element.
+	  attachMediaStream = function(element, stream) {
+	    console.log('Attaching media stream');
+	    element.mozSrcObject = stream;
+	  };
 
-	HubStreams = (function() {
-	  HubStreams.extend = function(source) {
-	    var prop;
-	    for (prop in source) {
-	      this.prototype[prop] = source[prop];
+	  reattachMediaStream = function(to, from) {
+	    console.log('Reattaching media stream');
+	    to.mozSrcObject = from.mozSrcObject;
+	  };
+
+	} else if (navigator.webkitGetUserMedia) {
+	  console.log('This appears to be Chrome');
+
+	  webrtcDetectedBrowser = 'chrome';
+	  // Temporary fix until crbug/374263 is fixed.
+	  // Setting Chrome version to 999, if version is unavailable.
+	  var result = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+	  if (result !== null) {
+	    webrtcDetectedVersion = parseInt(result[2], 10);
+	  } else {
+	    webrtcDetectedVersion = 999;
+	  }
+
+	  // Creates iceServer from the url for Chrome M33 and earlier.
+	  window.createIceServer = function(url, username, password) {
+	    var iceServer = null;
+	    var urlParts = url.split(':');
+	    if (urlParts[0].indexOf('stun') === 0) {
+	      // Create iceServer with stun url.
+	      iceServer = {
+	        'url': url
+	      };
+	    } else if (urlParts[0].indexOf('turn') === 0) {
+	      // Chrome M28 & above uses below TURN format.
+	      iceServer = {
+	        'url': url,
+	        'credential': password,
+	        'username': username
+	      };
+	    }
+	    return iceServer;
+	  };
+
+	  // Creates an ICEServer object from multiple URLs.
+	  window.createIceServers = function(urls, username, password) {
+	    return {
+	      'urls': urls,
+	      'credential': password,
+	      'username': username
+	    };
+	  };
+
+	  // The RTCPeerConnection object.
+	  RTCPeerConnection = function(pcConfig, pcConstraints) {
+	    return new webkitRTCPeerConnection(pcConfig, pcConstraints);
+	  };
+
+	  // Get UserMedia (only difference is the prefix).
+	  // Code from Adam Barth.
+	  getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
+	  navigator.getUserMedia = getUserMedia;
+
+	  // Attach a media stream to an element.
+	  attachMediaStream = function(element, stream) {
+	    if (typeof element.srcObject !== 'undefined') {
+	      element.srcObject = stream;
+	    } else if (typeof element.mozSrcObject !== 'undefined') {
+	      element.mozSrcObject = stream;
+	    } else if (typeof element.src !== 'undefined') {
+	      element.src = URL.createObjectURL(stream);
+	    } else {
+	      console.log('Error attaching stream to element.');
 	    }
 	  };
 
-	  function HubStreams() {
-	    this.constructor.extend(EventEmitterMixin);
-	    this.url = null;
-	  }
-
-	  HubStreams.prototype.urlSet = function(url1) {
-	    this.url = url1;
+	  reattachMediaStream = function(to, from) {
+	    to.src = from.src;
 	  };
+	} else {
+	  console.log('Browser does not appear to be WebRTC-capable');
+	}
 
-	  HubStreams.prototype.publish = function(streamName) {
-	    var data, dfr, url;
-	    url = this.url + '/on_publish';
-	    data = {
-	      streamName: streamName
+	// Returns the result of getUserMedia as a Promise.
+	function requestUserMedia(constraints) {
+	  return new Promise(function(resolve, reject) {
+	    var onSuccess = function(stream) {
+	      resolve(stream);
 	    };
-	    dfr = $.ajax({
-	      url: url,
-	      dataType: 'json',
-	      contentType: 'application/json',
-	      data: JSON.stringify(data),
-	      type: 'post'
-	    });
-	    return dfr;
-	  };
-
-	  HubStreams.prototype.unpublish = function(streamName) {
-	    var data, dfr, url;
-	    url = this.url + '/on_publish_done';
-	    data = {
-	      streamName: streamName
+	    var onError = function(error) {
+	      reject(error);
 	    };
-	    dfr = $.ajax({
-	      url: url,
-	      dataType: 'json',
-	      contentType: 'application/json',
-	      data: JSON.stringify(data),
-	      type: 'post'
-	    });
-	    return dfr;
-	  };
 
-	  return HubStreams;
+	    try {
+	      getUserMedia(constraints, onSuccess, onError);
+	    } catch (e) {
+	      reject(e);
+	    }
+	  });
+	}
 
-	})();
 
-	Hub = (function() {
-	  function Hub() {
-	    this.url = null;
-	    this.contents = new HubContents();
-	    this.jobs = new HubJobs();
-	    this.streams = new HubStreams();
-	  }
 
-	  Hub.prototype.urlSet = function(url) {
-	    this.url = url;
-	    this.contents.urlSet(this.url + '/contents');
-	    this.jobs.urlSet(this.url + '/jobs');
-	    return this.streams.urlSet(this.url + '/janus');
-	  };
+	/*** EXPORTS FROM exports-loader ***/
+	exports["getUserMedia"] = (getUserMedia);
+	exports["attachMediaStream"] = (attachMediaStream);
+	exports["webrtcDetectedBrowser"] = (webrtcDetectedBrowser);
+	exports["webrtcDetectedVersion"] = (webrtcDetectedVersion);
 
-	  Hub.prototype.info = function() {
-	    return $.ajax({
-	      url: this.url + '/info/jsonp',
-	      dataType: 'jsonp'
-	    });
-	  };
-
-	  return Hub;
-
-	})();
-
-	module.exports = Hub;
-
+	/*** EXPORTS FROM exports-loader ***/
+	exports["RTCPeerConnection"] = (RTCPeerConnection);
+	exports["RTCIceCandidate"] = (RTCIceCandidate);
+	exports["RTCSessionDescription"] = (RTCSessionDescription);
 
 /***/ },
 /* 7 */
@@ -13305,254 +13359,201 @@ var WebProducer =
 
 /***/ },
 /* 8 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	/*
-	 *  Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
-	 *
-	 *  Use of this source code is governed by a BSD-style license
-	 *  that can be found in the LICENSE file in the root of the source
-	 *  tree.
-	 */
+	var $, EventEmitterMixin, Hub, HubContents, HubJobs, HubStreams;
 
-	/* More information about these options at jshint.com/docs/options */
-	/* global mozRTCIceCandidate, mozRTCPeerConnection,
-	mozRTCSessionDescription, webkitRTCPeerConnection */
-	/* exported trace,requestUserMedia */
+	$ = __webpack_require__(7);
 
-	'use strict';
+	EventEmitterMixin = __webpack_require__(4).mixins.EventEmitterMixin;
 
-	var RTCPeerConnection = null;
-	var getUserMedia = null;
-	var attachMediaStream = null;
-	var reattachMediaStream = null;
-	var webrtcDetectedBrowser = null;
-	var webrtcDetectedVersion = null;
-
-	function trace(text) {
-	  // This function is used for logging.
-	  if (text[text.length - 1] === '\n') {
-	    text = text.substring(0, text.length - 1);
-	  }
-	  if (window.performance) {
-	    var now = (window.performance.now() / 1000).toFixed(3);
-	    console.log(now + ': ' + text);
-	  } else {
-	    console.log(text);
-	  }
-	}
-
-	function maybeFixConfiguration(pcConfig) {
-	  if (!pcConfig) {
-	    return;
-	  }
-	  for (var i = 0; i < pcConfig.iceServers.length; i++) {
-	    if (pcConfig.iceServers[i].hasOwnProperty('urls')) {
-	      pcConfig.iceServers[i].url = pcConfig.iceServers[i].urls;
-	      delete pcConfig.iceServers[i].urls;
+	HubContents = (function() {
+	  HubContents.extend = function(source) {
+	    var prop;
+	    for (prop in source) {
+	      this.prototype[prop] = source[prop];
 	    }
+	  };
+
+	  function HubContents() {
+	    this.constructor.extend(EventEmitterMixin);
+	    this.url = null;
 	  }
-	}
 
-	if (navigator.mozGetUserMedia) {
-	  console.log('This appears to be Firefox');
-
-	  webrtcDetectedBrowser = 'firefox';
-
-	  webrtcDetectedVersion =
-	    parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
-
-	  // The RTCPeerConnection object.
-	  RTCPeerConnection = function(pcConfig, pcConstraints) {
-	    // .urls is not supported in FF yet.
-	    maybeFixConfiguration(pcConfig);
-	    return new mozRTCPeerConnection(pcConfig, pcConstraints);
+	  HubContents.prototype.urlSet = function(url) {
+	    this.url = url;
+	    return this.urlStatic = url.replace('/api', '');
 	  };
 
-	  // The RTCSessionDescription object.
-	  window.RTCSessionDescription = mozRTCSessionDescription;
-
-	  // The RTCIceCandidate object.
-	  window.RTCIceCandidate = mozRTCIceCandidate;
-
-	  // getUserMedia shim (only difference is the prefix).
-	  // Code from Adam Barth.
-	  getUserMedia = navigator.mozGetUserMedia.bind(navigator);
-	  navigator.getUserMedia = getUserMedia;
-
-	  // Shim for MediaStreamTrack.getSources.
-	  MediaStreamTrack.getSources = function(successCb) {
-	    setTimeout(function() {
-	      var infos = [
-	        { kind: 'audio', id: 'default', label:'', facing:'' },
-	        { kind: 'video', id: 'default', label:'', facing:'' }
-	      ];
-	      successCb(infos);
-	    }, 0);
+	  HubContents.prototype.checkReady = function(name, kind) {
+	    var destinationUrl, fileName, metadataFileName, metadataUrl, self;
+	    self = this;
+	    kind = kind || 'mp4';
+	    fileName = [name, kind].join('.');
+	    destinationUrl = this.urlStatic + '/' + fileName;
+	    metadataFileName = [name, 'json'].join('.');
+	    metadataUrl = this.urlStatic + '/' + metadataFileName;
+	    return this._checkReadyPoll(name, function() {
+	      self.fire('save', destinationUrl, name);
+	      return self.fire('save-metadata', metadataUrl, name);
+	    });
 	  };
 
-	  // Creates ICE server from the URL for FF.
-	  window.createIceServer = function(url, username, password) {
-	    var iceServer = null;
-	    var urlParts = url.split(':');
-	    if (urlParts[0].indexOf('stun') === 0) {
-	      // Create ICE server with STUN URL.
-	      iceServer = {
-	        'url': url
-	      };
-	    } else if (urlParts[0].indexOf('turn') === 0) {
-	      if (webrtcDetectedVersion < 27) {
-	        // Create iceServer with turn url.
-	        // Ignore the transport parameter from TURN url for FF version <=27.
-	        var turnUrlParts = url.split('?');
-	        // Return null for createIceServer if transport=tcp.
-	        if (turnUrlParts.length === 1 ||
-	          turnUrlParts[1].indexOf('transport=udp') === 0) {
-	          iceServer = {
-	            'url': turnUrlParts[0],
-	            'credential': password,
-	            'username': username
-	          };
+	  HubContents.prototype._checkReadyPoll = function(name, cb) {
+	    var poll, url;
+	    url = this.url + '/' + name + '/ready';
+	    poll = function() {
+	      var d;
+	      d = $.ajax({
+	        url: url,
+	        dataType: 'jsonp'
+	      });
+	      d.done(function(result) {
+	        if (result.error) {
+	          return setTimeout(poll, 1000);
 	        }
-	      } else {
-	        // FF 27 and above supports transport parameters in TURN url,
-	        // So passing in the full url to create iceServer.
-	        iceServer = {
-	          'url': url,
-	          'credential': password,
-	          'username': username
-	        };
-	      }
+	        return cb(result);
+	      });
+	      return d.fail(function() {
+	        return setTimeout(poll, 1000);
+	      });
+	    };
+	    return poll();
+	  };
+
+	  return HubContents;
+
+	})();
+
+	HubJobs = (function() {
+	  HubJobs.extend = function(source) {
+	    var prop;
+	    for (prop in source) {
+	      this.prototype[prop] = source[prop];
 	    }
-	    return iceServer;
 	  };
 
-	  window.createIceServers = function(urls, username, password) {
-	    var iceServers = [];
-	    // Use .url for FireFox.
-	    for (var i = 0; i < urls.length; i++) {
-	      var iceServer =
-	        window.createIceServer(urls[i], username, password);
-	      if (iceServer !== null) {
-	        iceServers.push(iceServer);
-	      }
-	    }
-	    return iceServers;
-	  };
-
-	  // Attach a media stream to an element.
-	  attachMediaStream = function(element, stream) {
-	    console.log('Attaching media stream');
-	    element.mozSrcObject = stream;
-	  };
-
-	  reattachMediaStream = function(to, from) {
-	    console.log('Reattaching media stream');
-	    to.mozSrcObject = from.mozSrcObject;
-	  };
-
-	} else if (navigator.webkitGetUserMedia) {
-	  console.log('This appears to be Chrome');
-
-	  webrtcDetectedBrowser = 'chrome';
-	  // Temporary fix until crbug/374263 is fixed.
-	  // Setting Chrome version to 999, if version is unavailable.
-	  var result = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
-	  if (result !== null) {
-	    webrtcDetectedVersion = parseInt(result[2], 10);
-	  } else {
-	    webrtcDetectedVersion = 999;
+	  function HubJobs() {
+	    this.constructor.extend(EventEmitterMixin);
+	    this.url = null;
 	  }
 
-	  // Creates iceServer from the url for Chrome M33 and earlier.
-	  window.createIceServer = function(url, username, password) {
-	    var iceServer = null;
-	    var urlParts = url.split(':');
-	    if (urlParts[0].indexOf('stun') === 0) {
-	      // Create iceServer with stun url.
-	      iceServer = {
-	        'url': url
-	      };
-	    } else if (urlParts[0].indexOf('turn') === 0) {
-	      // Chrome M28 & above uses below TURN format.
-	      iceServer = {
-	        'url': url,
-	        'credential': password,
-	        'username': username
-	      };
-	    }
-	    return iceServer;
+	  HubJobs.prototype.urlSet = function(url) {
+	    return this.url = url;
 	  };
 
-	  // Creates an ICEServer object from multiple URLs.
-	  window.createIceServers = function(urls, username, password) {
-	    return {
-	      'urls': urls,
-	      'credential': password,
-	      'username': username
+	  HubJobs.prototype.enableRealtimeAnalysis = function(engine, success, error) {
+	    var data, dfr, dfr_done, dfr_error, url;
+	    url = this.url + '/submit/jsonp';
+	    data = {
+	      streamName: this.streamName,
+	      engine: engine || 'kanako_live'
 	    };
+	    dfr = new $.Deferred();
+	    dfr_error = function(err) {
+	      dfr.reject(err);
+	    };
+	    dfr_done = function(result, b, c) {
+	      if (result.error) {
+	        return dfr_error(result.error, b, c);
+	      }
+	      dfr.resolve(result, b, c);
+	    };
+	    $.ajax({
+	      url: url,
+	      dataType: 'jsonp',
+	      contentType: 'application/json',
+	      data: data,
+	      type: 'get'
+	    }).fail(dfr_error).fail(error).done(dfr_done).done(success);
+	    return dfr;
 	  };
 
-	  // The RTCPeerConnection object.
-	  RTCPeerConnection = function(pcConfig, pcConstraints) {
-	    return new webkitRTCPeerConnection(pcConfig, pcConstraints);
-	  };
+	  return HubJobs;
 
-	  // Get UserMedia (only difference is the prefix).
-	  // Code from Adam Barth.
-	  getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
-	  navigator.getUserMedia = getUserMedia;
+	})();
 
-	  // Attach a media stream to an element.
-	  attachMediaStream = function(element, stream) {
-	    if (typeof element.srcObject !== 'undefined') {
-	      element.srcObject = stream;
-	    } else if (typeof element.mozSrcObject !== 'undefined') {
-	      element.mozSrcObject = stream;
-	    } else if (typeof element.src !== 'undefined') {
-	      element.src = URL.createObjectURL(stream);
-	    } else {
-	      console.log('Error attaching stream to element.');
+	HubStreams = (function() {
+	  HubStreams.extend = function(source) {
+	    var prop;
+	    for (prop in source) {
+	      this.prototype[prop] = source[prop];
 	    }
 	  };
 
-	  reattachMediaStream = function(to, from) {
-	    to.src = from.src;
+	  function HubStreams() {
+	    this.constructor.extend(EventEmitterMixin);
+	    this.url = null;
+	  }
+
+	  HubStreams.prototype.urlSet = function(url1) {
+	    this.url = url1;
 	  };
-	} else {
-	  console.log('Browser does not appear to be WebRTC-capable');
-	}
 
-	// Returns the result of getUserMedia as a Promise.
-	function requestUserMedia(constraints) {
-	  return new Promise(function(resolve, reject) {
-	    var onSuccess = function(stream) {
-	      resolve(stream);
+	  HubStreams.prototype.publish = function(streamName) {
+	    var data, dfr, url;
+	    url = this.url + '/on_publish';
+	    data = {
+	      streamName: streamName
 	    };
-	    var onError = function(error) {
-	      reject(error);
+	    dfr = $.ajax({
+	      url: url,
+	      dataType: 'json',
+	      contentType: 'application/json',
+	      data: JSON.stringify(data),
+	      type: 'post'
+	    });
+	    return dfr;
+	  };
+
+	  HubStreams.prototype.unpublish = function(streamName) {
+	    var data, dfr, url;
+	    url = this.url + '/on_publish_done';
+	    data = {
+	      streamName: streamName
 	    };
+	    dfr = $.ajax({
+	      url: url,
+	      dataType: 'json',
+	      contentType: 'application/json',
+	      data: JSON.stringify(data),
+	      type: 'post'
+	    });
+	    return dfr;
+	  };
 
-	    try {
-	      getUserMedia(constraints, onSuccess, onError);
-	    } catch (e) {
-	      reject(e);
-	    }
-	  });
-	}
+	  return HubStreams;
 
+	})();
 
+	Hub = (function() {
+	  function Hub() {
+	    this.url = null;
+	    this.contents = new HubContents();
+	    this.jobs = new HubJobs();
+	    this.streams = new HubStreams();
+	  }
 
-	/*** EXPORTS FROM exports-loader ***/
-	exports["getUserMedia"] = (getUserMedia);
-	exports["attachMediaStream"] = (attachMediaStream);
-	exports["webrtcDetectedBrowser"] = (webrtcDetectedBrowser);
-	exports["webrtcDetectedVersion"] = (webrtcDetectedVersion);
+	  Hub.prototype.urlSet = function(url) {
+	    this.url = url;
+	    this.contents.urlSet(this.url + '/contents');
+	    this.jobs.urlSet(this.url + '/jobs');
+	    return this.streams.urlSet(this.url + '/janus');
+	  };
 
-	/*** EXPORTS FROM exports-loader ***/
-	exports["RTCPeerConnection"] = (RTCPeerConnection);
-	exports["RTCIceCandidate"] = (RTCIceCandidate);
-	exports["RTCSessionDescription"] = (RTCSessionDescription);
+	  Hub.prototype.info = function() {
+	    return $.ajax({
+	      url: this.url + '/info/jsonp',
+	      dataType: 'jsonp'
+	    });
+	  };
+
+	  return Hub;
+
+	})();
+
+	module.exports = Hub;
+
 
 /***/ },
 /* 9 */
@@ -13560,7 +13561,7 @@ var WebProducer =
 
 	var EventEmitterMixin, Hub, Urls;
 
-	Hub = __webpack_require__(6);
+	Hub = __webpack_require__(8);
 
 	EventEmitterMixin = __webpack_require__(4).mixins.EventEmitterMixin;
 
@@ -13641,7 +13642,7 @@ var WebProducer =
 
 	Janus = __webpack_require__(11);
 
-	Adapter = __webpack_require__(8);
+	Adapter = __webpack_require__(6);
 
 	EventEmitterMixin = __webpack_require__(4).EventEmitterMixin;
 
@@ -13978,7 +13979,7 @@ var WebProducer =
 	var $ = __webpack_require__(7);
 
 	/*** IMPORTS FROM imports-loader ***/
-	var adapter = __webpack_require__(8);
+	var adapter = __webpack_require__(6);
 
 	/*** IMPORTS FROM imports-loader ***/
 	var RTCPeerConnection = adapter.RTCPeerConnection;
