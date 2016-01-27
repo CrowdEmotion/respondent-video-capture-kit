@@ -14,6 +14,7 @@ var testListResult = function () {
     describe('DB check', function () {
         dlog(this.title);
         it("should have Respondent data ", function () {
+            jsl(vrtTest.results);
             ilog(this.test.title);
             cl(vrtTest.results);
             expect(vrtTest.results.db.respondent).to.not.be.empty;
@@ -66,7 +67,6 @@ var testListResult = function () {
             });
             it("should exist the logs file ", function (done) {
                 ilog(this.test.title);
-                jsl(vrtTest.results);
                 expect(fileExists(vrtTest.results.files.logs[index])).to.be.equal(200);
                 done()
             });
