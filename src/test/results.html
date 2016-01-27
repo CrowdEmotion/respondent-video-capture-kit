@@ -28,6 +28,9 @@
         #events .type, #events .time, #events .msg{
             display: inline;
         }
+        #results{
+            text-align: left;
+        }
     </style>
     <script type="text/javascript" charset="utf-8"  src="./func.js"></script>
     <!-- TESTS START -->
@@ -86,6 +89,10 @@
                 });
             };
 
+            $('#showresults').click(function(){
+                $('#results').toggle();
+            });
+
         });
     </script>
     <!-- EXAMPLE OF IMPLEMENTATION END -->
@@ -110,8 +117,8 @@
 <!-- TESTS END -->
 
 <!-- TESTS START -->
-<h4>Results</h4>
-<div id="results"></div>
+<button id="showresults" value="Show results"></button>
+<div id="results" style="display: none"></div>
 <!-- TESTS END -->
 
 </body>
