@@ -55,6 +55,24 @@ var testListResult = function () {
         testSuite = this;
         window.testSuite = testSuite;
         var fileTest = function(index){
+            it("should facevideo file status must be 2", function (done) {
+                ilog(this.test.title);
+                if(vrtTest.results.db.facevideos[index].statusMessage=='sandboxed'){
+                    expect(vrtTest.results.db.facevideos[index].statusMessage).to.be.equal('sandboxed');
+                }else if(vrtTest.results.db.facevideos[index].status==2){
+                    expect(vrtTest.results.db.facevideos[index].status).to.be.equal(2);
+                }
+                done()
+            });
+            it("should facevideo file analysis message be sandboxed or complete", function (done) {
+                ilog(this.test.title);
+                if(vrtTest.results.db.facevideos[index].statusMessage=='sandboxed'){
+                    expect(vrtTest.results.db.facevideos[index].statusMessage).to.be.equal('sandboxed');
+                }else{
+                    expect(vrtTest.results.db.facevideos[index].statusMessage).to.be.equal('Analysis complete');
+                }
+                done()
+            });
             it("should exist Timestamps file", function (done) {
                 ilog(this.test.title);
                 expect(fileExists(vrtTest.results.files.timedmetadatas[index])).to.be.equal(200);

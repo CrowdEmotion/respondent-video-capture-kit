@@ -13,9 +13,14 @@
             clear: both
         }
         #introzone{
-            border-bottom: 1px solid #0b97c4;
-            min-height: 300px;
+            border: 1px solid #0b97c4;
+            min-width: 600px;
+            float: right;
         }
+        #reszone{
+            float: left;
+        }
+
         h4{
             font-family: 'Lato', sans-serif;
         }
@@ -138,16 +143,16 @@
 
 </div>
 <!-- Playcorder END -->
+<div id="reszone" class="">
+    <!-- TESTS START -->
+    <h4>Test results</h4>
+    <div id="mocha"></div>
+    <!-- TESTS END -->
 
-<!-- TESTS START -->
-<h4>Test results</h4>
-<div id="mocha"></div>
-<!-- TESTS END -->
-
-<!-- TESTS START -->
-<h4>Console</h4>
-<div id="events"></div>
-<!-- TESTS END -->
-
+    <!-- TESTS START -->
+    <h4>Console</h4>
+    <div id="events"></div>
+    <!-- TESTS END -->
+</div>
 </body>
 </html>
