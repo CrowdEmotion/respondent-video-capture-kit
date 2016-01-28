@@ -287,6 +287,7 @@ var testList = function () {
                 done();
             });
             setTimeout(function () {
+                $(vrtTest).trigger('vrttest_end');
                 $(vrt).trigger('vrt_event_user_session_complete');
             }, 5000);
         });

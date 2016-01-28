@@ -70,6 +70,7 @@
             var rkey = gup('rkey') ? gup('rkey') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
             var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
             var apiSandbox = gup('apisandbox') ? gup('apisandbox') : true;
+            var fullVideo  = gup('full') ? gup('full') : false;
             var options = {
                 // apiDomain: "http://localhost:1337",
                 researchToken: rkey,
@@ -109,6 +110,15 @@
                 });
 
                 vrt.init();
+            });
+
+            $(vrtTest).on('vrttest_end',function(){
+                if(fullVideo){
+                    var win = window.open(
+                            'results.html?respondentid='+vrtTest.respondentId+'&appkey='+akey+'&rkey'+rkey
+                            , '_blank');
+                    //win.focus();
+                }
             });
 
 
