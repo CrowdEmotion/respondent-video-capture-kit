@@ -185,7 +185,8 @@ var testList = function () {
 
             describe("Video End ", function () {
                 dlog(this.title);
-                this.timeout(120000);
+                //TODO set timeout according to video legnth
+                this.timeout(1200000);
                 before('clean up',function(){
                     ilog('clean up video end');
                     cleanUpEnd();
