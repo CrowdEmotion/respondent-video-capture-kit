@@ -323,10 +323,10 @@ function alertMessage(msg){
 function fvToMetadata(remotelocation){
     return remotelocation.substr(0, remotelocation.lastIndexOf(".")) + ".json";;
 };
-function fvTolog(filename){
-    var original = parseURL(filename);
+function fvTolog(filename, full){
+    var original = parseURL(full);
     filename = filename.substr(0, filename.lastIndexOf(".")) + ".log";
-    return 'https://'+original.hostname+'/logs/remote/'+filename;
+    return 'https://'+original.domain+'/logs/remote/'+filename;
 }
 function getFile(name,type){
     //http://mediabox.crowdemotion.co.uk:8082/contents/test_0__1535005240.json
@@ -468,7 +468,7 @@ var apiLoadDataResults = function (ceInit, rkey, akey, respondentid , cb) {
                         if(res.remoteLocation){
                             vrtTest.results.files.facevideos.push(res.remoteLocation);
                             vrtTest.results.files.timedmetadatas.push(fvToMetadata(res.remoteLocation));
-                            vrtTest.results.files.logs.push(fvTolog(res.filename));
+                            vrtTest.results.files.logs.push(fvTolog(res.filename,res.remoteLocation));
                         }
                     });
                 i++;
