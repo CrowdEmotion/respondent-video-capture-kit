@@ -1385,7 +1385,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             id: this.producerID, // the html object id
             width: this.producerWidth, // these are sizes of the player on the page
             height: this.producerHeight, // not related to the stream resolution
-            trace: false, // would enable debug logs in js console
+            trace: true, // would enable debug logs in js console
             path: path,
             remote_logger_name: window.vrt.producerStreamName
         });
