@@ -246,6 +246,9 @@ var vrtOnEvent = function(){
         vrtTest.time.b = performance.now().toFixed(0);
         isPlayAndPublish()
     });
+    $(vrt).on('vrt_event_create_response', function (e, data) {
+        clog('vrt_event_create_response #'+data.responseId);
+    });
     $(window.vrt).on('vrt_event_stimuli_end', function (e, data) {
         clog('vrt_event_stimuli_end');
         vrtTest.time.c = performance.now().toFixed(0);

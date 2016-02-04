@@ -186,7 +186,7 @@ var testList = function () {
             describe("Video End ", function () {
                 dlog(this.title);
                 //TODO set timeout according to video legnth
-                this.timeout(1200000);
+                this.timeout( vrt.videoList[vrt.currentMedia]*2 );
                 before('clean up',function(){
                     ilog('clean up video end');
                     cleanUpEnd();
