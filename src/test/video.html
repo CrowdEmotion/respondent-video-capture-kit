@@ -115,6 +115,7 @@
 
             $(vrtTest).on('vrttest_end',function(){
                 if(fullVideo){
+                    tlog('<a target="_blank" href="results.html?respondentid='+vrtTest.respondentId+'&appkey='+akey+'&rkey='+rkey+'" >results</a>');
                     var win = window.open(
                             'results.html?respondentid='+vrtTest.respondentId+'&appkey='+akey+'&rkey='+rkey
                             , '_blank');
