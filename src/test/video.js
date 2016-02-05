@@ -219,6 +219,18 @@ var testList = function () {
                     }.bind(this));
                 });
 
+                it("video recording must have a save event", function (done) {
+                    this.timeout((vrt.calculateUnpublishTimeout(vrt.videoList[vrt.currentMedia])* 1.5));
+                    ilog(this.test.title);
+                    $(window.vrt).on('vrt_event_recorder_save', function(){
+                        vrtTest.time.e = performance.now().toFixed(0);
+                        done();
+                    });
+                    $(window.vrt).on('vrt_event_recorder_save_error', function(){
+                        done('facevideo not saved');
+                    });
+                });
+
                 it("video has a response id and video has custom data saved", function (done) {
                     ilog(this.test.title);
                     this.timeout(2000);

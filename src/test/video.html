@@ -15,7 +15,9 @@
         #introzone{
             border: 1px solid #0b97c4;
             width: 49%;
-            float: right;
+            position: fixed;
+            top: 0;
+            right: 0;
         }
         #reszone{
             max-width: 50%;
@@ -114,8 +116,8 @@
             });
 
             $(vrtTest).on('vrttest_end',function(){
+                tlog('<a target="_blank" href="results.html?respondentid='+vrtTest.respondentId+'&appkey='+akey+'&rkey='+rkey+'" >results</a>');
                 if(fullVideo){
-                    tlog('<a target="_blank" href="results.html?respondentid='+vrtTest.respondentId+'&appkey='+akey+'&rkey='+rkey+'" >results</a>');
                     var win = window.open(
                             'results.html?respondentid='+vrtTest.respondentId+'&appkey='+akey+'&rkey='+rkey
                             , '_blank');

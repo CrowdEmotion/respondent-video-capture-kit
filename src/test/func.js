@@ -85,7 +85,7 @@ sequences
  */
 window.vrtTest = {
     time:{
-        a:null,b:null,c:null,d:null,playback:null,recorder:null
+        a:null,b:null,c:null,d:null,e:null,playback:null,recorder:null
     },
     path:null,
     rid: null,
@@ -259,6 +259,12 @@ var vrtOnEvent = function(){
         vrtTest.time.d = performance.now().toFixed(0);
         isStopAndUnpublish();
     });
+    $(window.vrt).on('vrt_event_recorder_save', function(){
+        clog('vrt_event_producer_saved');
+    });
+    $(window.vrt).on('vrt_event_recorder_save_error', function(){
+        clog('vrt_event_producer_no_facevideo_saved');
+    });
 };
 function isPlayAndPublish(){
     if(vrtTest.time.a && vrtTest.time.b && !vrtTest.isPlayAndPublishDone){
@@ -300,6 +306,7 @@ function cleanUpStart() {
 function cleanUpEnd(){
     vrtTest.time.c = 0;
     vrtTest.time.d = 0;
+    vrtTest.time.e = 0;
     vrtTest.isStopAndUnpublishDone = false;
     if(vrtTest.handleIsStopAndUnpublish) clearTimeout(vrtTest.handleIsStopAndUnpublish);
 }
