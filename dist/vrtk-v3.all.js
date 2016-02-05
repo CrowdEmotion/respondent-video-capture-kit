@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-2-4 16:18 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-2-5 13:45 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -17340,7 +17340,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             this.afterpreload(true);
         }
     };
-    this.stepComplete = function(res) {
+    this.stepComplete = function(res, err) {
+        if (err) {
+            res = {
+                responseId: vrt.responseList[vrt.currentMedia]
+            };
+        }
         if (window.vrt.options && window.vrt.options.customData) {
             if (window.vrt.options.customData === true) {
                 window.vrt.options.customData = {};
@@ -17680,9 +17685,56 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $("#videoDiv").css("visibility", "hidden");
     };
     this.stop_rec = function() {
+        vrt.llog("REC STOP call unpublish");
         vrt.producer.unpublish();
-        vrt.llog("REC STOP");
         clearTimeout(vrt.stop_handle_rec);
+    };
+    this.afterSave = function(err, data) {
+        if (vrt.handleAfterSave) clearTimeout(vrt.handleAfterSave);
+        if (err) {
+            vrt.log("!!PRODUCER unpublish->save ERROR TIMEOUT");
+            $(window.vrt).trigger("vrt_event_recorder_save_error");
+            $(window.vrt).trigger("vrt_event_error", {
+                component: "producer",
+                error: "facevideo not saved timeout",
+                type: "normal"
+            });
+            vrt.log("!!PRODUCER err ");
+            vrt.hideVideoBox();
+            vrt.postPartecipate();
+            vrt.facevideoUpload(null, function() {
+                vrt.stepComplete(null, err);
+            });
+        } else {
+            vrt.log("!!PRODUCER unpublish->save OK");
+            $(window.vrt).trigger("vrt_event_recorder_save");
+            vrt.hideVideoBox();
+            vrt.postPartecipate();
+            vrt.facevideoUpload(data, vrt.stepComplete);
+        }
+    };
+    this.calculateUnpublishTimeout = function() {
+        var max = 12e4;
+        var base = 6e3;
+        var length = 10;
+        if (!vrt.videoList[vrt.currentMedia]) {
+            length = max;
+        } else if (vrt.videoList[vrt.currentMedia].lengthMS) {
+            length = vrt.videoList[vrt.currentMedia].lengthMS;
+        } else {
+            length = vrt.videoList[vrt.currentMedia].length * 100;
+        }
+        var to = length / 10 + base > max ? max : length / 10 + base;
+        vrt.llog("TIMEOUT SAVE: " + to);
+        return to;
+    };
+    this.afterSaveTimeout = function() {
+        var to_unp = vrt.calculateUnpublishTimeout(vrt.videoList[vrt.currentMedia]);
+        vrt.llog("to_unp: " + to_unp);
+        vrt.handleAfterSave = setTimeout(function() {
+            vrt.llog("handleAfterSave to_unp");
+            vrt.afterSave("no save", null);
+        }, to_unp);
     };
     this.webProducerInit = function(path) {
         this.log("===WEBP Webpr_init");
@@ -17824,6 +17876,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 clearTimeout(vrt.stop_polling_player_pos);
                 $(vrt).trigger("vrt_event_recorder_unpublish");
                 vrt.log("!!PRODUCER unpublish");
+                vrt.afterSaveTimeout();
             });
             this.on("connect", function() {
                 vrt.log("!!PRODUCER connect");
@@ -17836,10 +17889,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 }, 500);
             });
             this.on("save", function(url) {
-                vrt.log("!!PRODUCER save " + url);
-                vrt.hideVideoBox();
-                vrt.postPartecipate();
-                vrt.facevideoUpload(url, vrt.stepComplete);
+                vrt.llog("producer on save");
+                vrt.afterSave(null, url);
             });
             this.on("save-metadata", function(url) {});
             this.on("error", function(reason) {
