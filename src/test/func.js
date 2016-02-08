@@ -3,20 +3,21 @@ cl = function(msg){
         console.log(msg);
     }
 };
-ll = function(msg, prepend, append){
+ll = function(msg, prepend, type, append){
     if (window.console && console.log) {
         var d = performance.now();
         prepend ? '': prepend = '';
         console.log('=>'+prepend+': '+msg);
-        $('#events').append('<div class="msgwrap"><div class="time">'+d.toFixed(2)+'</div><div class="type">'+prepend+'</div><div class="msg"> '+msg+'</div></div>');
+        if(!type) type = 'normal';
+        $('#events').append('<div class="msgwrap '+type+'"><div class="time">'+d.toFixed(2)+'</div><div class="type">'+prepend+'</div><div class="msg"> '+msg+'</div></div>');
     }
 };
 jsl = function(obj){
     var p = JSON.stringify(obj, null, 4);
     $('#results').append('<pre>'+p+'</pre>');
 };
-clog = function (msg) {
-    ll(msg, 'EVENT');
+clog = function (msg,type) {
+    ll(msg, 'EVENT',type);
 };
 dlog = function (msg) {
     ll(msg, 'DESCRIBE');
@@ -156,11 +157,11 @@ var vrtOnEvent = function(){
     });
     /* flash yes */
     $(vrt).on('vrt_event_flash_old', function () {
-        clog('vrt_event_flash_old');
+        clog('vrt_event_flash_old','warning');
         setType('flash');
     });
     $(vrt).on('vrt_event_flash_no', function () {
-        clog('vrt_event_flash_no');
+        clog('vrt_event_flash_no','warning');
         setType('flash');
     });
     $(vrt).on('vrt_event_flash_is_present', function () {
@@ -182,7 +183,7 @@ var vrtOnEvent = function(){
         window.vrtTest.haveWebcam=true;
     });
     $(vrt).on('vrt_event_producer_no_camera_found', function () {
-        clog('vrt_event_producer_no_camera_found');
+        clog('vrt_event_producer_no_camera_found','warning');
         window.vrtTest.haveWebcam=false;
     });
     $(vrt).on('vrt_event_streamname', function(e, data){
@@ -197,11 +198,11 @@ var vrtOnEvent = function(){
         window.vrtTest.webcamAllowed=true;
     });
     $(vrt).on('vrt_event_producer_camera_muted', function () {
-        clog('vrt_event_producer_camera_muted');
+        clog('vrt_event_producer_camera_muted','warning');
         window.vrtTest.webcamAllowed=false;
     });
     $(vrt).on('vrt_event_producer_camera_blocked', function () {
-        clog('vrt_event_producer_camera_blocked');
+        clog('vrt_event_producer_camera_blocked','warning');
         window.vrtTest.webcamAllowed=false;
     });
     $(vrt).on('vrtstep_connect', function () {
@@ -263,7 +264,13 @@ var vrtOnEvent = function(){
         clog('vrt_event_producer_saved');
     });
     $(window.vrt).on('vrt_event_recorder_save_error', function(){
-        clog('vrt_event_producer_no_facevideo_saved');
+        clog('vrt_event_producer_no_facevideo_saved','error');
+    });
+    $(window.vrt).on('vrt_event_error_plugin_error', function(){
+        clog('vrt_event_error_plugin_error','error');
+    });
+    $(window.vrt).on('vrt_event_error_session_error', function(){
+        clog('vrt_event_error_session_error','error');
     });
 };
 function isPlayAndPublish(){
