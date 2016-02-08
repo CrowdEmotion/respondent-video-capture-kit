@@ -1632,6 +1632,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(window.vrt).trigger('vrt_event_error', {component:'producer',error:''+ reason,type:'blocking'});
             });
 
+            this.on('janus-session-error', function (reason) {
+                $(window.vrt).trigger('vrt_event_error_session_error');
+                $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'janus-session-error',type:'blocking'});
+            });
+            this.on('janus-plugin-error', function (reason) {
+                $(window.vrt).trigger('vrt_event_error_plugin_error');
+                $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'janus-plugin-error',type:'blocking'});
+            });
+
             this.on('disconnect', function () {
                 vrt.isRecording = false;
                 vrt.isRecordingPadding = false;
