@@ -10,6 +10,7 @@ ll = function(msg, prepend, type, append){
         console.log('=>'+prepend+': '+msg);
         if(!type) type = 'normal';
         $('#events').append('<div class="msgwrap '+type+'"><div class="time">'+d.toFixed(2)+'</div><div class="type">'+prepend+'</div><div class="msg"> '+msg+'</div></div>');
+        if(type && type=='error') alert('fatal error: restart test');
     }
 };
 jsl = function(obj){
@@ -262,9 +263,11 @@ var vrtOnEvent = function(){
     });
     $(window.vrt).on('vrt_event_recorder_save', function(){
         clog('vrt_event_producer_saved');
+        vrtTest.time.e = performance.now().toFixed(0);
     });
     $(window.vrt).on('vrt_event_recorder_save_error', function(){
         clog('vrt_event_producer_no_facevideo_saved','error');
+        vrtTest.time.e = false;
     });
     $(window.vrt).on('vrt_event_error_plugin_error', function(){
         clog('vrt_event_error_plugin_error','error');
@@ -313,7 +316,6 @@ function cleanUpStart() {
 function cleanUpEnd(){
     vrtTest.time.c = 0;
     vrtTest.time.d = 0;
-    vrtTest.time.e = 0;
     vrtTest.isStopAndUnpublishDone = false;
     if(vrtTest.handleIsStopAndUnpublish) clearTimeout(vrtTest.handleIsStopAndUnpublish);
 }

@@ -155,7 +155,7 @@ var testList = function () {
                 it("player play (A) and mediabox recording (B) in less than  " + vrtTest.maxTimeDiffAllowed + "ms", function (done) {
                     ilog(this.test.title);
                     this.done = done;
-                    this.timeout(5000);
+                    this.timeout(7000);
                     cleanUpStart();
                     $(vrtTest).on('vrttest_playandpublish', function (e, data) {
                         $(vrtTest).off('vrttest_playandpublish');
@@ -219,21 +219,9 @@ var testList = function () {
                     }.bind(this));
                 });
 
-                it("video recording must have a save event", function (done) {
-                    this.timeout((vrt.calculateUnpublishTimeout(vrt.videoList[vrt.currentMedia])* 1.5));
-                    ilog(this.test.title);
-                    $(window.vrt).on('vrt_event_recorder_save', function(){
-                        vrtTest.time.e = performance.now().toFixed(0);
-                        done();
-                    });
-                    $(window.vrt).on('vrt_event_recorder_save_error', function(){
-                        done('facevideo not saved');
-                    });
-                });
-
                 it("video has a response id and video has custom data saved", function (done) {
                     ilog(this.test.title);
-                    this.timeout(2000);
+                    this.timeout(7000);
                     this.done = done;
                     $(window.vrt).on('vrt_event_video_step_completed', function (e, data) {
                         var r = false, c = false;
@@ -254,6 +242,8 @@ var testList = function () {
                         }
                     });
                 });
+
+
 
                 it("video playback and video stimuli length should be similiar ", function () {
                     ilog(this.test.title);
@@ -278,7 +268,16 @@ var testList = function () {
 
                 });
 
+                it("video recording must have a save event", function () {
+                    ilog(this.test.title);
+                    var e  = vrtTest.time.e
+                    vrtTest.time.e = null;
+                    expect(e).to.be.greaterThan(0);
+                });
             });
+
+
+
         };
 
 
