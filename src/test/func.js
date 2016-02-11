@@ -130,8 +130,14 @@ window.vrtTest = {
             facevideos:[],
             timedmetadatas:[]
         },
+        filesResp: {
+            logs:[],
+            facevideos:[],
+            timedmetadatas:[]
+        },
         stimuli:[]
-    }
+    },
+    isDemo: false
 };
 
 var mobilecheck = function() {
@@ -364,20 +370,61 @@ function getFile(name,type){
         return false
     }
 };
+function createCORSRequest(method, url) {
+    method? '': method ='GET';
+    var xhr = new XMLHttpRequest();
+    if ("withCredentials" in xhr) {
+        // XHR for Chrome/Firefox/Opera/Safari.
+        xhr.open(method, url, true);
+    } else if (typeof XDomainRequest != "undefined") {
+        // XDomainRequest for IE.
+        xhr = new XDomainRequest();
+        xhr.open(method, url);
+    } else {
+        // CORS not supported.
+        xhr = null;
+    }
+    return xhr;
+}
+function makeCorsRequest(url) {
+    // All HTML5 Rocks properties support CORS.
 
-function fileExists(url) {
-    if(url){
+    var xhr = createCORSRequest('GET', url);
+    if (!xhr) {
+        return false;
+    }
+    // Response handlers.
+    xhr.onload = function() {
+        return xhr;
+       // alert('Response from CORS request to ' + url + ': ' + title);
+    };
+
+    xhr.onerror = function() {
+        return false
+     //   alert('Woops, there was an error making the request.');
+    };
+
+    xhr.send();
+}
+function fileExists(url){
+    if(!url)return false;
+    if(vrtTest.isDemo){
+        var u = new URL(url);
+        url = window.location.origin  + u.pathname
+    }
+    return _fileExists(url);
+}
+function _fileExists(url) {
+        var rnd = ''; //'&num='+Math.floor((Math.random() * 1000) + 1);
+        var origin = ''; //"?origin="+window.location.host;
         var req = new XMLHttpRequest();
-        req.open('GET', url, false);
+        req.open('GET', url+origin+rnd, false);
         req.send();
         console.log('======fileExists======');
         console.log(req);
 
-        return req.status;
+        return req;
         //return req;//req.status==200;
-    } else {
-        return false;
-    }
 };
 var stopTest = function(msg){
     var m = msg ? msg+' ' :  '';

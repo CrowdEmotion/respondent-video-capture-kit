@@ -8,13 +8,13 @@ var assert = chai.assert,
     expect = chai.expect,
     should = chai.should();
 var testSuite = null;
+
 var testListResult = function () {
 
 
     describe('DB check', function () {
         dlog(this.title);
         it("should have Respondent data ", function () {
-            jsl(vrtTest.results);
             ilog(this.test.title);
             cl(vrtTest.results);
             expect(vrtTest.results.db.respondent).to.not.be.empty;
@@ -75,19 +75,27 @@ var testListResult = function () {
             });
             it("should exist Timestamps file", function (done) {
                 ilog(this.test.title);
-                expect(fileExists(vrtTest.results.files.timedmetadatas[index])).to.be.equal(200);
+                vrtTest.results.filesResp.timedmetadatas.push(fileExists(vrtTest.results.files.timedmetadatas[index]));
+                expect(vrtTest.results.filesResp.timedmetadatas[index].status).to.be.equal(200);
                 done()
             });
             it("should exist facevideo file", function (done) {
                 ilog(this.test.title);
-                expect(fileExists(vrtTest.results.files.facevideos[index])).to.be.equal(200);
+                vrtTest.results.filesResp.facevideos.push(fileExists(vrtTest.results.files.facevideos[index]));
+                expect(vrtTest.results.filesResp.facevideos[index].status).to.be.equal(200);
                 done()
             });
-            it("should exist the logs file ", function (done) {
+            it.skip("should exist the logs file - passw auth required", function (done) {});
+            it("should Timestamps file has content", function () {
                 ilog(this.test.title);
-                expect(fileExists(vrtTest.results.files.logs[index])).to.be.equal(200);
-                done()
+                expect(vrtTest.results.filesResp.timedmetadatas[index].response).to.have.length.above(0);
             });
+            it("should facevideo file has content", function () {
+                jsl(vrtTest.results);
+                ilog(this.test.title);
+                expect(vrtTest.results.filesResp.facevideos[index].response).to.have.length.above(0);
+            });
+            it.skip("should log file has content  - passw auth required ", function () {});
         };
         var n = 0;
         while (n < vrtTest.results.db.responses.length ) {

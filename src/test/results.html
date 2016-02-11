@@ -38,6 +38,7 @@
             if (console.log)console.log(msg);
         }
         $(document).ready(function () {
+            vrtTest.isDemo = (!gup('rkey') && !gup('respondentid') && !gup('appkey') && window.location.hostname == 'localhost')? true:false;
 
             var rkey = gup('rkey') ? gup('rkey') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
             var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
