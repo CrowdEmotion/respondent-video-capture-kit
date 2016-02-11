@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-2-8 10:29 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-2-11 14:24 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -8711,7 +8711,7 @@
                 type: "GET",
                 url: longpoll,
                 cache: false,
-                timeout: 6e4,
+                timeout: 2e4 + retries * 5e3,
                 success: handleEvent,
                 error: function(XMLHttpRequest, textStatus, errorThrown) {
                     Janus.log(textStatus + ": " + errorThrown);

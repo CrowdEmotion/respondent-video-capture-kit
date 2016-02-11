@@ -14242,7 +14242,7 @@ var WebProducer =
 				type: 'GET',
 				url: longpoll,
 				cache: false,
-				timeout: 60000,	// FIXME
+				timeout: 20000+(retries*5000),	// FIXME
 				success: handleEvent,
 				error: function(XMLHttpRequest, textStatus, errorThrown) {
 					Janus.log(textStatus + ": " + errorThrown);
