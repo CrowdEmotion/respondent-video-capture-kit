@@ -17,7 +17,6 @@ module.exports = function(grunt) {
                     compress: false
                 },
                 src: [
-                    'src/libs/swfobject.js',
                     'src/recorder/var.js',
                     'src/libs/browsercompatibility.js',
                     'src/APIClient/sha256.js',
@@ -28,7 +27,7 @@ module.exports = function(grunt) {
                     'src/vrtk_player.js',
                     'src/vrtk.js'
                 ],
-                dest: 'dist/vrtk-v2.min.js'
+                dest: 'dist/vrtk-v3.min.js'
             },
             concat : {
                 options: {
@@ -39,7 +38,6 @@ module.exports = function(grunt) {
                     beautify: true
                 },
                 src: [
-                    'src/libs/swfobject.js',
                     'src/recorder/var.js',
                     'src/libs/browsercompatibility.js',
                     'src/APIClient/sha256.js',
@@ -50,7 +48,23 @@ module.exports = function(grunt) {
                     'src/vrtk_player.js',
                     'src/vrtk.js'
                 ],
-                dest: 'dist/vrtk-v2.all.js'
+                dest: 'dist/vrtk-v3.all.js'
+            },
+            client : {
+                options: {
+                    banner: '/* Javascript client crowdemotion.co.uk ' + w + ' */ ',
+                    mangle : false,
+                    compress: false,
+                    expand: true,
+                    beautify: true
+                },
+                src: [
+                    'src/APIClient/sha256.js',
+                    'src/APIClient/enc-base64-min.js',
+                    'src/APIClient/store.js',
+                    'src/APIClient/CEClient.js'
+                ],
+                dest: 'dist/ce-api-client.js'
             }
         }
     });

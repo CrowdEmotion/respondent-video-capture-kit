@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link type="text/css" href="https://cdn.crowdemotion.co.uk/playcorder/v3/vrtk-v3.min.css" rel="stylesheet">
+    <script type="text/javascript" charset="utf-8" src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" charset="utf-8"
+            src="https://cdn.crowdemotion.co.uk/playcorder/v3/vrtk-v3.all.js"></script>
+
+
+    <script type="text/javascript" charset="utf-8">
+        var vrtIsTest = false;
+        window.vrtIsTest = vrtIsTest;
+        window.vrtFinished = {comment: false, end: false};
+        // example implementation
+        function validateEmail(email) {
+            var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+            return re.test(email);
+        }
+        function validateQuestion(){
+            return $('input[name=user_video_behavior]:checked').val()
+        }
+        function gup( name, url ) {
+            if (!url) url = location.href;
+            name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+            var regexS = "[\\?&]"+name+"=([^&#]*)";
+            var regex = new RegExp( regexS );
+            var results = regex.exec( url );
+            return results == null ? null : results[1];
+        };
+
+
+        //DEMO SCRIPTS
+        $(document).ready(function () {
+            window.vrtIsTest?  $('#video_saving_demo').hide():$('#video_saving_test').hide();
+            $("#proceed").click(function (event) {
+                if(window.vrtIsTest || (validateEmail($("#mail").val()) && validateQuestion())){ //mail check
+                    $('#mail_alert').hide();
+                    $('#intro').slideUp('slow', function () {
+                        $('#main').slideDown('slow', function () {
+                                    window.createVrt();
+                                }
+                        );
+                    });
+                }else{
+                    $('#mail_alert').show().removeClass('vrthide');
+                }
+            });
+
+            $("#send").click(function (event) {
+                var msg = $('#message').val();
+                window.vrtFinished.comment = true;
+                vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {feedback: msg}, function(){ window.turnOffWebcam()})
+                $('#message').slideUp('slow', function () {
+                    $('#send').slideUp('slow')
+                });
+                $('#feedback').hide();
+                $('#feedbackarea').html('<div class="textline">Thank for your for feedback</div>');
+            });
+
+            var rt = gup('r') || gup('rkey'), at = gup('a') || gup('appkey');
+
+            if(!rt || ! at){
+                alert('Link not valid');
+            }
+
+            var createVrt = function (cb) {
+
+
+                var vb = window.vrtIsTest ? 'delete_video' : validateQuestion();
+                var options = {
+                    researchToken: rt,
+                    appToken: at,
+                    streamName: 'ce-demo3_',
+                    apiSandbox: true,
+                    debug: true,
+                    respondentCustomData: {user_video_behavior: vb},
+                    playerCentered: false,
+                    recorderCentered: false,
+                    playerHorizontallyCentered: true,
+                    recorderHorizontallyCentered: true,
+                    fullscreen: false,
+                    randomOrder: false,
+                    savePlatform: true,
+                    recordingAudio: false //temporary fix
+                };
+
+                var vrt = new Vrt(options);
+                var alertMessage = function (msg) {
+                    if (msg == undefined || msg == null) {
+                        $('#alerts').html('');
+                        $('#alerts').removeClass('pure-button');
+                        $('#alerts').removeClass('button-b');
+                    } else {
+                        $('#alerts').html(msg);
+                        $('#alerts').addClass('pure-button');
+                        $('#alerts').addClass('button-b');
+                    }
+                };
+                var turnOffWebcam = function(){
+                    if(window.vrtFinished.comment && window.vrtFinished.end){
+                        //if (window.vrt && window.vrt.producer && window.vrt.producer.stream) window.vrt.producer.stream.stop();
+                        //if (window.vrt && window.vrt.producer && window.vrt.producer.unpublish) window.vrt.producer.unpublish();
+                        setTimeout(function(){
+                            $(window.vrt).trigger('vrt_event_user_session_complete')
+                        }, 500);
+
+                    }
+                };
+                window.turnOffWebcam = turnOffWebcam;
+
+
+                $('#alerts').on('click', function () {
+                    alertMessage();
+                });
+
+                $('#start').show().addClass('disabled');
+                // show start button
+                $(vrt).on('vrt_event_producer_camera_ok', function () {
+                    console.log('!!!!!! vrt_event_producer_camera_ok');
+                    alertMessage();
+                    $('#start').removeClass('disabled');
+                });
+                // watch first video
+                $('#start').on('click', function () {
+                    if(!$('#start').hasClass('disabled')) {
+                        alertMessage();
+                        $('#start').hide().remove();
+                        $(vrt).trigger('vrt_event_start_video_session');
+                    }
+                    //if (vrt.continuosPlay !== true)$('#next').show();
+                });
+
+                $(vrt).on('vrtstep_play', function (evt, data) {
+                    $("#vrt object#producer").css("position", "absolute").css("left", "-1000000px").css("opacity", "0").css("height", "1%");
+                    $('#skip').show().addClass('disabled');
+                    setTimeout(
+                            function(){$('#skip').removeClass('disabled');},4000
+                    );
+                });
+
+                $(vrt).on('vrt_event_stimuli_end', function (evt, data) {
+                    $('#skip').hide();
+                });
+
+                // watch next video
+                $(vrt).on('vrt_event_video_step_completed', function (evt, data) {
+                    alertMessage();
+                    $('#next').show();
+                    if (data.responseId) {
+                        alertMessage('Facevideo uploaded with response id: ' + data.responseId);
+                        var d = new Date();
+                        window.vrt.apiClientSaveCustomData(data.responseId, {time: d.getTime()});
+                    }
+
+                });
+
+                $('#next').on('click', function () {
+                    $('#skip').hide();
+                    $('#next').hide();
+                    alertMessage();
+                    $(vrt).trigger('vrt_event_user_next_video');
+                });
+
+                $('#skip').on('click', function () {
+                    if(!$('#skip').hasClass('disabled')){
+                        $('#skip').hide();
+                        alertMessage();
+                        $(vrt).trigger('vrt_event_user_next_video');
+                    };
+                });
+
+                var isfeedBackOpen = false;
+                var openFeedBack = function(){
+                    if(!isfeedBackOpen) {
+                        $('#feedbackarea').slideDown('slow', function () {
+                            isfeedBackOpen = true;
+                            $('#feedback').hide();
+                        }.bind(this));
+                    }
+                }
+
+                $(vrt).on('vrt_event_video_session_complete',function(){
+                    alertMessage();
+                    window.vrtFinished.end= true;
+                    $('#vrt').animate({height: "1px"}, 1500 );
+                    $('#vrt').children().animate({height: "1px"}, 1500, 'swing', function(){
+                        $('#vrt_wrap').css({'min-height' : '1px'});
+                        $('#vrt_wrap').animate({height: "1px"}, 1500);
+                    } );
+
+                    $("#producertext").hide();
+                    window.turnOffWebcam();
+                    $('iframe').remove();
+                    $('#next').hide().remove();
+                    $('#end').show();
+                    openFeedBack();
+                });
+
+                $('#feedback').on('click', function () {
+                    openFeedBack();
+                });
+
+                $(vrt).on('vrt_event_respondent_created',
+                        function () {
+                            var mail = $('#mail').val();
+                            if (mail) vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {mail: mail});
+                        }
+                );
+
+
+                //alerts
+                //no api login
+                $(vrt).on('vrt_event_api_login_fail', function () {
+                    alertMessage('Error: API login fail');
+                    alert('No API login');
+                });
+                //no camera
+                $(vrt).on('vrt_event_producer_no_camera_found', function () {
+                    alertMessage('Error: No webcam found');
+                    alert('Your computer have no webcam')
+                });
+                //camera blocked
+                $(vrt).on('vrt_event_producer_camera_blocked', function () {
+                    alertMessage('Error: Webcam blocked by user');
+                });
+                //wating user permission for webcam
+                $(vrt).on('vrt_event_producer_camera_muted', function () {
+                    alertMessage('Please click on the "Allow" on your webcam request');
+                });
+                $(vrt).on('vrt_event_fatal_error', function () {
+                    alertMessage('FATAL ERROR ');
+                });
+
+                $(vrt).on('vrt_event_browser_old', function () {
+                    alert('Your browser is too old.')
+                });
+
+                $(vrt).on('vrt_event_no_requirement', function () {
+                    alert('This application in not compatible with iPad/iPhone/iPod');
+                });
+
+                vrt.init();
+
+                $(vrt).on('vrt_event_producer_ready', function () {
+
+                });
+                //no Flash - flash version only
+                $(vrt).on('vrt_event_flash_no', function(){
+                    alertMessage('Error: no Adobe Flash founded');
+                    alert('No Flash detected on your computer');
+                });
+                //old Flash version  - flash version only
+                $(vrt).on('vrt_event_flash_old', function(){
+                    alertMessage('Error: the version of Adobe Flash is old');
+                    alert('the version of Adobe Flash on your computer is old');
+                });
+
+                $(vrt).on('vrtstep_play', function(){
+                    $('#icon_play').removeClass('hide').show();
+                });
+                $(vrt).on('vrtstep_stop', function(){
+                    $('#icon_play').hide();
+                });
+                $(vrt).on('vrt_event_recorder_publish', function(){
+                    $('#icon_rec').removeClass('hide').show();
+                });
+                $(vrt).on('vrt_event_recorder_unpublish', function(){
+                    $('#icon_rec').hide();
+                });
+                $(vrt).on('vrt_event_respondent_created',
+                        function(){
+                            $('#respid').html(vrt.respondentId);
+                        });
+
+
+                if (cb)cb();
+
+
+            };
+
+            window.createVrt = createVrt;
+
+        });
+
+        function getParameterByName(name) {
+            var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+            return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+        }
+
+
+    </script>
+
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Lato:100,300,400,700);
+
+        body {
+            font-family: 'Lato', sans-serif;
+            font-size: 14px;
+            font-weight: 300;
+            color: #586474;
+            background: transparent url('//cdn.crowdemotion.co.uk/images/bground-1_2560.jpg') 50% 0 repeat-x;
+            background-size: cover;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .clearfix {
+            clear: both;
+        }
+
+        header, article {
+            clear: both;
+        }
+
+        .block {
+            display: block;
+        }
+
+        .inline {
+            display: inline;
+        }
+
+        .floatleft {
+            float: left;
+        }
+
+        .floatright {
+            float: right;
+        }
+
+        #intro, #main {
+            background-color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+        }
+        #intro, #main {
+            padding-left: 20px;
+            padding-right: 20px;
+            margin-left: 10px;
+            margin-right: 10px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        #main {
+            min-height: 400px;
+        }
+
+        .vrtbtn {
+            border: 1px rgb(157, 196, 35) solid;
+            border-radius: 5px;
+            margin: 20px 10px 20px 0;
+            padding: 10px;
+            width: 150px;
+            color: white;
+            background-color: rgb(157, 196, 35);
+            text-align: center;
+            cursor: pointer;
+        }
+        .vrtbtn.disabled {
+            border: 1px rgba(157, 196, 35,0.3) solid;
+            background-color: rgba(157, 196, 35,0.3);
+            cursor: default;
+        }
+        .vrtbtntext {
+            margin: 20px 10px 20px 0;
+            padding: 10px;
+            color: #476D8C;
+            text-align: center;
+        }
+        .vrtbtntextalert {
+            margin: 20px 10px 20px 0;
+            padding: 10px;
+            color: #e53a17;
+            text-align: center;
+        }
+
+        .vrtinput {
+            border: 1px rgb(157, 196, 35) solid;
+            border-radius: 5px;
+            margin: 20px 10px 20px 0;
+            padding: 10px;
+        }
+        #mail.vrtinput {
+            width: 200px;
+            text-align: center;
+        }
+        #message.vrtinput {
+            margin: 20px 0 20px 0;
+            text-align: center;
+        }
+
+        textarea.vrtinput {
+            width: 300px;
+            height: 200px;
+        }
+
+        #alerts.pure-button {
+            padding: 5px;
+            margin: 5px 5px 5px 0;
+        }
+
+        #alerts {
+            background-color: #fec700;
+        }
+
+        #logo {
+            display: block;
+            margin: auto;
+            height: 50px;
+        }
+
+        #header {
+            margin: 20px 0 20px 0;
+        }
+
+        .smalltitle {
+            border-bottom: 1px #9399a5 solid;
+            color: #9399a5;
+            padding-bottom: 10px;
+            margin-bottom: 40px;
+        }
+
+        .smalltitle span {
+            font-weight: 100;
+            font-size: 15px;
+            line-height: 33px;
+            text-align: center;
+        }
+
+        .smalltitle img {
+            height: 25px
+        }
+
+        #next, #start, #skip, #buttons, #feedback, #send {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        #buttons_wrap {
+            height: 40px;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .ccenter {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+        #balls img{
+            height: 20px;
+        }
+        #label_message{
+            margin-top: 20px;
+        }
+        .textline{
+            margin: 20px 0;
+        }
+        #feedback_wrap{
+            margin-top: 20px;
+            min-height: 40px;
+        }
+        #feedback_wrap .vrtbtn{
+            margin-top: 0px;
+        }
+        #vrt_wrap{
+            min-height: 240px;
+        }
+        #foot_icon{
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            height: 10px;
+        }
+        #foot_icon img{
+            float: right;
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+<header id="header">
+    <img id="logo" src="//cdn.crowdemotion.co.uk/images/CE-logo-1.png" align="middle">
+</header>
+
+<article id="content">
+
+
+    <section id="intro">
+        <div class="smalltitle">
+            <span class="floatleft">PlayCorder demo</span>
+            <img id="balls" class="floatright" src="//cdn.crowdemotion.co.uk/images/balls_20px.png" align="right">
+
+            <div class="clearfix"></div>
+        </div>
+        <div class="clearfix"><b>Welcome to the PlayCorder Demo</b></div>
+
+        <p>
+            We use facial recognition to tease out how audiences emotionally engage with videos.<br/>
+            It adds a whole new layer of insight above and beyond what our audiences claim.<br/>
+
+        </p>
+        <p><b>Watch two shorts videos.</b></p>
+
+        <p>
+            Is the video a Guilty Pleasure for you or do you Love it?
+        </p>
+        <p>Please leave your mail.</p>
+        <label class="block">We will <b>not</b> contact you except if we need your feedback to fix bugs.</label>
+        <div id="mail_alert" class="hide vrtbtntextalert">Please insert a valid mail and select a video option before proceed</div>
+
+        <div><input id="mail" name="mail" placeholder="your@email.com (optional)" value="" class="vrtinput" autocomplete="on" /></div>
+
+        <div id="video_saving_test">
+            <b class="block">Your videos will be deleted after analysis</b>
+        </div>
+        <div id="video_saving_demo">
+            <div id="video_saving_Wrapper" class="checkbox">
+                <div class="question"><b>Can we keep your video?</b></div>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="delete_video" class="user_video_behavior checkbox first"  autocomplete="off" >No, delete it</label><br>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="keep_available_no_humans" class="user_video_behavior checkbox first"  autocomplete="off" >Yes, but don't look it at (computers only)</label><br>
+                <label class="first" style="padding-left: 0"><input type="radio" name="user_video_behavior" value="keep_further_analysis" class="user_video_behavior checkbox first"  autocomplete="off" >Yes and you can look it at</label><br>
+            </div>
+        </div>
+        <input id="proceed" name="proceed" value="Proceed" class="vrtbtn"/>
+    </section>
+    <section id="main" class="hide">
+        <div class="smalltitle">
+            <span class="floatleft">PlayCorder demo</span>
+            <img id="balls" class="floatright" src="//cdn.crowdemotion.co.uk/images/balls-1.png" align="right">
+
+            <div class="clearfix"></div>
+        </div>
+        <div id="alerts_wrap" class="block clearfix">
+            <div id="alerts" class=""></div>
+        </div>
+        <div id="buttons_wrap" class="block clearfix">
+            <div id="buttons">
+                <div id="start" class="hide vrtbtn">Start Session</div>
+                <div id="skip" class="hide vrtbtn">Skip</div>
+                <div id="next" class="hide vrtbtn">Next video</div>
+                <div id="end" class="hide vrtbtntext">Thank you for your partecipation</div>
+            </div>
+        </div>
+        <div id="vrt_wrap" class="block clearfix ccenter" style="">
+            <div id="vrt" style=""></div>
+        </div>
+        <div id="feedback_wrap" class="block clearfix">
+            <div id="feedback" class="vrtbtn">Write your feedback</div>
+            <aside id="feedbackarea" class="hide">
+                <label id="label_message" for="message" class="block clearfix">Please, can you describe your experience? </label>
+            <textarea id="message" name="message" placeholder="Please write any feedback or bugs" value=""
+                      class="vrtinput"></textarea>
+                <input id="send" name="send" value="Send feedback" class="vrtbtn block clearfix"/>
+            </aside>
+        </div>
+        <div class="clearfix"></div>
+    </section>
+
+
+    <div id="notice"></div>
+
+</article>
+</section>
+
+
+
+</article>
+
+<footer id="foot_icon">
+    <img id="icon_rec" src="//cdn.crowdemotion.co.uk/images/icon_rec.png" align="right" class="hide" />
+    <img id="icon_play" src="//cdn.crowdemotion.co.uk/images/icon_play.png" align="right"  class="hide" />
+    <div id="respid"  class="" ></div>
+</footer>
+</body>
+</html>

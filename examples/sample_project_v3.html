@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,18 +14,13 @@
 
     <link type="text/css" href="../dist/vrtk-v3.min.css" rel="stylesheet" >
     <script type="text/javascript" charset="utf-8" src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../dist/vrtk-v3.all.js"></script>
 
-
-    <script type="text/javascript" charset="utf-8" src="../src/recorder/var.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../src/libs/browsercompatibility.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../src/APIClient/sha256.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../src/APIClient/enc-base64-min.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../src/APIClient/store.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../src/APIClient/CEClient.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../src/libs/video-js-4-7/video.dev.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../src/vrtk_player.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../src/vrtk.js"></script>
-
+    <!-- or if we wanted to include local sources ..
+    <link type="text/css" href="../dist/vrtk.min.css" rel="stylesheet" >
+    <script type="text/javascript" charset="utf-8" src="libs/jquery-1.9.1.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../dist/vrtk.all.js"></script>
+    -->
 
     <script type="text/javascript" charset="utf-8">
 
@@ -75,14 +70,13 @@
                 // Specify a respondent unique name if you like. This will help data analysis.
                 // You can also add custom objects and attributes that will be saved with your 
                 // analysis (not mandatory).
-                respondentName: 'testl',
+                respondentName: 'test1',
                 respondentCustomData: { name1: 'testname1', lastname1: 'testlastname1' },
                 customData: { user_id: user_id },
                 playerCentered: playercentered,
                 recorderCenter: recordercenter,
                 fullscreen: fullscreen,
-                randomOrder: randomorder,
-                norclick: false,
+                randomOrder: randomorder
             };
 
             var vrt = new Vrt(options);
@@ -127,6 +121,11 @@
                 }
 
             });
+            $(vrt).on('vrt_event_frame_close',function(evt, data){
+                alertMessage();
+                $(vrt).trigger('vrt_event_user_next_video');
+                $('#next').show();
+            });
 
              $('#next').on('click',function(){
                  if(vrt.continuosPlay!==true) {
@@ -138,7 +137,7 @@
             //end session
             $(vrt).on('vrt_event_video_session_complete',function(){
                 alertMessage();
-                $('#next').hide();
+                //$('#next').hide();
                 $('#end').show();
             });
             $('#end').on('click',function(){
@@ -195,11 +194,11 @@
 </div>
 
 <div class="content-wrapper">
-    <div id="introzone" class="">
+    <div id="introzone" class="information pure-g smallline">
 
-        <div id="alerts" class=""></div>
+        <div id="alerts" class="pure-u-1 pure-u-md-1"></div>
 
-        <div id="buttons"  class="">
+        <div id="buttons"  class="pure-u-1 pure-u-md-1">
             <div id="start" class="hide button-choose pure-button vrtbtn">Start Session</div>
             <div id="next"  class="hide button-choose pure-button vrtbtn">Next video</div>
             <div id="end"  class="hide button-choose pure-button vrtbtn">End</div>

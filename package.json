@@ -2,7 +2,10 @@
   "name": "vrtk",
   "version": "0.1.0",
   "scripts": {
-    "build": "node_modules/.bin/grunt"
+    "build": "node_modules/.bin/grunt",
+    "cdn": "s3cmd --acl-public --cf-invalidate sync dist/ s3://cdn-crowdemotion-co-uk/playcorder/v3/",
+    "test-deploy": "s3cmd --acl-public --cf-invalidate sync src/ s3://cdn-crowdemotion-co-uk/demos/memoembed/",
+    "demo-deploy": "s3cmd --acl-public --cf-invalidate sync examples/ s3://cdn-crowdemotion-co-uk/demos/memoembed/"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

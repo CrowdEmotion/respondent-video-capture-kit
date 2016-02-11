@@ -1,0 +1,38 @@
+.hide {
+    display: none
+}
+.clearfix {
+    clear: both
+}
+
+h4{
+    font-family: 'Lato', sans-serif;
+}
+#events div, #testmenu {
+    margin-left: 15px;
+    font-size: 12px;
+    font-weight: normal;
+    font-family:  'Helvetica Neue', Helvetica, Arial, sans-serif
+}
+#events .type, #events .time, #events .msg{
+    display: inline;
+}
+
+.msgwrap.error .msg{
+    color: #cb0000;
+}
+.msgwrap.warning .msg{
+    color: #cb8300;
+}
+
+#introzone{
+    border: 1px solid #0b97c4;
+    width: 49%;
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+#reszone{
+    max-width: 50%;
+    float: left;
+}
