@@ -5,10 +5,28 @@
     <title>Playcorder tests</title>
     <link rel="stylesheet" type="text/css" href="./libs/mocha.css"/>
     <link rel="stylesheet" type="text/css" href="test.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(
+          function(){
+               $('a').on('click',function(evt){
+                   //evt.preventDefault();
+                   var u1 = '';
+                   var u2 = '';
+                   if($('#plink').val()){
+                       u1 = new URL($('#plink').val());
+                        u1 = u1.search.substr(1);
+                   }
+                   if($('#rid').val()){
+                       u2 = $('#rid').val();
+                   }
+                   var href = $(this).attr("href");
+                   $(this).attr("href",href+'?'+u1+'&respondentid='+u2);
+               });
 
-    <style>
-
-    </style>
+          }
+        );
+    </script>
 </head>
 <body>
 
@@ -16,10 +34,26 @@
 
 <div id="testmenu">
     <h2>Tests</h2>
-    <li><a href="video.html">Video test</a></li>
-    <li><a href="results.html">Results test</a></li>
-    <li><a href="video.html?full=true">Full test</a></li>
+    <h3>Test options</h3>
+    <div>
+        <div>
+        <label for="plink">Project link (optional)</label>
+        <input id="plink" name="plink" type="text" placeholder="insert a project link link and select a test" />
+        </div>
+        <div>
+        <label for="rid">Respondent id (optional, just for result test)</label>
+        <input id="rid" name="rid" type="text" placeholder="insert a respondent id" />
+        </div>
+    </div>
+    <h3>Select a test</h3>
+    <ol>
+        <li><a href="video.html">Video test </a></li>
+        <li><a href="results.html">Results test</a></li>
+        <li><a href="video.html?full=true">Full test</a></li>
+    </ol>
 </div>
+
+
 
 
 

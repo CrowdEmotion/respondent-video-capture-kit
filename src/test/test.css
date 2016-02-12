@@ -36,3 +36,13 @@ h4{
     max-width: 50%;
     float: left;
 }
+label{
+    width: 300px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+input{
+    width: 300px;
+    margin-bottom: 20px;
+}
