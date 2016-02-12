@@ -92,6 +92,7 @@ var testListResult = function () {
             });
             it("should facevideo file has content", function () {
                 jsl(vrtTest.results);
+                filel();
                 ilog(this.test.title);
                 expect(vrtTest.results.filesResp.facevideos[index].response).to.have.length.above(0);
             });

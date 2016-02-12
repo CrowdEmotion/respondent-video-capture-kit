@@ -8,13 +8,13 @@
 h4{
     font-family: 'Lato', sans-serif;
 }
-#events div, #testmenu {
+#events div, #testmenu,#filelist {
     margin-left: 15px;
     font-size: 12px;
     font-weight: normal;
     font-family:  'Helvetica Neue', Helvetica, Arial, sans-serif
 }
-#events .type, #events .time, #events .msg{
+#events .type, #events .time, #events .msg, #filelist a{
     display: inline;
 }
 

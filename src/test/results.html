@@ -66,6 +66,7 @@
 
             $('#showresults').click(function(){
                 $('#results').toggle();
+                $('#filelist').toggle();
             });
 
         });
@@ -93,7 +94,12 @@
 
 <!-- TESTS START -->
 <button id="showresults" value="Show results">Data</button>
-<div id="results" style="display: none"></div>
+<div id="filelist" style="display: none">
+    <h4>Files</h4>
+</div>
+<div id="results" style="display: none">
+    <h4>Results</h4>
+</div>
 <!-- TESTS END -->
 
 </body>

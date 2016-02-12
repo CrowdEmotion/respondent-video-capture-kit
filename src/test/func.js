@@ -17,6 +17,13 @@ jsl = function(obj){
     var p = JSON.stringify(obj, null, 4);
     $('#results').append('<pre>'+p+'</pre>');
 };
+filel = function(){
+    var list_of_files = [].concat(vrtTest.results.files.facevideos, vrtTest.results.files.timedmetadatas,vrtTest.results.files.logs);
+
+    for(var j = 0; j<list_of_files.length;  j++){
+        $('#filelist').append('<div class="msgwrap normal"><a href="'+list_of_files[j]+'" target="_blank">'+j+':'+list_of_files[j].slice(-4)+'</a></div>');
+    }
+};
 clog = function (msg,type) {
     ll(msg, 'EVENT',type);
 };
