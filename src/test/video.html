@@ -45,6 +45,7 @@
             var rkey = gup('rkey') ? gup('rkey') : '0bd53b148074dc5f4f8b5eb990e60047cd9a4c9d';
             var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
             var apiSandbox = gup('apisandbox') ? gup('apisandbox') : true;
+            var customorder = gup('customorder') ? gup('customorder') : false;
             var fullVideo  = gup('full') ? gup('full') : false;
             var options = {
                 // apiDomain: "http://localhost:1337",
@@ -61,6 +62,7 @@
                 fullscreen: false,
                 randomOrder: false,
                 savePlatform: true,
+                customOrder : customorder,
                 recordingAudio: false //temporary fix
             };
             var ceInit ={
@@ -72,9 +74,15 @@
                 sandbox: true
             };
             apiLoadDataVideo(ceInit,rkey,akey, function(res){
-                vrtTest.stimuliNumber = res.length;
-                vrtTest.stimuli = res;
                 window.vrt = new Vrt(options);
+                if(customorder){
+                    customorder = vrt._setCustomOrder(customorder);
+                    vrtTest.stimuli = vrt._setOrderList(res, customorder);
+                } else{
+                    vrtTest.stimuli = res
+                }
+
+                vrtTest.stimuliNumber = vrtTest.stimuli .length;
 
                 vrtOnEvent();
 
