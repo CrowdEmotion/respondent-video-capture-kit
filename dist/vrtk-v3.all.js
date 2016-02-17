@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-2-11 14:24 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-2-17 14:53 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -10726,7 +10726,7 @@ function CEClient() {
     };
     this.loadMediaList = function(researchId, cb) {
         var ceclient = this;
-        var url = 'media?where={"research_id":"' + researchId + '"}';
+        var url = "media?research_id=" + researchId + "&sort=videoOrder";
         javaRest.get(url, null, function(res) {
             if (cb) {
                 cb(res);
@@ -16549,6 +16549,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.recorderCentered = false;
     this.recorderHCentered = false;
     this.randomOrder = false;
+    this.customOrder = false;
     this.flash_allowed = false;
     this.ww = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
     this.wh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
@@ -16628,6 +16629,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.videoListOrdered = list;
         this.calculateListData();
         this.randomizeOrderList();
+        this.setOrderList();
         this.log(type, "type");
         this.log(list, "list");
     };
@@ -16674,6 +16676,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.recorderCentered = this.checkOpt(options, "recorderCentered", false);
         this.recorderHCentered = this.checkOpt(options, "recorderHorizontallyCentered", false);
         this.randomOrder = this.checkOpt(options, "randomOrder", false);
+        this.customOrder = this.checkOpt(options, "customOrder", false);
         this.apiHttps = options.apiHttps || true;
         this.continuosPlay = this.checkOpt(options, "continuosPlay", false);
         this.swfPath = options.swfPath || scriptUrl;
@@ -17122,6 +17125,34 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.randomizeOrderList = function() {
         if (this.randomOrder === true && this.mediaCount > 1) {
             this.videoList = this.shuffle(this.videoList);
+        }
+    };
+    this._setCustomOrder = function(co) {
+        if (typeof co == "string") {
+            co = co.split(",");
+            for (var yy = 0; yy < co.length; yy++) {
+                co[yy] = parseInt(co[yy]);
+            }
+        } else if (co instanceof Array) {}
+        return co;
+    };
+    this._setOrderList = function(list, co) {
+        var vl = [];
+        for (var y = 0; y < list.length; y++) {
+            if (list[y].id) {
+                var pos = co.indexOf(parseInt(list[y].id));
+                if (pos > -1) {
+                    vl[pos] = list[y];
+                }
+            }
+        }
+        return vl;
+    };
+    this.setOrderList = function() {
+        if (this.customOrder && this.mediaCount > 1) {
+            vrt.customOrder = this._setCustomOrder(vrt.customOrder);
+            vrt.videoList = this._setOrderList(vrt.videoListOrdered, vrt.customOrder);
+            vrt.mediaCount = vrt.videoList.length;
         }
     };
     this.shuffle = function(o) {
@@ -17980,6 +18011,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                             vrt.platform.ua ? vrtdata.vrt_ua = vrt.platform.ua : "";
                         }
                         vrt.ceclient.writeRespondentCustomData(vrt.respondentId, vrtdata);
+                        if (vrt.customOrder) {
+                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {
+                                custom_order: vrt.customOrder.toString()
+                            });
+                        }
                     });
                 };
                 if (vrt.options.researchToken) {

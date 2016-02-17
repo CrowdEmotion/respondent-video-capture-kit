@@ -60,6 +60,7 @@
             });
 
             var rt = gup('r') || gup('rkey'), at = gup('a') || gup('appkey');
+            var co = gup('customorder') || false;
 
             if(!rt || ! at){
                 alert('Link not valid');
@@ -83,6 +84,7 @@
                     fullscreen: false,
                     randomOrder: false,
                     savePlatform: true,
+                    customOrder: co,
                     recordingAudio: false //temporary fix
                 };
 

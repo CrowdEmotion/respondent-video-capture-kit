@@ -1,4 +1,4 @@
-/* Javascript client crowdemotion.co.uk 2016-2-11 14:24 */ var CryptoJS = CryptoJS || function(i, p) {
+/* Javascript client crowdemotion.co.uk 2016-2-17 14:53 */ var CryptoJS = CryptoJS || function(i, p) {
     var f = {}, q = f.lib = {}, j = q.Base = function() {
         function a() {}
         return {
@@ -582,7 +582,7 @@ function CEClient() {
     };
     this.loadMediaList = function(researchId, cb) {
         var ceclient = this;
-        var url = 'media?where={"research_id":"' + researchId + '"}';
+        var url = "media?research_id=" + researchId + "&sort=videoOrder";
         javaRest.get(url, null, function(res) {
             if (cb) {
                 cb(res);

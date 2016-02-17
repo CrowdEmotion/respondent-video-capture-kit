@@ -317,7 +317,8 @@ function CEClient() {
 
     this.loadMediaList = function(researchId, cb){
         var ceclient = this;
-        var url = 'media?where={"research_id":"'+ researchId +'"}';
+        //var url = 'media?where={"research_id":"'+ researchId +'"}';
+        var url = 'media?research_id='+ researchId +'&sort=videoOrder';
         javaRest.get(url, null,
             function (res){ if(cb) { cb(res); } },
             function (res){ if(cb) { cb(res); } }
