@@ -1898,10 +1898,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                                 vrt.platform.description  ? vrtdata.vrt_platform =  vrt.platform.description : '';
                                 vrt.platform.ua  ?vrtdata.vrt_ua = vrt.platform.ua : '';
                             }
-                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrtdata);
+                            vrtdata.isTesting  = vrt.options.apiSandbox ?  vrt.options.apiSandbox : false;
                             if(vrt.customOrder){
-                                vrt.ceclient.writeRespondentCustomData(vrt.respondentId,{'custom_order':vrt.customOrder.toString()});
+                                vrtdata.custom_order = vrt.customOrder.toString();
                             }
+                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrtdata);
                         });
                 }
 
