@@ -1,6 +1,8 @@
 PlayCorder
 ===========
 
+[![Join the chat at https://gitter.im/CrowdEmotion/respondent-video-capture-kit](https://badges.gitter.im/CrowdEmotion/respondent-video-capture-kit.svg)](https://gitter.im/CrowdEmotion/respondent-video-capture-kit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 Description
 -----------
