@@ -244,6 +244,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         this.browser.isChromeMobile = this.checkChromeMobileVersion();
         this.browser.isAndroid = this.checkIsAndroid();
         this.options.saveSessionRespondent = this.checkOpt(options,'saveSessionRespondent',false);
+        this.options.createUniqueRespondent = this.checkOpt(options,'createUniqueRespondent',false);
+        this.options.doNotTrack = this.checkOpt(options,'donottrack',false);
+        if(this.options.doNotTrack===true){
+            this.options.saveSessionRespondent = false;
+            this.options.createUniqueRespondent = false;
+            vrtCookie.erase('vrt_urid');
+        }
 
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
@@ -626,6 +633,21 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on('vrt_event_user_click_no_camera', function () {
             vrt.llog('!! user click no camera');
+        });
+        $(window.vrt).on('vrt_event_respondent_created', function () {
+
+            if (vrt.options.createUniqueRespondent) {
+                var cookieV = vrtCookie.read('vrt_urid');
+                if (!cookieV) {
+                    vrtCookie.create('vrt_urid', vrt.respondentId, 1825);
+                    cookieV = vrt.respondentId;
+                }
+                if (!vrt.options.respondentName) {
+                    vrt.ceclient.writeRespondent({name: cookieV});
+                }
+                vrt.ceclient.writeRespondentCustomData( vrt.respondentId, {'vrt_urid': cookieV});
+            };
+
         });
 
     };

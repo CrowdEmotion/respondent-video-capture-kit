@@ -576,7 +576,7 @@ var apiLoadDataResults = function (ceInit, rkey, akey, respondentid , cb) {
 
 };
 
-var falsy = /^(?:f(?:alse)?|no?|0+)$/i;
 Boolean.parse = function(val) {
+    var falsy = /^(?:f(?:alse)?|no?|0+)$/i;
     return !falsy.test(val) && !!val;
 };
