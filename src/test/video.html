@@ -17,6 +17,7 @@
     <!-- Configuration file -->
     <!-- Mandatory files -->
     <script type="text/javascript" charset="utf-8" src="./libs/jquery-1.9.1.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../libs/browsercompatibility.js"></script>
 
     <!-- Recorder files -->
     <script type="text/javascript" charset="utf-8" src="../libs/swfobject.js"></script>
@@ -46,6 +47,7 @@
             var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
             var apiSandbox = gup('apisandbox') ? gup('apisandbox') : true;
             var customorder = gup('customorder') ? gup('customorder') : false;
+            var saveSessionRespondent = gup('ssr') ? gup('ssr') : false;
             var fullVideo  = gup('full') ? gup('full') : false;
             var options = {
                 // apiDomain: "http://localhost:1337",
@@ -63,6 +65,7 @@
                 randomOrder: false,
                 savePlatform: true,
                 customOrder : customorder,
+                saveSessionRespondent: Boolean.parse(saveSessionRespondent),
                 recordingAudio: false //temporary fix
             };
             var ceInit ={

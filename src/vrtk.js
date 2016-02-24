@@ -242,7 +242,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
           this.responseAtStart = options.responseAtStart = true;
         }
         this.browser.isChromeMobile = this.checkChromeMobileVersion();
-        this.browser.isAndroid= this.checkIsAndroid();
+        this.browser.isAndroid = this.checkIsAndroid();
+        this.options.saveSessionRespondent = this.checkOpt(options,'saveSessionRespondent',false);
 
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
@@ -1871,40 +1872,57 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     });
                 };
 
+                var apiPostCreateRespondent = function(res){
+
+                        vrt.respondentId = res.id;
+                        if(vrt.options.saveSessionRespondent == true) {
+                            vrtCookie.create('vrt_rid_' + vrt.researchId, res.id);
+                        }
+
+                        $(vrt).trigger('vrt_event_respondent_created');
+                        vrt.llog('respondent num: ' + vrt.respondentId);
+                        if(vrt.options.respondentCustomData){
+                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
+                        }
+                        var vrtdata = {'vrt_locationHref': vrt.options.locationHref};
+                        if(vrt.options.savePlatform && vrt.options.savePlatform===true){
+                            vrtdata = {'vrt_locationHref': vrt.options.locationHref, 'vrt_platform': {}, 'vrt_ua': {}};
+                            vrt.platform.description  ? vrtdata.vrt_platform =  vrt.platform.description : '';
+                            vrt.platform.ua  ?vrtdata.vrt_ua = vrt.platform.ua : '';
+                        }
+                        vrtdata.isTesting  = vrt.options.apiSandbox ?  vrt.options.apiSandbox : false;
+                        if(vrt.customOrder){
+                            vrtdata.custom_order = vrt.customOrder.toString();
+                        }
+                        vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrtdata);
+
+                };
+
                 var apiClientCreateRespondent = function(cb){
-                    var respoData = {};
-                    if(vrt.researchId) {
-                        respoData.researchId = vrt.researchId;
-                        respoData.research_id = vrt.researchId;
-                    }
-                    if(vrt.options.respondentCustomDataString) {
-                        respoData.customData = vrt.options.respondentCustomDataString;
-                    }
-                    if(vrt.options.respondentName) {
-                        respoData.name = vrt.options.respondentName;
+
+                    if(vrt.options.saveSessionRespondent == true){
+                        var haveRid = vrtCookie.read('vrt_rid_'+vrt.researchId);
+                        if(haveRid){
+                            vrt.respondentId = haveRid;
+                            $(vrt).trigger('vrt_event_respondent_created');
+                        }
                     }
 
-                    vrt.ceclient.writeRespondent(respoData,
-                        function(res){
-                            vrt.respondentId = res.id;
-                            $(vrt).trigger('vrt_event_respondent_created');
-                            vrt.llog('respondent num: ' + vrt.respondentId);
-                            if(vrt.options.respondentCustomData){
-                                vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrt.options.respondentCustomData );
-                            }
-                            var vrtdata = {'vrt_locationHref': vrt.options.locationHref};
-                            if(vrt.options.savePlatform && vrt.options.savePlatform===true){
-                                vrtdata = {'vrt_locationHref': vrt.options.locationHref, 'vrt_platform': {}, 'vrt_ua': {}};
-                                vrt.platform.description  ? vrtdata.vrt_platform =  vrt.platform.description : '';
-                                vrt.platform.ua  ?vrtdata.vrt_ua = vrt.platform.ua : '';
-                            }
-                            vrtdata.isTesting  = vrt.options.apiSandbox ?  vrt.options.apiSandbox : false;
-                            if(vrt.customOrder){
-                                vrtdata.custom_order = vrt.customOrder.toString();
-                            }
-                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrtdata);
-                        });
-                }
+                    if(!vrt.respondentId){
+                        var respoData = {};
+                        if (vrt.researchId) {
+                            respoData.researchId = vrt.researchId;
+                            respoData.research_id = vrt.researchId;
+                        }
+                        if (vrt.options.respondentCustomDataString) {
+                            respoData.customData = vrt.options.respondentCustomDataString;
+                        }
+                        if (vrt.options.respondentName) {
+                            respoData.name = vrt.options.respondentName;
+                        }
+                        vrt.ceclient.writeRespondent(respoData, function(res){apiPostCreateRespondent(res)});
+                    }
+                };
 
                 if(vrt.options.researchToken) {
                     vrt.ceclient.loadResearch(vrt.options.researchToken, function(research){
