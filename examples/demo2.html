@@ -29,12 +29,12 @@
             $("#proceed").click(function (event) {
                 if(window.vrtIsTest || (validateEmail($("#mail").val()) && validateQuestion())){ //mail check
                     $('#mail_alert').hide();
-                $('#intro').slideUp('slow', function () {
-                    $('#main').slideDown('slow', function () {
-                                window.createVrt();
-                            }
-                    );
-                });
+                    $('#intro').slideUp('slow', function () {
+                        $('#main').slideDown('slow', function () {
+                                    window.createVrt();
+                                }
+                        );
+                    });
                 }else{
                     $('#mail_alert').show().removeClass('vrthide');
                 }
@@ -120,9 +120,9 @@
                 // watch first video
                 $('#start').on('click', function () {
                     if(!$('#start').hasClass('disabled')) {
-                    alertMessage();
-                    $('#start').hide().remove();
-                    $(vrt).trigger('vrt_event_start_video_session');
+                        alertMessage();
+                        $('#start').hide().remove();
+                        $(vrt).trigger('vrt_event_start_video_session');
                     }
                     //if (vrt.continuosPlay !== true)$('#next').show();
                 });
@@ -160,9 +160,9 @@
 
                 $('#skip').on('click', function () {
                     if(!$('#skip').hasClass('disabled')){
-                    $('#skip').hide();
-                    alertMessage();
-                    $(vrt).trigger('vrt_event_user_next_video');
+                        $('#skip').hide();
+                        alertMessage();
+                        $(vrt).trigger('vrt_event_user_next_video');
                     };
                 });
 
@@ -515,7 +515,7 @@
         <div><input id="mail" name="mail" placeholder="your@email.com (optional)" value="" class="vrtinput" autocomplete="on" /></div>
 
         <div id="video_saving_test">
-        <b class="block">Your videos will be deleted after analysis</b>
+            <b class="block">Your videos will be deleted after analysis</b>
         </div>
         <div id="video_saving_demo">
             <div id="video_saving_Wrapper" class="checkbox">
