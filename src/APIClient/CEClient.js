@@ -220,7 +220,22 @@ function CEClient() {
             }
         })
     };
+    this.editRespondentName = function(respondentId, data, callback) {
 
+        javaRest.put(
+            'respondent/' + respondentId,
+            '{"name" : "'+data+'"}',
+            function (response) {
+                if (callback)
+                    callback();
+
+            },
+            function(jqXHR, textStatus) {
+                if (callback)
+                    callback(jqXHR);
+            },
+            true)
+    };
     this.writeRespondent = function (data, callback) {
         if(data.customData && typeof data.customData  == 'object'){
             data.customData = JSON.stringify(data.customData)
@@ -646,15 +661,15 @@ javaRest.postAuthForm = function (url, form_id) {
 /**
  * Wrap the API so we can proxy calls while testing.
  */
-javaRest.put = function (url, data, success, error) {
-
+javaRest.put = function (url, data, success, error, plain) {
+    var dataput = (plain)? data : JSON.stringify(data);
     var auth = javaRest.getAuthData('PUT', url);
 
     $.ajax({
         url: this.baseurl()+url,
         type: "PUT",
         contentType: "application/json", // send as JSON
-        data: JSON.stringify(data),
+        data: dataput,
         crossDomain: true,
         headers: {
             'Authorization' : auth.authorization,

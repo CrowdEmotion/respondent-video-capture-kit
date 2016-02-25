@@ -635,19 +635,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.llog('!! user click no camera');
         });
         $(window.vrt).on('vrt_event_respondent_created', function () {
-
-            if (vrt.options.createUniqueRespondent) {
-                var cookieV = vrtCookie.read('vrt_urid');
-                if (!cookieV) {
-                    vrtCookie.create('vrt_urid', vrt.respondentId, 1825);
-                    cookieV = vrt.respondentId;
-                }
-                if (!vrt.options.respondentName) {
-                    vrt.ceclient.writeRespondent({name: cookieV});
-                }
-                vrt.ceclient.writeRespondentCustomData( vrt.respondentId, {'vrt_urid': cookieV});
-            };
-
+            vrt.saveUniqueRespondent();
         });
 
     };
@@ -1844,6 +1832,20 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.ceclient.writeResponse(data, cb)
     };
 
+    this.saveUniqueRespondent = function(){
+        if (vrt.options.createUniqueRespondent) {
+            var cookieV = vrtCookie.read('vrt_urid');
+            if (!cookieV) {
+                vrtCookie.create('vrt_urid', vrt.respondentId, 1825);
+                cookieV = vrt.respondentId;
+            }
+            if (!vrt.options.respondentName) {
+                vrt.ceclient.editRespondentName(vrt.respondentId,cookieV);
+            }
+            vrt.ceclient.writeRespondentCustomData( vrt.respondentId, {'vrt_urid': cookieV});
+        };
+    };
+
     this.apiClientSetup = function(cbSuccess, cbFail){
 
         var apiClientSetupNext = function(ret){
@@ -1919,6 +1921,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         vrt.ceclient.writeRespondentCustomData(vrt.respondentId,vrtdata);
 
                 };
+
 
                 var apiClientCreateRespondent = function(cb){
 
