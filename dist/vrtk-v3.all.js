@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-2-25 10:6 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-2-25 16:17 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -10676,6 +10676,13 @@ function CEClient() {
             }
         });
     };
+    this.editRespondentName = function(respondentId, data, callback) {
+        javaRest.put("respondent/" + respondentId, '{"name" : "' + data + '"}', function(response) {
+            if (callback) callback();
+        }, function(jqXHR, textStatus) {
+            if (callback) callback(jqXHR);
+        }, true);
+    };
     this.writeRespondent = function(data, callback) {
         if (data.customData && typeof data.customData == "object") {
             data.customData = JSON.stringify(data.customData);
@@ -11001,13 +11008,14 @@ javaRest.postAuthForm = function(url, form_id) {
     $("#" + form_id).attr("action", this.baseurl() + url + "?Authorization=" + encodeURIComponent(auth.authorization) + "&x-ce-rest-date=" + encodeURIComponent(auth.time) + "&nonce=" + encodeURIComponent(auth.nonce)).submit();
 };
 
-javaRest.put = function(url, data, success, error) {
+javaRest.put = function(url, data, success, error, plain) {
+    var dataput = plain ? data : JSON.stringify(data);
     var auth = javaRest.getAuthData("PUT", url);
     $.ajax({
         url: this.baseurl() + url,
         type: "PUT",
         contentType: "application/json",
-        data: JSON.stringify(data),
+        data: dataput,
         crossDomain: true,
         headers: {
             Authorization: auth.authorization,
@@ -17045,21 +17053,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             vrt.llog("!! user click no camera");
         });
         $(window.vrt).on("vrt_event_respondent_created", function() {
-            if (vrt.options.createUniqueRespondent) {
-                var cookieV = vrtCookie.read("vrt_urid");
-                if (!cookieV) {
-                    vrtCookie.create("vrt_urid", vrt.respondentId, 1825);
-                    cookieV = vrt.respondentId;
-                }
-                if (!vrt.options.respondentName) {
-                    vrt.ceclient.writeRespondent({
-                        name: cookieV
-                    });
-                }
-                vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {
-                    vrt_urid: cookieV
-                });
-            }
+            vrt.saveUniqueRespondent();
         });
     };
     this.newTS = function(data) {
@@ -17996,6 +17990,21 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         data.media_id = this.media_id;
         data.respondent_id = data.respondentd = this.respondentId;
         vrt.ceclient.writeResponse(data, cb);
+    };
+    this.saveUniqueRespondent = function() {
+        if (vrt.options.createUniqueRespondent) {
+            var cookieV = vrtCookie.read("vrt_urid");
+            if (!cookieV) {
+                vrtCookie.create("vrt_urid", vrt.respondentId, 1825);
+                cookieV = vrt.respondentId;
+            }
+            if (!vrt.options.respondentName) {
+                vrt.ceclient.editRespondentName(vrt.respondentId, cookieV);
+            }
+            vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {
+                vrt_urid: cookieV
+            });
+        }
     };
     this.apiClientSetup = function(cbSuccess, cbFail) {
         var apiClientSetupNext = function(ret) {

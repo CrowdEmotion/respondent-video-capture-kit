@@ -1,4 +1,4 @@
-/* Javascript client crowdemotion.co.uk 2016-2-25 10:6 */ var CryptoJS = CryptoJS || function(i, p) {
+/* Javascript client crowdemotion.co.uk 2016-2-25 16:17 */ var CryptoJS = CryptoJS || function(i, p) {
     var f = {}, q = f.lib = {}, j = q.Base = function() {
         function a() {}
         return {
@@ -506,6 +506,13 @@ function CEClient() {
             }
         });
     };
+    this.editRespondentName = function(respondentId, data, callback) {
+        javaRest.put("respondent/" + respondentId, '{"name" : "' + data + '"}', function(response) {
+            if (callback) callback();
+        }, function(jqXHR, textStatus) {
+            if (callback) callback(jqXHR);
+        }, true);
+    };
     this.writeRespondent = function(data, callback) {
         if (data.customData && typeof data.customData == "object") {
             data.customData = JSON.stringify(data.customData);
@@ -831,13 +838,14 @@ javaRest.postAuthForm = function(url, form_id) {
     $("#" + form_id).attr("action", this.baseurl() + url + "?Authorization=" + encodeURIComponent(auth.authorization) + "&x-ce-rest-date=" + encodeURIComponent(auth.time) + "&nonce=" + encodeURIComponent(auth.nonce)).submit();
 };
 
-javaRest.put = function(url, data, success, error) {
+javaRest.put = function(url, data, success, error, plain) {
+    var dataput = plain ? data : JSON.stringify(data);
     var auth = javaRest.getAuthData("PUT", url);
     $.ajax({
         url: this.baseurl() + url,
         type: "PUT",
         contentType: "application/json",
-        data: JSON.stringify(data),
+        data: dataput,
         crossDomain: true,
         headers: {
             Authorization: auth.authorization,
