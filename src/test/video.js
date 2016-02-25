@@ -109,7 +109,7 @@ var testList = function () {
         it("webcam should be allowed", function (done) {
             ilog(this.test.title);
             this.done = done;
-            this.timeout(5000);
+            this.timeout(20000);
             $(window.vrt).on('vrt_event_producer_camera_muted', function () {
                 done('camera is blocked')
             });

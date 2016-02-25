@@ -47,8 +47,8 @@
             var akey = gup('appkey') ? gup('appkey') : '7a94ee21-9e11-41fd-906d-069000fade82';
             var apiSandbox = gup('apisandbox') ? Boolean.parse(gup('apisandbox')) : true;
             var customorder = gup('customorder') ? gup('customorder') : false;
-            var saveSessionRespondent = gup('ssr') ? Boolean.parse(gup('ssr')) : false;
-            var createUniqueRespondent = gup('cur')? Boolean.parse(gup('cur')) : false;
+            var saveSessionRespondent = gup('ssr') ? Boolean.parse(gup('ssr')) : true;
+            var createUniqueRespondent = gup('cur')? Boolean.parse(gup('cur')) : true;
             var doNotTrack = gup('doNotTrack')? Boolean.parse(gup('dnt')) : false;
             var fullVideo  = gup('full') ? gup('full') : false;
             var options = {
