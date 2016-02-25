@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-2-17 15:28 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-2-25 10:6 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -9959,6 +9959,32 @@ window.console = window.console || function() {
     return c;
 }();
 
+var vrtCookie = {};
+
+vrtCookie.create = function(name, value, days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1e3);
+        var expires = "; expires=" + date.toGMTString();
+    } else var expires = "";
+    document.cookie = name + "=" + value + expires + "; path=/";
+};
+
+vrtCookie.read = function(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == " ") c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+};
+
+vrtCookie.erase = function(name) {
+    createCookie(name, "", -1);
+};
+
 var ltIE9 = !document.addEventListener;
 
 if (ltIE9) {
@@ -16725,6 +16751,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
         this.browser.isChromeMobile = this.checkChromeMobileVersion();
         this.browser.isAndroid = this.checkIsAndroid();
+        this.options.saveSessionRespondent = this.checkOpt(options, "saveSessionRespondent", true);
+        this.options.createUniqueRespondent = this.checkOpt(options, "createUniqueRespondent", true);
+        this.options.doNotTrack = this.checkOpt(options, "donottrack", false);
+        if (this.options.doNotTrack === true) {
+            this.options.saveSessionRespondent = false;
+            this.options.createUniqueRespondent = false;
+            vrtCookie.erase("vrt_urid");
+        }
         this.producerStreamUrl = streamUrl;
         this.producerStreamName = this.clearname(streamName);
         this.initMediaList(type, list);
@@ -17009,6 +17043,23 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on("vrt_event_user_click_no_camera", function() {
             vrt.llog("!! user click no camera");
+        });
+        $(window.vrt).on("vrt_event_respondent_created", function() {
+            if (vrt.options.createUniqueRespondent) {
+                var cookieV = vrtCookie.read("vrt_urid");
+                if (!cookieV) {
+                    vrtCookie.create("vrt_urid", vrt.respondentId, 1825);
+                    cookieV = vrt.respondentId;
+                }
+                if (!vrt.options.respondentName) {
+                    vrt.ceclient.writeRespondent({
+                        name: cookieV
+                    });
+                }
+                vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {
+                    vrt_urid: cookieV
+                });
+            }
         });
     };
     this.newTS = function(data) {
@@ -17979,43 +18030,58 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         }
                     });
                 };
-                var apiClientCreateRespondent = function(cb) {
-                    var respoData = {};
-                    if (vrt.researchId) {
-                        respoData.researchId = vrt.researchId;
-                        respoData.research_id = vrt.researchId;
+                var apiPostCreateRespondent = function(res) {
+                    vrt.respondentId = res.id;
+                    if (vrt.options.saveSessionRespondent == true) {
+                        vrtCookie.create("vrt_rid_" + vrt.researchId, res.id);
                     }
-                    if (vrt.options.respondentCustomDataString) {
-                        respoData.customData = vrt.options.respondentCustomDataString;
+                    $(vrt).trigger("vrt_event_respondent_created");
+                    vrt.llog("respondent num: " + vrt.respondentId);
+                    if (vrt.options.respondentCustomData) {
+                        vrt.ceclient.writeRespondentCustomData(vrt.respondentId, vrt.options.respondentCustomData);
                     }
-                    if (vrt.options.respondentName) {
-                        respoData.name = vrt.options.respondentName;
-                    }
-                    vrt.ceclient.writeRespondent(respoData, function(res) {
-                        vrt.respondentId = res.id;
-                        $(vrt).trigger("vrt_event_respondent_created");
-                        vrt.llog("respondent num: " + vrt.respondentId);
-                        if (vrt.options.respondentCustomData) {
-                            vrt.ceclient.writeRespondentCustomData(vrt.respondentId, vrt.options.respondentCustomData);
-                        }
-                        var vrtdata = {
-                            vrt_locationHref: vrt.options.locationHref
+                    var vrtdata = {
+                        vrt_locationHref: vrt.options.locationHref
+                    };
+                    if (vrt.options.savePlatform && vrt.options.savePlatform === true) {
+                        vrtdata = {
+                            vrt_locationHref: vrt.options.locationHref,
+                            vrt_platform: {},
+                            vrt_ua: {}
                         };
-                        if (vrt.options.savePlatform && vrt.options.savePlatform === true) {
-                            vrtdata = {
-                                vrt_locationHref: vrt.options.locationHref,
-                                vrt_platform: {},
-                                vrt_ua: {}
-                            };
-                            vrt.platform.description ? vrtdata.vrt_platform = vrt.platform.description : "";
-                            vrt.platform.ua ? vrtdata.vrt_ua = vrt.platform.ua : "";
+                        vrt.platform.description ? vrtdata.vrt_platform = vrt.platform.description : "";
+                        vrt.platform.ua ? vrtdata.vrt_ua = vrt.platform.ua : "";
+                    }
+                    vrtdata.isTesting = vrt.options.apiSandbox ? vrt.options.apiSandbox : false;
+                    if (vrt.customOrder) {
+                        vrtdata.custom_order = vrt.customOrder.toString();
+                    }
+                    vrt.ceclient.writeRespondentCustomData(vrt.respondentId, vrtdata);
+                };
+                var apiClientCreateRespondent = function(cb) {
+                    if (vrt.options.saveSessionRespondent == true) {
+                        var haveRid = vrtCookie.read("vrt_rid_" + vrt.researchId);
+                        if (haveRid) {
+                            vrt.respondentId = haveRid;
+                            $(vrt).trigger("vrt_event_respondent_created");
                         }
-                        vrtdata.isTesting = vrt.options.apiSandbox ? vrt.options.apiSandbox : false;
-                        if (vrt.customOrder) {
-                            vrtdata.custom_order = vrt.customOrder.toString();
+                    }
+                    if (!vrt.respondentId) {
+                        var respoData = {};
+                        if (vrt.researchId) {
+                            respoData.researchId = vrt.researchId;
+                            respoData.research_id = vrt.researchId;
                         }
-                        vrt.ceclient.writeRespondentCustomData(vrt.respondentId, vrtdata);
-                    });
+                        if (vrt.options.respondentCustomDataString) {
+                            respoData.customData = vrt.options.respondentCustomDataString;
+                        }
+                        if (vrt.options.respondentName) {
+                            respoData.name = vrt.options.respondentName;
+                        }
+                        vrt.ceclient.writeRespondent(respoData, function(res) {
+                            apiPostCreateRespondent(res);
+                        });
+                    }
                 };
                 if (vrt.options.researchToken) {
                     vrt.ceclient.loadResearch(vrt.options.researchToken, function(research) {

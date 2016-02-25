@@ -243,8 +243,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
         this.browser.isChromeMobile = this.checkChromeMobileVersion();
         this.browser.isAndroid = this.checkIsAndroid();
-        this.options.saveSessionRespondent = this.checkOpt(options,'saveSessionRespondent',false);
-        this.options.createUniqueRespondent = this.checkOpt(options,'createUniqueRespondent',false);
+        this.options.saveSessionRespondent = this.checkOpt(options,'saveSessionRespondent',true);
+        this.options.createUniqueRespondent = this.checkOpt(options,'createUniqueRespondent',true);
         this.options.doNotTrack = this.checkOpt(options,'donottrack',false);
         if(this.options.doNotTrack===true){
             this.options.saveSessionRespondent = false;
