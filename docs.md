@@ -2,16 +2,24 @@
 
 ### Implement
 
-1. Requirements: PlayCorder use the _JQuery_ library, tested on 1.9.1 version:
-  1. Download JQuery [here](http://jquery.com/download/)
-  2. Include *JQuery* in the *head* of you html page
-1. Include the Webproducer, a Flash object for recording video:
-  - Copy the file  `swf/producer.swf` in your file system
-1. In the *head* of your html page, include all these files:
-  1. `js/vrtk.min.js`
-  2. `js/vrtk.min.css`
-1. Include this html code in the *body* of your page: `<div id="vrt"></div>`
-1. Initialize PlayCorder
+1. Include CDN Hosted version of MeMo Embed in your page including CSS and Javascript resources
+	1. jQuery 1.9.1+:
+ 	https://code.jquery.com/jquery-1.9.1.min.js
+	1. MeMo Embed code: https://cdn.crowdemotion.co.uk/playcorder/v3/vrtk-v3.all.js
+	1. MeMo Embed CSS: https://cdn.crowdemotion.co.uk/playcorder/v3/vrtk-v3.min.css
+	1. See the code: https://github.com/CrowdEmotion/respondent-video-capture-kit/blob/master/examples/demo1.html#L6-L9
+1. Add the following markup elements to your HTML structure:
+	1. minimal markup https://github.com/CrowdEmotion/respondent-video-capture-kit/blob/master/examples/demo1.html#L549
+	1. option markup with example buttons https://github.com/CrowdEmotion/respondent-video-capture-kit/blob/master/examples/demo1.html#L540-L550
+1. Use the following Javascript code to configure and activate the MeMo Embed:
+	1. Be sure to substitute appToken and projectKey with the ones you collected in the previous steps
+	1. Check carefully how event handlers are attached to the MeMo Embed and to the DOM elements because that is where most of your customization takes place to change the user workflow
+	1. During tests it is very important to leave apiSandbox parameter to true in order to avoid wasting paid viewers during development 
+	1. The proposed Javascript code should be executed when the markup elements are already in place (in the DOM of the page)
+	1. See the code: https://github.com/CrowdEmotion/respondent-video-capture-kit/blob/master/examples/demo1.html#L56-L280
+1. If you are going to use MeMo Embed default configuration for video recording and not your servers, write to to us at support@crodemotion.co.uk about which domains you wish whitelisted else MeMo Embed will not work.
+1. MeMo Embed runs only on pages that implement a secure transport (HTTPS protocol) - this is a requirement of browsers/web standards, not of MeMo Embed.
+
 
 
 ###### Initialization
@@ -34,23 +42,11 @@ $(document).ready(function(){
 ```       
      
 the  `<<OPTIONS>>` object attributes are the same of previous paragraph, just add these values:
+- `researchToken`: a `string` value that load the media list
+- `appToken`: an auth `string` value
+- `streamName`: a `string` value to prepend before each string
+- `apiSandbox`: a `boolean` value, set to false for facevideo analysis
 
-- `type` string: `youtube` or `custom server` - choose if your video stimuli are hosted by YouTube or your own custom server
-- `list` array: list of video stimuli, please follow  instruction on previous paragraph under the `<<VIDEODATA>> ` option
-- `streamName` string: a simple string used as recording name
-- `apiDomain` string : contain CrowdEmotion API domain to upload videos for analysis. See API documentation at [http://docs.ceapi1.apiary.io/](http://docs.ceapi1.apiary.io/)
-
-Important note: If you include a valid value for `researchToken`, `type` can be set to `null` and `list`  as empty object `{}` (because both `list` and `type` are loaded from the research )
-
-### Load PlayCorder media from API
-
-If the `appToken` and `researchToken` options are specified, media are loaded through the CrowdEmotion API backend [http://api.crowdemotion.co.uk/] 
-To upload media, just follow these steps:
-
-1. Signup at [https://api.crowdemotion.co.uk/#/signup] and wait for confirmation of your account
-2. Login at [https://api.crowdemotion.co.uk/#/login] 
-3. Create a project [https://api.crowdemotion.co.uk/#/project] and check `Ready`
-4. Create the media [https://api.crowdemotion.co.uk/#/media] and assign them to your project 
 
                     
 ### Implement in you code the listeners for the following events:
@@ -100,15 +96,22 @@ $(window.vrt).on('vrt_event_producer_camera_blocked', function () {
 ```
 (document).ready(function(){
 	//create PlayCorder object
-	var vrt = new Vrt({ optionstype:"youtube", list:{} ,streamName:"test", streamUrl:"xxxx.com", researchToken:"XXXXXXXXYYYYYYYYY",appToken:"AAAAAAAABBBBBBBBBB",
-                apiDomain:"http://api.com',
-                debug:true, debugChrono:  true, debugChronoHtml: false, debugEvt:true, debugVImportant:true,
-                randomOrder : true, timedOverPlayToEnd:false, continuosPlay:true,
-                customData:{user_id:user_id}, customDataInsertMediaName: true, customDataInsertMediaId: true,
-                customDataInsertMediaPath : true, responseAtStart: true,
-                respondentName: "nnnnnn",
-                respondentCustomDataString:  {name:"nnnn", lastname:"mmmm"},
-                respondentCustomData : {name1:"myname", lastname1:"mylastname"} });
+	var vrt = new Vrt({
+                    researchToken: ‘XXXXXX’,
+                    appToken: ‘YYYYYY’,
+                    streamName: ‘ce-demo1_’,
+                    apiSandbox: true,
+                    debug: true,
+                    respondentCustomData: {user_video_behavior: vb},
+                    playerCentered: false,
+                    recorderCentered: false,
+                    playerHorizontallyCentered: true,
+                    recorderHorizontallyCentered: true,
+                    fullscreen: false,
+                    randomOrder: false,
+                    savePlatform: true,
+                    recordingAudio: false //temporary fix
+                });
 
 	//Implement event and method related to PlayCorder
  		$(vrt).on("vrt_event_producer_camera_ok",function()	{ alert("Your webcam is ok") });
@@ -177,15 +180,4 @@ The values for outgoing Url will be:
    
    
 
-
-
-##NOTES
-
-`vrtk.min.js` and `vtk.min.css`` are compressed files that contains all js/css files in these folders:
-
-- js/APIClient/
-- js/external/
-- js/recorder/
-- js/video/ [^]
-- js/video_respondent_test/
 
