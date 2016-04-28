@@ -124,6 +124,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.browser = {isChromeMobile: false, old: false, requirement: true, isAndroid: false};
     this.platform = null;
     this.producerVideo = null;
+    this.isUploading = false
 
 
     this.reloadFlash = null;
@@ -660,6 +661,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
     };
 
+    this.createResponseList = function(res){
+        vrt.responseList[vrt.currentMedia] = res.id;
+        //console.log('responseList');
+        //console.log(vrt.responseList);
+        $(window.vrt).trigger('vrt_event_create_response',[{data:res.id}]);
+        $(window.vrt).trigger('vrtstep_loaded_by_response');
+    }
+
     this.createTS = function(data){
         vrt.bufferTSAll.push(data);
 
@@ -681,15 +690,21 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         //vrt.bufferTSAllPushed.push(TS);
         //vrt.llog('addTS');
         //vrt.llog(TS);
-        vrt.producer.addTimedMetadata(
-            TS,
-            function(){
-                //vrt.llog('added TS');
-                if(cbOk)cbOk()},
-            function(){
-                //vrt.llog('no added TS');
-                if(cbNo)cbNo()}
-        );
+        //console.log('addTS');
+        //console.log(vrt.producer.streamName);
+        if(vrt.producer.streamName) {
+            vrt.producer.addTimedMetadata(
+                TS,
+                function () {
+                    //vrt.llog('added TS');
+                    if (cbOk)cbOk()
+                },
+                function () {
+                    //vrt.llog('no added TS');
+                    if (cbNo)cbNo()
+                }
+            );
+        }
     };
 
     this.saveBufferedTS = function (cb) {
@@ -755,20 +770,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
         }
         return hval >>> 0;
-        /*
-        return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
-        */
-        /*
-        var hash = 0;
-        s = s.toString();
-        if (s.length == 0) return s;
-        for (i = 0; i < s.length; i++) {
-            var char = s.charCodeAt(i);
-            hash = ((hash<<5)-hash)+char;
-            hash = hash & hash; // Convert to 32bit integer
-        }
-        return hash;
-        */
+
     };
 
     this.calculateListData = function (){
@@ -952,6 +954,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.stepComplete = function(res,err){
 
+        vrt.isUploading = false;
+        //console.log('vrt.isUploading: '+vrt.isUploading);
         if(err){
             res = {responseId:vrt.responseList[vrt.currentMedia]}
         }
@@ -973,15 +977,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if(window.vrt.options.customDataInsertMediaLength && window.vrt.options.customDataInsertMediaLength===true) {
                 window.vrt.options.customData.media_length = window.vrt.media_length;
             }
-            window.vrt.apiClientSaveCustomData(res.responseId, window.vrt.options.customData,
-                function() {
-                    window.vrt.loader('postVideo','default',false);
-                    $(window.vrt).trigger('vrt_event_video_step_completed', [{
-                        responseId: res.responseId,
-                        insertedCustomData: true
-                    }])
-                }
-            );
+            if(res && res.responseId) {
+                window.vrt.apiClientSaveCustomData(res.responseId, window.vrt.options.customData,
+                    function () {
+                        window.vrt.loader('postVideo', 'default', false);
+                        $(window.vrt).trigger('vrt_event_video_step_completed', [{
+                            responseId: res.responseId,
+                            insertedCustomData: true
+                        }])
+                    }
+                );
+            }
         }else{
             window.vrt.loader('postVideo','default',false);
             $(window.vrt).trigger('vrt_event_video_step_completed',[{responseId: res.responseId,insertedCustomData:false}]);
@@ -1397,7 +1403,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
     this.pollingPlayerPos = function(){
-        vrt.addTS(vrt.createTS({status:17}));
+        console.log('polling on '+ vrt.producer.streamName);
+        if(vrt.producer && vrt.producer.streamName)
+            vrt.addTS(vrt.createTS({status:17}));
     };
 
     this.stop_playing =function() {
@@ -1629,8 +1637,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 vrt.log('!!PRODUCER publish');
             });
 
-
-            this.on('unpublish',function(){
+            vrt.on_unpublish = function(){
                 $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(21)});
                 vrt.logChrono(0, false, 'PRODUCER RECORDING');
                 vrt.isRecording =  false;
@@ -1641,6 +1648,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(vrt).trigger('vrt_event_recorder_unpublish');
                 vrt.log('!!PRODUCER unpublish');
                 vrt.afterSaveTimeout();
+            };
+
+            this.on('unpublish',function(){
+                vrt.on_unpublish();
             });
 
             this.on('connect', function () {
@@ -1658,10 +1669,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     $(vrt).trigger('vrtstep_connect');
                 },500);
             });
-
-            this.on('save', function (url) {
+            vrt.on_save = function(url){
                 vrt.llog('producer on save');
                 vrt.afterSave(null, url);
+            };
+            this.on('save', function (url) {
+                vrt.on_save(url);
             });
 
             this.on('save-metadata', function (url) {
@@ -1819,7 +1832,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
         //console.log('>>>>>>>>dataToUpload');
         //console.log(dataToUpload);
-        this.ceclient.uploadLink(dataToUpload, cb);
+        if(!vrt.isUploading){
+            vrt.isUploading = true;
+            //console.log('vrt.isUploading: '+vrt.isUploading);
+            this.ceclient.uploadLinkRepeat(dataToUpload, cb);
+        }
+
     };
 
     this.apiClientWriteResponse = function (data, cb) {
@@ -1829,7 +1847,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         data.respondent_id = data.respondentd = this.respondentId;
         //this.llog('>>>>>>>>writeResponse');
         //this.llog(data);
-        vrt.ceclient.writeResponse(data, cb)
+        vrt.ceclient.writeResponseRepeat(data, cb)
     };
 
     this.saveUniqueRespondent = function(){
@@ -1945,7 +1963,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         if (vrt.options.respondentName) {
                             respoData.name = vrt.options.respondentName;
                         }
-                        vrt.ceclient.writeRespondent(respoData, function(res){apiPostCreateRespondent(res)});
+                        vrt.ceclient.writeRespondentRepeat(respoData, function(res){apiPostCreateRespondent(res)});
                     }
                 };
 

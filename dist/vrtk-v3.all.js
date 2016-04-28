@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-4-18 10:21 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-4-28 15:30 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -10677,6 +10677,13 @@ function CEClient() {
             if (cb) cb(res);
         });
     };
+    this.uploadLinkRepeat = function(mediaURL, cb) {
+        var ceclient = this;
+        javaRest.facevideo.uploadLinkRepeat(mediaURL, function(res) {
+            ceclient.responseId = res.responseId;
+            if (cb) cb(res);
+        });
+    };
     this.writeCustomData = function(responseId, data, cb) {
         javaRest.response.writeCustomData(responseId, data, function(res) {
             if (cb) cb(res);
@@ -10795,6 +10802,17 @@ function CEClient() {
             }
         });
     };
+    this.writeResponseRepeat = function(data, callback) {
+        javaRest.postAuthRepeat("response" + javaRest.queryUrl(), data, function(response) {
+            if (callback) {
+                callback(response);
+            }
+        }, function(jqXHR, textStatus) {
+            if (callback) {
+                callback(jqXHR);
+            }
+        });
+    };
     this.editRespondentName = function(respondentId, data, callback) {
         javaRest.put("respondent/" + respondentId, '{"name" : "' + data + '"}', function(response) {
             if (callback) callback();
@@ -10807,6 +10825,20 @@ function CEClient() {
             data.customData = JSON.stringify(data.customData);
         }
         javaRest.postAuth("respondent" + javaRest.queryUrl(), data, function(response) {
+            if (callback) {
+                callback(response);
+            }
+        }, function(jqXHR, textStatus) {
+            if (callback) {
+                callback(jqXHR);
+            }
+        });
+    };
+    this.writeRespondentRepeat = function(data, callback) {
+        if (data.customData && typeof data.customData == "object") {
+            data.customData = JSON.stringify(data.customData);
+        }
+        javaRest.postAuthRepeat("respondent" + javaRest.queryUrl(), data, function(response) {
             if (callback) {
                 callback(response);
             }
@@ -11119,6 +11151,38 @@ javaRest.postAuth = function(url, data, success, error) {
         dataType: "json",
         success: success,
         error: error
+    });
+};
+
+javaRest.postAuthRepeat = function(url, data, success, error, retry) {
+    if (console && console.log) {
+        console.log("postAuthRepeat " + " " + url + " retry");
+    }
+    var auth = javaRest.getAuthData("POST", url);
+    retry === undefined ? retry = 0 : retry = retry + 1;
+    var max_retry = 3;
+    var call = $.ajax({
+        url: this.baseurl() + url,
+        type: "POST",
+        contentType: "application/json",
+        data: data ? JSON.stringify(data) : null,
+        crossDomain: true,
+        headers: {
+            Authorization: auth.authorization,
+            "x-ce-rest-date": auth.time,
+            nonce: auth.nonce
+        },
+        dataType: "json"
+    });
+    call.done(success);
+    call.fail(function(e) {
+        if (retry < max_retry) {
+            setTimeout(function() {
+                javaRest.postAuthRepeat(url, data, success, error, retry);
+            }, Math.pow(retry, retry) * 100 + 100);
+        } else {
+            if (error) error;
+        }
     });
 };
 
@@ -11451,6 +11515,23 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
         };
     }
     javaRest.postAuth("facevideo/upload" + javaRest.queryUrl(), videoLink, function(response) {
+        if (callback) {
+            callback(response);
+        }
+    }, function(jqXHR, textStatus) {
+        if (callback) {
+            callback(jqXHR);
+        }
+    });
+};
+
+javaRest.facevideo.uploadLinkRepeat = function(videoLink, callback) {
+    if (typeof videoLink == "string") {
+        videoLink = {
+            link: videoLink
+        };
+    }
+    javaRest.postAuthRepeat("facevideo/upload" + javaRest.queryUrl(), videoLink, function(response) {
         if (callback) {
             callback(response);
         }
@@ -16773,6 +16854,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
     this.platform = null;
     this.producerVideo = null;
+    this.isUploading = false;
     this.reloadFlash = null;
     this.initMediaList = function(type, list) {
         if (!list) return;
@@ -17192,6 +17274,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
         }
     };
+    this.createResponseList = function(res) {
+        vrt.responseList[vrt.currentMedia] = res.id;
+        $(window.vrt).trigger("vrt_event_create_response", [ {
+            data: res.id
+        } ]);
+        $(window.vrt).trigger("vrtstep_loaded_by_response");
+    };
     this.createTS = function(data) {
         vrt.bufferTSAll.push(data);
         var time_rec = vrt.producer.streamTimeBase > 0 ? vrt.producer.getStreamTime() : 0;
@@ -17207,11 +17296,13 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
     this.addTS = function(TS, cbOk, cbNo) {
         if (!TS) return;
-        vrt.producer.addTimedMetadata(TS, function() {
-            if (cbOk) cbOk();
-        }, function() {
-            if (cbNo) cbNo();
-        });
+        if (vrt.producer.streamName) {
+            vrt.producer.addTimedMetadata(TS, function() {
+                if (cbOk) cbOk();
+            }, function() {
+                if (cbNo) cbNo();
+            });
+        }
     };
     this.saveBufferedTS = function(cb) {
         var ar = vrt.bufferTS;
@@ -17418,6 +17509,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
     };
     this.stepComplete = function(res, err) {
+        vrt.isUploading = false;
         if (err) {
             res = {
                 responseId: vrt.responseList[vrt.currentMedia]
@@ -17439,13 +17531,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if (window.vrt.options.customDataInsertMediaLength && window.vrt.options.customDataInsertMediaLength === true) {
                 window.vrt.options.customData.media_length = window.vrt.media_length;
             }
-            window.vrt.apiClientSaveCustomData(res.responseId, window.vrt.options.customData, function() {
-                window.vrt.loader("postVideo", "default", false);
-                $(window.vrt).trigger("vrt_event_video_step_completed", [ {
-                    responseId: res.responseId,
-                    insertedCustomData: true
-                } ]);
-            });
+            if (res && res.responseId) {
+                window.vrt.apiClientSaveCustomData(res.responseId, window.vrt.options.customData, function() {
+                    window.vrt.loader("postVideo", "default", false);
+                    $(window.vrt).trigger("vrt_event_video_step_completed", [ {
+                        responseId: res.responseId,
+                        insertedCustomData: true
+                    } ]);
+                });
+            }
         } else {
             window.vrt.loader("postVideo", "default", false);
             $(window.vrt).trigger("vrt_event_video_step_completed", [ {
@@ -17744,7 +17838,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         vrt.stop_polling_player_pos = setInterval(vrt.pollingPlayerPos, 1e3);
     };
     this.pollingPlayerPos = function() {
-        vrt.addTS(vrt.createTS({
+        console.log("polling on " + vrt.producer.streamName);
+        if (vrt.producer && vrt.producer.streamName) vrt.addTS(vrt.createTS({
             status: 17
         }));
     };
@@ -17941,7 +18036,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(vrt).trigger("vrt_event_recorder_publish");
                 vrt.log("!!PRODUCER publish");
             });
-            this.on("unpublish", function() {
+            vrt.on_unpublish = function() {
                 $(vrt).trigger("vrtevent_player_ts", {
                     status: vrt.player.statusMap(21)
                 });
@@ -17954,6 +18049,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(vrt).trigger("vrt_event_recorder_unpublish");
                 vrt.log("!!PRODUCER unpublish");
                 vrt.afterSaveTimeout();
+            };
+            this.on("unpublish", function() {
+                vrt.on_unpublish();
             });
             this.on("connect", function() {
                 vrt.log("!!PRODUCER connect");
@@ -17965,9 +18063,12 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                     $(vrt).trigger("vrtstep_connect");
                 }, 500);
             });
-            this.on("save", function(url) {
+            vrt.on_save = function(url) {
                 vrt.llog("producer on save");
                 vrt.afterSave(null, url);
+            };
+            this.on("save", function(url) {
+                vrt.on_save(url);
             });
             this.on("save-metadata", function(url) {});
             this.on("error", function(reason) {
@@ -18101,14 +18202,17 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 }
             }
         }
-        this.ceclient.uploadLink(dataToUpload, cb);
+        if (!vrt.isUploading) {
+            vrt.isUploading = true;
+            this.ceclient.uploadLinkRepeat(dataToUpload, cb);
+        }
     };
     this.apiClientWriteResponse = function(data, cb) {
         data = {};
         data.research_id = this.researchId;
         data.media_id = this.media_id;
         data.respondent_id = data.respondentd = this.respondentId;
-        vrt.ceclient.writeResponse(data, cb);
+        vrt.ceclient.writeResponseRepeat(data, cb);
     };
     this.saveUniqueRespondent = function() {
         if (vrt.options.createUniqueRespondent) {
@@ -18206,7 +18310,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                         if (vrt.options.respondentName) {
                             respoData.name = vrt.options.respondentName;
                         }
-                        vrt.ceclient.writeRespondent(respoData, function(res) {
+                        vrt.ceclient.writeRespondentRepeat(respoData, function(res) {
                             apiPostCreateRespondent(res);
                         });
                     }

@@ -71,6 +71,15 @@ function CEClient() {
             if(cb) cb(res);
         });
     };
+    this.uploadLinkRepeat = function (mediaURL, cb) {
+        var ceclient = this;
+
+        javaRest.facevideo.uploadLinkRepeat(mediaURL, function (res){
+            ceclient.responseId = res.responseId;
+            if(cb) cb(res);
+        });
+    };
+
 
     /**
      *
@@ -220,6 +229,19 @@ function CEClient() {
             }
         })
     };
+    this.writeResponseRepeat = function (data, callback) {
+        javaRest.postAuthRepeat("response" + javaRest.queryUrl(), data, function (response) {
+            //console.log(jqXHR);response);
+            if (callback) {
+                callback(response)
+            }
+        }, function (jqXHR, textStatus) {
+            //console.log(jqXHR);jqXHR);
+            if (callback) {
+                callback(jqXHR)
+            }
+        })
+    };
     this.editRespondentName = function(respondentId, data, callback) {
 
         javaRest.put(
@@ -252,6 +274,23 @@ function CEClient() {
             }
         })
     };
+    this.writeRespondentRepeat = function (data, callback) {
+        if(data.customData && typeof data.customData  == 'object'){
+            data.customData = JSON.stringify(data.customData)
+        }
+        javaRest.postAuthRepeat("respondent" + javaRest.queryUrl(), data, function (response) {
+            //console.log(jqXHR);response);
+            if (callback) {
+                callback(response)
+            }
+        }, function (jqXHR, textStatus) {
+            //console.log(jqXHR);jqXHR);
+            if (callback) {
+                callback(jqXHR)
+            }
+        })
+    };
+
 
     this.readRespondent = function (data, cb, key) {
         if(key===undefined) key = 'id';
@@ -647,6 +686,47 @@ javaRest.postAuth = function (url, data, success, error) {
         error : error
     })
 };
+
+
+javaRest.postAuthRepeat = function (url, data, success, error, retry) {
+
+    if(console && console.log){
+        console.log('postAuthRepeat ' + ' ' +url+ ' retry')
+    }
+
+    var auth = javaRest.getAuthData('POST', url);
+    retry===undefined? retry = 0 : retry = retry + 1 ;
+    var max_retry = 3;
+
+    var call =  $.ajax({
+        url: this.baseurl()+url,
+        type: "POST",
+        contentType: "application/json", // send as JSON
+        data: data?JSON.stringify(data):null,
+        crossDomain: true,
+        headers: {
+            'Authorization' : auth.authorization,
+            'x-ce-rest-date' : auth.time ,
+            'nonce' : auth.nonce
+        },
+        dataType: "json"
+    });
+    call.done(success);
+    call.fail(function(e){
+        //TODO log error
+        if(retry<max_retry){
+            setTimeout(
+                function(){
+                    javaRest.postAuthRepeat(url, data, success, error, retry);
+                }
+            ,(Math.pow(retry, retry)*100+100));
+        }else{
+            if(error) error;
+        }
+    });
+
+};
+
 
 javaRest.postAuthForm = function (url, form_id) {
 
@@ -1172,7 +1252,31 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
                 callback(jqXHR);
             }
         }
-    )
+    );
+};
+
+
+javaRest.facevideo.uploadLinkRepeat = function(videoLink, callback) {
+
+    if(typeof videoLink == 'string') {
+        videoLink = { link: videoLink };
+    }
+
+    javaRest.postAuthRepeat(
+        'facevideo/upload'+javaRest.queryUrl(),
+        videoLink,
+        function(response) {
+            if (callback) {
+                callback(response);
+            }
+        },
+        function(jqXHR, textStatus) {
+            //console.log(jqXHR);jqXHR);
+            if (callback) {
+                callback(jqXHR);
+            }
+        }
+    );
 };
 
 javaRest.facevideo.info = function(response_id, callback) {

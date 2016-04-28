@@ -1,4 +1,4 @@
-/* Javascript client crowdemotion.co.uk 2016-4-18 10:21 */ var CryptoJS = CryptoJS || function(i, p) {
+/* Javascript client crowdemotion.co.uk 2016-4-28 15:30 */ var CryptoJS = CryptoJS || function(i, p) {
     var f = {}, q = f.lib = {}, j = q.Base = function() {
         function a() {}
         return {
@@ -388,6 +388,13 @@ function CEClient() {
             if (cb) cb(res);
         });
     };
+    this.uploadLinkRepeat = function(mediaURL, cb) {
+        var ceclient = this;
+        javaRest.facevideo.uploadLinkRepeat(mediaURL, function(res) {
+            ceclient.responseId = res.responseId;
+            if (cb) cb(res);
+        });
+    };
     this.writeCustomData = function(responseId, data, cb) {
         javaRest.response.writeCustomData(responseId, data, function(res) {
             if (cb) cb(res);
@@ -506,6 +513,17 @@ function CEClient() {
             }
         });
     };
+    this.writeResponseRepeat = function(data, callback) {
+        javaRest.postAuthRepeat("response" + javaRest.queryUrl(), data, function(response) {
+            if (callback) {
+                callback(response);
+            }
+        }, function(jqXHR, textStatus) {
+            if (callback) {
+                callback(jqXHR);
+            }
+        });
+    };
     this.editRespondentName = function(respondentId, data, callback) {
         javaRest.put("respondent/" + respondentId, '{"name" : "' + data + '"}', function(response) {
             if (callback) callback();
@@ -518,6 +536,20 @@ function CEClient() {
             data.customData = JSON.stringify(data.customData);
         }
         javaRest.postAuth("respondent" + javaRest.queryUrl(), data, function(response) {
+            if (callback) {
+                callback(response);
+            }
+        }, function(jqXHR, textStatus) {
+            if (callback) {
+                callback(jqXHR);
+            }
+        });
+    };
+    this.writeRespondentRepeat = function(data, callback) {
+        if (data.customData && typeof data.customData == "object") {
+            data.customData = JSON.stringify(data.customData);
+        }
+        javaRest.postAuthRepeat("respondent" + javaRest.queryUrl(), data, function(response) {
             if (callback) {
                 callback(response);
             }
@@ -830,6 +862,38 @@ javaRest.postAuth = function(url, data, success, error) {
         dataType: "json",
         success: success,
         error: error
+    });
+};
+
+javaRest.postAuthRepeat = function(url, data, success, error, retry) {
+    if (console && console.log) {
+        console.log("postAuthRepeat " + " " + url + " retry");
+    }
+    var auth = javaRest.getAuthData("POST", url);
+    retry === undefined ? retry = 0 : retry = retry + 1;
+    var max_retry = 3;
+    var call = $.ajax({
+        url: this.baseurl() + url,
+        type: "POST",
+        contentType: "application/json",
+        data: data ? JSON.stringify(data) : null,
+        crossDomain: true,
+        headers: {
+            Authorization: auth.authorization,
+            "x-ce-rest-date": auth.time,
+            nonce: auth.nonce
+        },
+        dataType: "json"
+    });
+    call.done(success);
+    call.fail(function(e) {
+        if (retry < max_retry) {
+            setTimeout(function() {
+                javaRest.postAuthRepeat(url, data, success, error, retry);
+            }, Math.pow(retry, retry) * 100 + 100);
+        } else {
+            if (error) error;
+        }
     });
 };
 
@@ -1162,6 +1226,23 @@ javaRest.facevideo.uploadLink = function(videoLink, callback) {
         };
     }
     javaRest.postAuth("facevideo/upload" + javaRest.queryUrl(), videoLink, function(response) {
+        if (callback) {
+            callback(response);
+        }
+    }, function(jqXHR, textStatus) {
+        if (callback) {
+            callback(jqXHR);
+        }
+    });
+};
+
+javaRest.facevideo.uploadLinkRepeat = function(videoLink, callback) {
+    if (typeof videoLink == "string") {
+        videoLink = {
+            link: videoLink
+        };
+    }
+    javaRest.postAuthRepeat("facevideo/upload" + javaRest.queryUrl(), videoLink, function(response) {
         if (callback) {
             callback(response);
         }
