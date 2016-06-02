@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-4-28 15:30 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-6-2 14:33 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -10680,8 +10680,13 @@ function CEClient() {
     this.uploadLinkRepeat = function(mediaURL, cb) {
         var ceclient = this;
         javaRest.facevideo.uploadLinkRepeat(mediaURL, function(res) {
-            ceclient.responseId = res.responseId;
-            if (cb) cb(res);
+            if (res && res.responseId) {
+                ceclient.responseId = res.responseId;
+                if (cb) cb(res, false);
+            } else {
+                ceclient.responseId = null;
+                if (cb) cb(null, true);
+            }
         });
     };
     this.writeCustomData = function(responseId, data, cb) {
@@ -11181,7 +11186,7 @@ javaRest.postAuthRepeat = function(url, data, success, error, retry) {
                 javaRest.postAuthRepeat(url, data, success, error, retry);
             }, Math.pow(retry, retry) * 100 + 100);
         } else {
-            if (error) error;
+            if (error) error();
         }
     });
 };

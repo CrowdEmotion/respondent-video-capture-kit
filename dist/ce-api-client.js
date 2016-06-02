@@ -1,4 +1,4 @@
-/* Javascript client crowdemotion.co.uk 2016-4-28 15:30 */ var CryptoJS = CryptoJS || function(i, p) {
+/* Javascript client crowdemotion.co.uk 2016-6-2 14:33 */ var CryptoJS = CryptoJS || function(i, p) {
     var f = {}, q = f.lib = {}, j = q.Base = function() {
         function a() {}
         return {
@@ -391,8 +391,13 @@ function CEClient() {
     this.uploadLinkRepeat = function(mediaURL, cb) {
         var ceclient = this;
         javaRest.facevideo.uploadLinkRepeat(mediaURL, function(res) {
-            ceclient.responseId = res.responseId;
-            if (cb) cb(res);
+            if (res && res.responseId) {
+                ceclient.responseId = res.responseId;
+                if (cb) cb(res, false);
+            } else {
+                ceclient.responseId = null;
+                if (cb) cb(null, true);
+            }
         });
     };
     this.writeCustomData = function(responseId, data, cb) {
@@ -892,7 +897,7 @@ javaRest.postAuthRepeat = function(url, data, success, error, retry) {
                 javaRest.postAuthRepeat(url, data, success, error, retry);
             }, Math.pow(retry, retry) * 100 + 100);
         } else {
-            if (error) error;
+            if (error) error();
         }
     });
 };

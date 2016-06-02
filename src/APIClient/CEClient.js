@@ -75,8 +75,13 @@ function CEClient() {
         var ceclient = this;
 
         javaRest.facevideo.uploadLinkRepeat(mediaURL, function (res){
-            ceclient.responseId = res.responseId;
-            if(cb) cb(res);
+            if(res && res.responseId) {
+                ceclient.responseId = res.responseId;
+                if (cb) cb(res, false);
+            }else{
+                ceclient.responseId = null;
+                if (cb) cb(null, true);
+            }
         });
     };
 
@@ -721,7 +726,7 @@ javaRest.postAuthRepeat = function (url, data, success, error, retry) {
                 }
             ,(Math.pow(retry, retry)*100+100));
         }else{
-            if(error) error;
+            if(error) error();
         }
     });
 
