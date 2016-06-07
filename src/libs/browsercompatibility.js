@@ -29,7 +29,7 @@ vrtCookie.read = function(name) {
 };
 
 vrtCookie.erase = function(name) {
-    createCookie(name,"",-1);
+    if(vrtCookie && vrtCookie.create) vrtCookie.create(name,"",-1);
 };
 
 var ltIE9 = !document.addEventListener;
