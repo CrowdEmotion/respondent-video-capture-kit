@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-6-16 14:20 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-6-16 15:15 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -17224,6 +17224,11 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on("vrt_event_recorder_dropconnection", function() {
             vrt.log("EVT vrt_event_recorder_dropconnection: " + vrt.recordDropConn);
+            if (vrt.responseList && vrt.currentMedia && vrt.responseList[vrt.currentMedia]) {
+                window.vrt.apiClientSaveCustomData(vrt.responseList[vrt.currentMedia], {
+                    vrt_recorder_drop_connection: true
+                }, function() {});
+            }
         });
         $(window.vrt).on("vrt_event_start_video_session", function() {
             if (window.vrt.recAutoHide == false) {
