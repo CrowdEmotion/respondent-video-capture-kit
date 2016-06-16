@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-6-7 15:53 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-6-16 14:20 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16860,6 +16860,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.platform = null;
     this.producerVideo = null;
     this.isUploading = false;
+    this.recordDropConn = false;
     this.reloadFlash = null;
     this.initMediaList = function(type, list) {
         if (!list) return;
@@ -17220,6 +17221,9 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
         $(window.vrt).on("vrtstep_disconnect", function() {
             vrt.log("EVT vrtstep_disconnect");
+        });
+        $(window.vrt).on("vrt_event_recorder_dropconnection", function() {
+            vrt.log("EVT vrt_event_recorder_dropconnection: " + vrt.recordDropConn);
         });
         $(window.vrt).on("vrt_event_start_video_session", function() {
             if (window.vrt.recAutoHide == false) {
@@ -17863,6 +17867,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
     this.stop_rec = function() {
         vrt.llog("REC STOP call unpublish");
+        vrt.recordDropConn = false;
         vrt.producer.unpublish();
         clearTimeout(vrt.stop_handle_rec);
     };
@@ -18027,6 +18032,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             }
             this.on("publish", function() {
                 vrt.isRecording = true;
+                vrt.recordDropConn = true;
                 vrt.sendTSEvent = setInterval(function() {
                     vrt.newTS();
                 }, 1e3);
@@ -18045,6 +18051,14 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 $(vrt).trigger("vrtevent_player_ts", {
                     status: vrt.player.statusMap(21)
                 });
+                if (vrt.recordDropConn) {
+                    $(vrt).trigger("vrt_event_recorder_dropconnection");
+                    $(window.vrt).trigger("vrt_event_error", {
+                        component: "producer",
+                        error: "unxpected unpublish",
+                        type: "normal"
+                    });
+                }
                 vrt.logChrono(0, false, "PRODUCER RECORDING");
                 vrt.isRecording = false;
                 vrt.isRecordingPadding = false;

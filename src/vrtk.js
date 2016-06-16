@@ -124,7 +124,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     this.browser = {isChromeMobile: false, old: false, requirement: true, isAndroid: false};
     this.platform = null;
     this.producerVideo = null;
-    this.isUploading = false
+    this.isUploading = false;
+    this.recordDropConn = false;
 
 
     this.reloadFlash = null;
@@ -582,11 +583,15 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
 
         $(window.vrt).on('vrt_event_publish', function () {
+
             vrt.log('EVT vrt_event_publish  ' + vrt.logTime());
         });
 
         $(window.vrt).on('vrtstep_disconnect', function () {
             vrt.log('EVT vrtstep_disconnect');
+        });
+        $(window.vrt).on('vrt_event_recorder_dropconnection', function () {
+            vrt.log('EVT vrt_event_recorder_dropconnection: '+vrt.recordDropConn);
         });
 
         //external event
@@ -1424,6 +1429,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
     this.stop_rec =function() {
         vrt.llog('REC STOP call unpublish');
+        vrt.recordDropConn = false;
         vrt.producer.unpublish();
         //vrt.isRec=false;
         clearTimeout(vrt.stop_handle_rec);
@@ -1620,6 +1626,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             //producer.setCredentials("username", "password"); // if you want to emulate fmle auth
             this.on('publish',function(){
                 vrt.isRecording = true;
+                vrt.recordDropConn = true;
                 //vrt.llog('vrt.isRecording:' + vrt.isRecording);
                 vrt.sendTSEvent = setInterval(
                     function(){vrt.newTS();},
@@ -1639,6 +1646,10 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
 
             vrt.on_unpublish = function(){
                 $(vrt).trigger('vrtevent_player_ts', {status:vrt.player.statusMap(21)});
+                if(vrt.recordDropConn) {
+                    $(vrt).trigger('vrt_event_recorder_dropconnection');
+                    $(window.vrt).trigger('vrt_event_error', {component:'producer',error:'unxpected unpublish',type:'normal'});
+                }
                 vrt.logChrono(0, false, 'PRODUCER RECORDING');
                 vrt.isRecording =  false;
                 vrt.isRecordingPadding =  false;
