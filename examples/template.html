@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MeMo Embed template page</title>
+
+    <!-- BEGIN: MeMo Embed files: add these tag to the HEAD of your page -->
+
+    <!-- memo embed core files-->
+    <link type="text/css" href="https://cdn.crowdemotion.co.uk/playcorder/v3/vrtk-v3.min.css" rel="stylesheet">
+    <script type="text/javascript" charset="utf-8" src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" charset="utf-8"
+            src="https://cdn.crowdemotion.co.uk/playcorder/v3/vrtk-v3.all.js"></script>
+
+    <!-- demo\template file -->
+    <script type="text/javascript" charset="utf-8"
+            src="js/memoembedtemplate.js"></script>
+
+    <!-- END -->
+
+
+    <!-- BEGIN: demo\template script -->
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function () {
+            var meDemo = MemoEmbedTemplate;
+            meDemo.init({   apiSandbox: true,
+                            researchToken: '7674cb8779c471c401d5e11efc7fcffbf6f16eb8',
+                            appToken: '77d486ba-4dc6-4bfc-a9d5-0c9e62157f20',
+                            streamName: 'meDemo7674cb_',
+                            donottrack: true,
+                            respondentCustomData: {keyDemo: 'valDemo_'+meHelper.randomInt(0,1000),user_video_behavior: 'delete_video'},
+                            });
+        });
+    </script>
+    <!-- END -->
+
+</head>
+
+<body>
+
+    <!-- BEGIN: Add this markup to your page-->
+    <section id="memoEmbed">
+
+        <!-- demo html - optional-->
+        <div id="meButtons">
+            <div id="meStart" class="meBtn" >Start Session</div>
+            <div id="meSkip" class="meBtn" >Skip</div>
+            <div id="meNext" class="meBtn"  >Next video</div>
+            <div id="meEnd" >End session</div>
+        </div>
+        <!-- core html end-->
+        <!-- core html -->
+        <div id="vrt_wrap">
+            <div id="vrt" style=""></div>
+        </div>
+        <!-- core html end-->
+    </section>
+    <!-- END -->
+
+
+
+</body>
+</html>
