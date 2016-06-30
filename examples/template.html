@@ -2,6 +2,18 @@
 <html>
 <head>
     <title>MeMo Embed template page</title>
+    <link href='https://fonts.googleapis.com/css?family=Lato|Syncopate' rel='stylesheet' type='text/css'>
+    <style>
+        body { font-family: 'lato', Arial, serif; font-weight: 400; }
+        h1,h2 { font-family: 'Syncopate', sans-serif; font-weight: 400; }
+        h1 { font-size: 22px}
+        h2 { font-size: 18px}
+        header,footer { text-align: center; width: 300px}
+        section {margin-top: 30px;}
+        footer { font-size: 12px; margin-top: 30px;}
+        a{text-decoration: none}
+    </style>
+
 
     <!-- BEGIN: MeMo Embed files: add these tag to the HEAD of your page -->
 
@@ -36,6 +48,12 @@
 </head>
 
 <body>
+<header id="header">
+    <img id="logo" src="//cdn.crowdemotion.co.uk/images/logo320_100.jpg">
+    <h1>CrowdEmotion</h1>
+    <h2>MeMo Embed demo</h2>
+</header>
+
 
     <!-- BEGIN: Add this markup to your page-->
     <section id="memoEmbed">
@@ -56,6 +74,18 @@
     </section>
     <!-- END -->
 
+<footer id="footer">
+
+    <div class="">
+            <span class="label label-none"><a href="http://www.crowdemotion.co.uk/" target="_blank">Website</a></span>
+        - <span class="label label-none"><a href="http://developer.crowdemotion.co.uk/" target="_blank">Developers documentations</a></span>
+        <br/><span class="label label-none"><a href="https://github.com/CrowdEmotion" target="_blank">Github</a></span>
+        - <span class="label label-none"><a href="https://www.facebook.com/crowdemotionltd"
+                                          target="_blank">Facebook</a></span>
+        - <span class="label label-none"><a href="https://twitter.com/crowdemotion/" target="_blank">Twitter</a></span>
+
+    </div>
+</footer>
 
 
 </body>
