@@ -10,7 +10,7 @@
         $(document).ready(
           function(){
                $('a.edit').on('click',function(evt){
-                   //evt.preventDefault();
+                   evt.preventDefault();
                    var u1 = '';
                    var u2 = '';
                    if($('#plink').val()){
@@ -19,9 +19,26 @@
                    }
                    if($('#rid').val()){
                        u2 = $('#rid').val();
+                       u2 = u2.split(',');
                    }
-                   var href = $(this).attr("href");
-                   $(this).attr("href",href+'?'+u1+'&respondentid='+u2);
+                    var href = $(this).attr("rel");
+                    switch (href){
+                        case "1":
+                            href = 'video.html';
+                            break;
+                        case "2":
+                            href = 'results.html';
+                            break;
+                        case "3":
+                            href = 'video.html?full=true';
+                            break;
+                    }
+                   for(var i = 0; i < u2.length; i++){
+                       var u = href+'?'+u1+'&respondentid='+u2[i];
+                       window.open(u);
+                       //$(this).attr("href",u);
+                   }
+
                });
 
           }
@@ -41,15 +58,15 @@
         <input id="plink" name="plink" type="text" placeholder="insert a project link link and select a test" />
         </div>
         <div>
-        <label for="rid">Respondent id (optional, just for result test)</label>
+        <label for="rid">Respondent id (optional, just for result test, could be separated by comma)</label>
         <input id="rid" name="rid" type="text" placeholder="insert a respondent id" />
         </div>
     </div>
     <h3>Select a test</h3>
     <ol>
-        <li><a href="video.html" class="edit">Video test </a></li>
-        <li><a href="results.html" class="edit">Results test</a></li>
-        <li><a href="video.html?full=true" class="edit">Full test</a></li>
+        <li><a href="video.html" rel="1" class="edit" target="_blank" >Video test </a></li>
+        <li><a href="results.html" rel="2" class="edit"  target="_blank" >Results test</a></li>
+        <li><a href="video.html?full=true" rel="3" class="edit"  target="_blank" >Full test</a></li>
         <!-- 204,206,207,208,623,624,625,626,627,628 original order -->
     </ol>
 </div>
