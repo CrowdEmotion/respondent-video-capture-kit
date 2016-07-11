@@ -94,20 +94,36 @@ var MemoEmbedTemplate = {
      */
     layoutHandleButtons: function(){
         var _this = this;
+        /*
+         * Start the video session after camera preview
+         */
         $('#meStart').on('click', function () {
                 $('#meStart').hide().remove();
-                $(vrt).trigger('vrt_event_start_video_session');
+                vrt.start();
+                // You can also use
+                // $(vrt).trigger('vrt_event_start_video_session');
+
         });
+        /*
+         * Go to the next video
+         */
         $('#meNext').on('click', function () {
             $('#meSkip').hide();
             $('#meNext').hide();
             meHelper.alertMessage();
-            $(vrt).trigger('vrt_event_user_next_video');
+            vrt.next();
+            // You can also use
+            // $(vrt).trigger('vrt_event_user_next_video');
         });
+        /*
+         * Skip the video
+         */
         $('#meSkip').on('click', function () {
                 $('#meSkip').hide();
-                meHelper.alertMessage;
-                $(vrt).trigger('vrt_event_user_next_video');
+                meHelper.alertMessage();
+                vrt.next();
+                // You can also use
+                // $(vrt).trigger('vrt_event_user_next_video');
         });
         $(vrt).on('vrt_event_video_session_complete', function () {
             $("#producertext").hide();
@@ -139,22 +155,23 @@ var MemoEmbedTemplate = {
         $(vrt).on('vrt_event_recorder_save_error', function (evt, data) {
             meHelper.alertMessage('ME template: facevideo not saved');
         });
-// watch next video
         $(vrt).on('vrt_event_video_step_completed', function (evt, data) {
             $('#meNext').show();
             if (data.responseId) {
                 meHelper.alertMessage('ME template: response id: ' + data.responseId);
                 var d = new Date();
                 //save data on API response metadata
-                window.vrt.apiClientSaveCustomData(data.responseId, {time: d.getTime()});
+                vrt.saveResponseMetadata({time: d.getTime()});
+                vrt.vote('rate',meHelper.randomInt(1,6));
+                vrt.vote('share',meHelper.randomInt(0,2));
+                vrt.vote('seen',meHelper.randomInt(0,2));
             }
         });
         $(vrt).on('vrt_event_respondent_created', function () {
-            //save data on API respondent metadata
-            vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {randomInteger:meHelper.randomInt(0,1000)});
-        });
-        $(vrt).on('vrt_event_respondent_created', function () {
-            meHelper.alertMessage('Respondent session id: ' + vrt.respondentId);
+            meHelper.alertMessage('ME template: Respondent session id: ' + vrt.respondentId);
+            vrt.saveRespondentMetadata({randomInteger:meHelper.randomInt(0,1000)})
+            // You can also use
+            // vrt.ceclient.writeRespondentCustomData(vrt.respondentId, {randomInteger:meHelper.randomInt(0,1000)});
         });
     },
     /**

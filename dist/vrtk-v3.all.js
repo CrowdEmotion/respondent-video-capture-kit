@@ -1,4 +1,4 @@
-/* Playcorder crowdemotion.co.uk 2016-6-16 15:15 */ var WebProducer = function(modules) {
+/* Playcorder crowdemotion.co.uk 2016-7-11 14:30 */ var WebProducer = function(modules) {
     var installedModules = {};
     function __webpack_require__(moduleId) {
         if (installedModules[moduleId]) return installedModules[moduleId].exports;
@@ -16996,7 +16996,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         }
         this.sendTSEvent = null;
     };
-    this.init = function() {
+    this.init = function(cb) {
         this.log(">>STEP: vrt init");
         window.vrt = this;
         this.log(this.mediaCount, "mediaCount");
@@ -17050,6 +17050,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
             if (console.log) console.log("apiClientSetup api login error");
         });
         $(this).trigger("vrt_init_ok");
+        if (cb) cb();
     };
     this.loadFlashElements = function() {
         vrt.playerVersion = swfobject.getFlashPlayerVersion();
@@ -17270,6 +17271,27 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         $(window.vrt).on("vrt_event_respondent_created", function() {
             vrt.saveUniqueRespondent();
         });
+    };
+    this.start = function() {
+        $(window.vrt).trigger("vrt_event_start_video_session");
+    };
+    this.next = function() {
+        $(window.vrt).trigger("vrt_event_user_next_video");
+    };
+    this.saveResponseMetadata = function(data, responseId) {
+        if (!responseId) responseId = vrt.responseList[vrt.currentMedia];
+        this.apiClientSaveCustomData(responseId, data);
+    };
+    this.saveRespondentMetadata = function(data) {
+        if (vrt.respondentId && data) {} else return false;
+        this.apiClientSaveRespondentCustomData(vrt.respondentId, data);
+    };
+    this.vote = function(key, vote, responseId) {
+        if (!key) return false;
+        if (!responseId) responseId = vrt.responseList[vrt.currentMedia];
+        var saveVote = {};
+        saveVote[key] = vote;
+        vrt.saveResponseMetadata(saveVote, responseId);
     };
     this.newTS = function(data) {
         if (vrt.streamName == "" || vrt.streamName == null || vrt.streamName == undefined) return;

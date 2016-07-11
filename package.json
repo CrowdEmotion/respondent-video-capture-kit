@@ -5,8 +5,9 @@
     "build": "node_modules/.bin/grunt",
     "cdn": "s3cmd --acl-public --cf-invalidate sync dist/ s3://cdn-crowdemotion-co-uk/playcorder/v3/",
     "ss" : "python -m SimpleHTTPServer",
-    "test-deploy": "s3cmd --acl-public --cf-invalidate sync src/ s3://cdn-crowdemotion-co-uk/demos/memoembed/",
-    "demo-deploy": "s3cmd --acl-public --cf-invalidate sync examples/ s3://cdn-crowdemotion-co-uk/demos/memoembed/"
+    "src-deploy": "s3cmd --acl-public --cf-invalidate sync src/ s3://cdn-crowdemotion-co-uk/demos/memoembed/",
+    "test-deploy": "s3cmd --acl-public --cf-invalidate sync src/test/ s3://cdn-crowdemotion-co-uk/demos/memoembed/test/",
+    "demo-deploy": "s3cmd --acl-public --cf-invalidate sync examples/ s3://cdn-crowdemotion-co-uk/demos/memoembed/examples/"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

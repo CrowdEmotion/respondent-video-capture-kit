@@ -280,7 +280,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
     };
 
 
-    this.init = function() {
+    this.init = function(cb) {
         this.log('>>STEP: vrt init');
         //this.log(arguments);
 
@@ -336,8 +336,8 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 if (console.log)console.log('apiClientSetup api login error');
             }
         );
-
         $(this).trigger('vrt_init_ok');
+        if(cb) cb();
     };
 
     this.loadFlashElements = function(){
@@ -605,7 +605,7 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
                 window.vrt.recorderHide(null, window.vrt.setupPlayer());
             }
         });
-
+        
         $(window.vrt).on('vrt_event_user_next_video', function () {
             window.vrt.skip_video();
         });
@@ -648,6 +648,42 @@ function Vrt(type, list, streamUrl, streamName, apiDomain, apiUser, apiPassword,
         });
 
     };
+    
+    //wrap methods
+    this.start = function (){
+        $(window.vrt).trigger('vrt_event_start_video_session');
+    };
+
+    this.next = function (){
+        $(window.vrt).trigger('vrt_event_user_next_video');
+    };
+
+    this.saveResponseMetadata = function (data , responseId){
+        if(!responseId) responseId = vrt.responseList[vrt.currentMedia];
+        this.apiClientSaveCustomData(responseId, data );
+    };
+
+    this.saveRespondentMetadata = function (data){
+        if(vrt.respondentId && data ){} else  return false;
+        this.apiClientSaveRespondentCustomData(vrt.respondentId,data);
+    };
+
+    this.vote = function(key, vote, responseId){
+        if(!key) return false;
+        if(!responseId) responseId = vrt.responseList[vrt.currentMedia];
+        var saveVote ={};
+        saveVote[key] = vote;
+        vrt.saveResponseMetadata(saveVote,responseId);
+    };
+
+
+
+    //ok vrt_event_start_video_session
+    //ok vrt_event_user_session_complete
+    //?? turn on off fullscreen
+    //?? pause play
+    
+    //end wrap methods
 
     this.newTS = function(data){
         if(vrt.streamName=='' || vrt.streamName==null || vrt.streamName==undefined) return ;
