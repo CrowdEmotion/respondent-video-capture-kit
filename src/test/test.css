@@ -46,3 +46,13 @@ input{
     width: 300px;
     margin-bottom: 20px;
 }
+fieldset{
+    border: 1px solid grey;
+    margin-top: 15px;
+}
+legend{
+    font-size: 18px;
+}
+hr{
+    border: 1px solid #e6e6e6;
+}
