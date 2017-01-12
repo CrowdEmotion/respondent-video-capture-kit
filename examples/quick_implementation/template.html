@@ -34,11 +34,14 @@
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function () {
             var meDemo = MemoEmbedTemplate;
+            meDemo.getUrlParams();
+            //redirect: 'http://www.crowdemotion.co.uk/?a=tempatedemo&x={p1}&y={p2}&z={p3}',
             meDemo.init({   apiSandbox: true,
-                            researchToken: '7674cb8779c471c401d5e11efc7fcffbf6f16eb8',
-                            appToken: '77d486ba-4dc6-4bfc-a9d5-0c9e62157f20',
-                            streamName: 'meDemo7674cb_',
+                            researchToken: meDemo.urlParams.memor? meDemo.urlParams.memor : '991e4aa34de45bcbaca49da35c92a6cc3b907e2f',
+                            appToken:  meDemo.urlParams.memoa? meDemo.urlParams.memoa : '77d486ba-4dc6-4bfc-a9d5-0c9e62157f20',
+                            streamName: meDemo.urlParams.memos? meDemo.urlParams.memos : 'meDemo7674cb_',
                             donottrack: true,
+                            respondentName: meDemo.urlParams.memorespondentname ? meDemo.urlParams.memorespondentname : meHelper.randomInt(1000,2000),
                             respondentCustomData: {keyDemo: 'valDemo_'+meHelper.randomInt(0,1000),user_video_behavior: 'delete_video'},
                             });
         });

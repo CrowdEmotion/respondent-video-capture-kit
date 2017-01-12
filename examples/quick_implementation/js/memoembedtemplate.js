@@ -31,7 +31,8 @@ var MemoEmbedTemplate = {
     demoDefaultOptions:  {
         targetId: 'memoEmbed', //string :tag wrapper id
         buttons: true,         //true|false: create demo markup buttons
-        buttonsSkipTime: 5     //int: seconds before skip button appear, 0 will hide skip button
+        buttonsSkipTime: 5,     //int: seconds before skip button appear, 0 will hide skip button
+        redirectEvent: 'vrt_event_video_session_complete'
     },
     vrtOptions: null,
     /**
@@ -68,6 +69,7 @@ var MemoEmbedTemplate = {
         if(!window.vrt) window.vrt = this.vrt;
         this.eventHandle();
         this.layoutHandle();
+        this.getUrlParams();
     },
     /**
      * Inject demo layout into page markup
@@ -247,6 +249,25 @@ var MemoEmbedTemplate = {
         $(vrt).on('vrt_event_respondent_created', function () {
 
         });
+        if(this.demoOptions.redirectEvent) {
+            $(vrt).on(this.demoOptions.redirectEvent, function () {
+                _this.redirect();
+            });
+        };
+    },
+    gup: function(name, url) {
+        if (!url) url = location.href;
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regexS = "[\\?&]" + name + "=([^&#]*)";
+        var regex = new RegExp(regexS);
+        var results = regex.exec(url);
+        return results == null ? null : results[1];
+    },
+    isRedirect: function(){
+        return vrt && vrt.researchOutUrl && vrt.researchOutUrl.length > 0 ? true : false;
+    },
+    redirect: function(redirect, origin){
+        this.isRedirect()?window.location.href = vrt.researchOutUrl : '';
     },
     /**
      * Add custom style to html page
@@ -276,6 +297,17 @@ var MemoEmbedTemplate = {
         }
         return obj1
     },
+    getUrlParams: function () {
+        var match,
+            pl     = /\+/g,  // Regex for replacing addition symbol with a space
+            search = /([^&=]+)=?([^&]*)/g,
+            decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+            query  = window.location.search.substring(1);
+
+        this.urlParams = {};
+        while (match = search.exec(query))
+            this.urlParams[decode(match[1])] = decode(match[2]);
+    }
 };
 
 window.MemoEmbedTemplate = MemoEmbedTemplate;
