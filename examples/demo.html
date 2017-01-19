@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MeMo Embed template page</title>
+    <link href='https://fonts.googleapis.com/css?family=Lato|Syncopate' rel='stylesheet' type='text/css'>
+    <style>
+        body { font-family: 'lato', Arial, serif; font-weight: 400; }
+        h1,h2 { font-family: 'Syncopate', sans-serif; font-weight: 400; }
+        h1 { font-size: 22px}
+        h2 { font-size: 18px}
+        header,footer { text-align: center; margin: 0 auto; width: 320px}
+        section {margin-top: 30px;text-align: center }
+        footer { font-size: 12px; margin-top: 30px; padding-top: 30px}
+        a{text-decoration: none}
+        #wrapper{  width: 640px; margin:0 auto; text-align: center }
+        #meButtons{text-align: center; margin: 0 auto; width: 320px }
+    </style>
+
+
+    <!-- BEGIN: MeMo Embed files: add these tag to the HEAD of your page -->
+
+    <!-- memo embed core files-->
+    <link type="text/css" href="https://cdn.crowdemotion.co.uk/playcorder/v3/vrtk-v3.min.css" rel="stylesheet">
+    <script type="text/javascript" charset="utf-8" src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" charset="utf-8"
+            src="https://cdn.crowdemotion.co.uk/playcorder/v3/vrtk-v3.all.js"></script>
+
+    <!-- demo\template file -->
+    <script type="text/javascript" charset="utf-8"
+            src="quick_implementation/js/memoembedtemplate.js"></script>
+
+    <!-- END -->
+
+
+    <!-- BEGIN: demo\template script -->
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function () {
+            var meDemo = MemoEmbedTemplate;
+            meDemo.getUrlParams();
+            //redirect: 'http://www.crowdemotion.co.uk/?a=tempatedemo&x={p1}&y={p2}&z={p3}',
+            meDemo.redirectResult = function(){
+                return 'http://cdn.crowdemotion.co.uk/demos/api-demo/index.html?a='+( meDemo.urlParams.memoa? meDemo.urlParams.memoa : 'df7f9fb1-51b9-4dd1-83c5-3e52e074fb7d')+'&r='+ vrt.responseList[0];
+            };
+            meDemo.init({   apiSandbox: false,
+                researchToken: meDemo.urlParams.memor? meDemo.urlParams.memor : '7c043c2f7cf13796b81befa0aa18585a747880b5',
+                appToken:  meDemo.urlParams.memoa? meDemo.urlParams.memoa : 'df7f9fb1-51b9-4dd1-83c5-3e52e074fb7d',
+                streamName: meDemo.urlParams.memos? meDemo.urlParams.memos : 'meSales_',
+                donottrack: true,
+                redirectUrl: meDemo.redirectResult,
+                respondentName: meDemo.urlParams.memorespondentname ? meDemo.urlParams.memorespondentname : meHelper.randomInt(1000,2000),
+                respondentCustomData: {keyDemo: 'meSales_'+meHelper.randomInt(0,1000),user_video_behavior: 'delete_video'},
+            });
+        });
+    </script>
+    <!-- END -->
+
+</head>
+
+<body>
+<div id="wrapper">
+    <header id="header">
+        <img id="logo" src="//cdn.crowdemotion.co.uk/images/logo320_100.jpg">
+        <h1>CrowdEmotion</h1>
+        <h2>MeMo Embed demo</h2>
+    </header>
+
+
+    <!-- BEGIN: Add this markup to your page-->
+    <section id="memoEmbed">
+
+        <!-- demo html - optional-->
+        <div id="meButtons">
+            <div id="meStart" class="meBtn" >Start Session</div>
+            <div id="meSkip" class="meBtn" >Skip</div>
+            <div id="meNext" class="meBtn"  >Next video</div>
+            <div id="meEnd" >End session</div>
+        </div>
+        <!-- core html end-->
+        <!-- core html -->
+        <div id="vrt_wrap">
+            <div id="vrt" style=""></div>
+        </div>
+        <!-- core html end-->
+    </section>
+    <!-- END -->
+
+    <footer id="footer">
+
+        <div class="">
+            <span class="label label-none"><a href="http://www.crowdemotion.co.uk/" target="_blank">Website</a></span>
+            - <span class="label label-none"><a href="http://developers.crowdemotion.co.uk/" target="_blank">Developers documentations</a></span>
+            <br/><span class="label label-none"><a href="https://github.com/CrowdEmotion" target="_blank">Github</a></span>
+            - <span class="label label-none"><a href="https://www.facebook.com/crowdemotionltd"
+                                                target="_blank">Facebook</a></span>
+            - <span class="label label-none"><a href="https://twitter.com/crowdemotion/" target="_blank">Twitter</a></span>
+
+        </div>
+    </footer>
+</div>
+
+</body>
+</html>

@@ -32,7 +32,8 @@ var MemoEmbedTemplate = {
         targetId: 'memoEmbed', //string :tag wrapper id
         buttons: true,         //true|false: create demo markup buttons
         buttonsSkipTime: 5,     //int: seconds before skip button appear, 0 will hide skip button
-        redirectEvent: 'vrt_event_video_session_complete'
+        redirectEvent: 'vrt_event_video_session_complete',
+        redirectUrl:false
     },
     vrtOptions: null,
     /**
@@ -263,11 +264,15 @@ var MemoEmbedTemplate = {
         var results = regex.exec(url);
         return results == null ? null : results[1];
     },
+    isForceRedirect: function(){
+        return this.options.redirectUrl;
+    },
     isRedirect: function(){
         return vrt && vrt.researchOutUrl && vrt.researchOutUrl.length > 0 ? true : false;
     },
-    redirect: function(redirect, origin){
+    redirect: function(redirect){
         this.isRedirect()?window.location.href = vrt.researchOutUrl : '';
+        this.isForceRedirect()?window.location.href = (typeof this.options.redirectUrl === "function"? this.options.redirectUrl() : this.options.redirectUrl) : '';
     },
     /**
      * Add custom style to html page
