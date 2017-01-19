@@ -12,8 +12,12 @@
         section {margin-top: 30px;text-align: center }
         footer { font-size: 12px; margin-top: 30px; padding-top: 30px}
         a{text-decoration: none}
+
         #wrapper{  width: 640px; margin:0 auto; text-align: center }
         #meButtons{text-align: center; margin: 0 auto; width: 320px }
+        .meBtn.centered{
+            margin: 0 auto;
+        }
     </style>
 
 
@@ -49,7 +53,11 @@
                 redirectUrl: meDemo.redirectResult,
                 respondentName: meDemo.urlParams.memorespondentname ? meDemo.urlParams.memorespondentname : meHelper.randomInt(1000,2000),
                 respondentCustomData: {keyDemo: 'meSales_'+meHelper.randomInt(0,1000),user_video_behavior: 'delete_video'},
-            });
+            },{buttonsSkipTime:50});
+            $('#meStart').on('click',
+                function(){
+                    $('#privacyFields').hide();
+                });
         });
     </script>
     <!-- END -->
@@ -68,12 +76,15 @@
     <!-- BEGIN: Add this markup to your page-->
     <section id="memoEmbed">
 
+        <div id="privacyFields">
+            <span class="label label-none">Clicking on "Start" I will accept the <a href="termsandcondtions.html" target="_blank">Terms and Conditions</a></span>
+        </div>
         <!-- demo html - optional-->
         <div id="meButtons">
-            <div id="meStart" class="meBtn" >Start Session</div>
+            <div id="meStart" class="meBtn centered" >Start</div>
             <div id="meSkip" class="meBtn" >Skip</div>
-            <div id="meNext" class="meBtn"  >Next video</div>
-            <div id="meEnd" >End session</div>
+            <div id="meNext" class="meBtn centered"  >See results</div>
+            <div id="meEnd" >loading</div>
         </div>
         <!-- core html end-->
         <!-- core html -->
@@ -81,9 +92,7 @@
             <div id="vrt" style=""></div>
         </div>
         <!-- core html end-->
-        <div id="privacyFields">
-            <span class="label label-none"><a href="termsandcondtions.html" target="_blank">Terms and Conditions</a></span>
-        </div>
+
     </section>
     <!-- END -->
 
