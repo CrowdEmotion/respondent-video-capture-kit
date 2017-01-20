@@ -36,7 +36,7 @@
             var meDemo = MemoEmbedTemplate;
             meDemo.getUrlParams();
             //redirect: 'http://www.crowdemotion.co.uk/?a=tempatedemo&x={p1}&y={p2}&z={p3}',
-            meDemo.init({   apiSandbox: true,
+            meDemo.init({   apiSandbox: meDemo.urlParams.memotesting? JSON.parse(meDemo.urlParams.memotesting) : true,
                             researchToken: meDemo.urlParams.memor? meDemo.urlParams.memor : '991e4aa34de45bcbaca49da35c92a6cc3b907e2f',
                             appToken:  meDemo.urlParams.memoa? meDemo.urlParams.memoa : '77d486ba-4dc6-4bfc-a9d5-0c9e62157f20',
                             streamName: meDemo.urlParams.memos? meDemo.urlParams.memos : 'meDemo7674cb_',
