@@ -45,7 +45,7 @@
             meDemo.redirectResult = function(){
                 return 'https://cdn.crowdemotion.co.uk/demos/api-demo/index.html?a='+( meDemo.urlParams.memoa? meDemo.urlParams.memoa : 'df7f9fb1-51b9-4dd1-83c5-3e52e074fb7d')+'&r='+ vrt.responseList[0];
             };
-            meDemo.init({   apiSandbox: false,
+            meDemo.init({   apiSandbox: meDemo.urlParams.memotesting? JSON.parse(meDemo.urlParams.memotesting) : true,
                 researchToken: meDemo.urlParams.memor? meDemo.urlParams.memor : '7c043c2f7cf13796b81befa0aa18585a747880b5',
                 appToken:  meDemo.urlParams.memoa? meDemo.urlParams.memoa : 'df7f9fb1-51b9-4dd1-83c5-3e52e074fb7d',
                 streamName: meDemo.urlParams.memos? meDemo.urlParams.memos : 'meSales_',
